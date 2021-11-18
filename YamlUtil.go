@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"log"
 	"reflect"
@@ -71,20 +72,20 @@ func MapToYaml(dataMap map[string]interface{}) string {
 //}
 
 // 进行深层嵌套的map数据处理
-func MapToProperties(dataMap map[string]interface{}) {
+func MapToProperties(dataMap map[string]interface{}) string {
 	propertyStrList := []string{}
 	for key, value := range dataMap {
 		valueKind := reflect.TypeOf(value).Kind()
 		switch valueKind {
 		case reflect.Map:
 			{
-				propertyStrList = append(propertyStrList, doMapToProperties(propertyStrList, value, prefixWithDOT("")+key)...)
+				propertyStrList = doMapToProperties(propertyStrList, value, prefixWithDOT("")+key)
 			}
 		case reflect.Array, reflect.Slice:
 			{
 				objectValue := reflect.ValueOf(value)
 				for index := 0; index < objectValue.Len(); index++ {
-					propertyStrList = append(propertyStrList, doMapToProperties(propertyStrList, objectValue.Index(index), prefixWithDOT("")+key+"["+strconv.Itoa(index)+"]")...)
+					propertyStrList = doMapToProperties(propertyStrList, objectValue.Index(index), prefixWithDOT("")+key+"["+strconv.Itoa(index)+"]")
 				}
 			}
 		case reflect.String:
@@ -92,10 +93,15 @@ func MapToProperties(dataMap map[string]interface{}) {
 			objectValueStr := strings.ReplaceAll(objectValue.String(), "\n", "\\\n")
 			propertyStrList = append(propertyStrList, prefixWithDOT("")+key+"="+objectValueStr)
 		default:
-			objectValue := reflect.ValueOf(value).String()
-			propertyStrList = append(propertyStrList, prefixWithDOT("")+key+"="+objectValue)
+			propertyStrList = append(propertyStrList, prefixWithDOT("")+key+"="+fmt.Sprintf("%v", value))
 		}
 	}
+	resultStr := ""
+	for _, propertyStr := range propertyStrList {
+		resultStr += propertyStr + "\n"
+	}
+
+	return resultStr
 }
 
 func doMapToProperties(propertyStrList []string, value interface{}, prefix string) []string {
@@ -109,16 +115,16 @@ func doMapToProperties(propertyStrList []string, value interface{}, prefix strin
 			}
 
 			for mapR := reflect.ValueOf(value).MapRange(); mapR.Next(); {
-				mapKey := mapR.Key()
-				mapValue := mapR.Value()
-				propertyStrList = append(propertyStrList, doMapToProperties(propertyStrList, mapValue, prefixWithDOT(prefix)+mapKey.String())...)
+				mapKey := mapR.Key().Interface()
+				mapValue := mapR.Value().Interface()
+				propertyStrList = doMapToProperties(propertyStrList, mapValue, prefixWithDOT(prefix)+fmt.Sprintf("%v", mapKey))
 			}
 		}
 	case reflect.Array, reflect.Slice:
 		{
 			objectValue := reflect.ValueOf(value)
 			for index := 0; index < objectValue.Len(); index++ {
-				propertyStrList = append(propertyStrList, doMapToProperties(propertyStrList, objectValue.Index(index), prefix+"["+strconv.Itoa(index)+"]")...)
+				propertyStrList = doMapToProperties(propertyStrList, objectValue.Index(index), prefix+"["+strconv.Itoa(index)+"]")
 			}
 		}
 	case reflect.String:
@@ -126,7 +132,7 @@ func doMapToProperties(propertyStrList []string, value interface{}, prefix strin
 		objectValueStr := strings.ReplaceAll(objectValue.String(), "\n", "\\\n")
 		propertyStrList = append(propertyStrList, prefix+"="+objectValueStr)
 	default:
-		objectValue := reflect.ValueOf(value).String()
+		objectValue := fmt.Sprintf("%v", reflect.ValueOf(value))
 		propertyStrList = append(propertyStrList, prefix+"="+objectValue)
 	}
 	return propertyStrList
