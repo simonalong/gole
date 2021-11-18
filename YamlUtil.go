@@ -6,6 +6,7 @@ import (
 	"log"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -60,7 +61,7 @@ func YamlToProperties(contentOfYaml string) (string, error) {
 	return MapToProperties(dataMap)
 }
 
-func PropertiesStrToYaml(contentOfProperties string) string {
+func PropertiesToYaml(contentOfProperties string) (string, error) {
 	var yamlLineList []string
 	var yamlNodes []YamlNode
 	propertiesLineWordList := getPropertiesItemLineList(contentOfProperties)
@@ -81,13 +82,13 @@ func PropertiesStrToYaml(contentOfProperties string) string {
 					value = YamlNewLineDom + value
 				}
 
-				lineWordList := strings.Split(key, "\\.")
-				lineWordList, yamlNodes = wordToNode(lineWordList, yamlNodes, nil, false, -1, appendSpaceForArrayValue(value));
+				lineWordList := strings.Split(key, ".")
+				lineWordList, yamlNodes = wordToNode(lineWordList, yamlNodes, nil, false, -1, appendSpaceForArrayValue(value))
 			}
 		}
 	}
-	formatPropertiesToYaml(yamlLineList, yamlNodes, false, "");
-	return strings.Join(yamlLineList, "\n") + "\n"
+	formatPropertiesToYaml(yamlLineList, yamlNodes, false, "")
+	return strings.Join(yamlLineList, "\n") + "\n", nil
 }
 
 func YamlToMap(contentOfYaml string) (map[string]interface{}, error) {
@@ -177,7 +178,7 @@ func getPropertiesItemLineList(content string) []string {
 			stringAppender = ""
 		}
 	}
-	return itemLineList;
+	return itemLineList
 }
 
 func formatPropertiesToYaml(yamlLineList []string, yamlNodes []YamlNode, lastNodeArrayFlag bool, blanks string) []string {
@@ -193,67 +194,40 @@ func formatPropertiesToYaml(yamlLineList []string, yamlNodes []YamlNode, lastNod
 		} else {
 			equalSign = SignSemicolon + " "
 		}
-	}
 
+		yamlNode.resortValue()
 
-	Integer beforeNodeIndex = null;
-	String equalSign;
-	for (YamlNode YamlNode : YamlNodes) {
-		String value = YamlNode.getValue();
-		String remark = YamlNode.getRemark();
-
-		equalSign = SIGN_SEMICOLON;
-		if (null == value || "".equals(value)) {
-			value = "";
-		} else {
-			equalSign = SIGN_SEMICOLON + " ";
-		}
-		YamlNode.resortValue();
-
-		String name = YamlNode.getName();
-		if (lastNodeArrayFlag) {
-			if (null == name) {
-				yamlLineList.add(blanks + ARRAY_BLANKS + stringValueWrap(value));
+		name := yamlNode.name
+		if lastNodeArrayFlag {
+			if "" == name {
+				yamlLineList = append(yamlLineList, blanks+ArrayBlanks+stringValueWrap(value))
 			} else {
-				if (null != beforeNodeIndex && beforeNodeIndex.equals(YamlNode.getLastNodeIndex())) {
-					yamlLineList.add(blanks + INDENT_BLANKS + name + equalSign + stringValueWrap(value));
+				if -1 != beforeNodeIndex && beforeNodeIndex == yamlNode.lastNodeIndex {
+					yamlLineList = append(yamlLineList, blanks+IndentBlanks+name+equalSign+stringValueWrap(value))
 				} else {
-					yamlLineList.add(blanks + ARRAY_BLANKS + name + equalSign + stringValueWrap(value));
+					yamlLineList = append(yamlLineList, blanks+ArrayBlanks+name+equalSign+stringValueWrap(value))
 				}
 			}
-			beforeNodeIndex = YamlNode.getLastNodeIndex();
+			beforeNodeIndex = yamlNode.lastNodeIndex
 		} else {
-			// 父节点为空，表示，当前为顶层
-			if (null == YamlNode.getParent()) {
-				String remarkTem = getRemarkProject(YamlNode.getProjectRemark());
-				if (!"".equals(remarkTem)) {
-					yamlLineList.add(blanks + getRemarkProject(YamlNode.getProjectRemark()));
-				}
-			}
-
-			// 自己节点为数组，则添加对应的注释
-			if (YamlNode.getArrayFlag()) {
-				if (null != remark && !"".equals(remark)) {
-					yamlLineList.add(blanks + remark);
-				}
-			}
-			yamlLineList.add(blanks + name + equalSign + stringValueWrap(value, remark));
+			yamlLineList = append(yamlLineList, blanks+ArrayBlanks+name+equalSign+stringValueWrap(value))
 		}
 
-		if (YamlNode.getArrayFlag()) {
-			if (lastNodeArrayFlag) {
-				formatPropertiesToYaml(yamlLineList, YamlNode.getValueList(), true, INDENT_BLANKS + INDENT_BLANKS + blanks);
+		if yamlNode.arrayFlag {
+			if lastNodeArrayFlag {
+				yamlLineList = formatPropertiesToYaml(yamlLineList, yamlNode.valueList, true, IndentBlanks+IndentBlanks+blanks)
 			} else {
-				formatPropertiesToYaml(yamlLineList, YamlNode.getValueList(), true, INDENT_BLANKS + blanks);
+				yamlLineList = formatPropertiesToYaml(yamlLineList, yamlNode.valueList, true, IndentBlanks+blanks)
 			}
 		} else {
-			if (lastNodeArrayFlag) {
-				formatPropertiesToYaml(yamlLineList, YamlNode.getChildren(), false, INDENT_BLANKS + INDENT_BLANKS + blanks);
+			if lastNodeArrayFlag {
+				yamlLineList = formatPropertiesToYaml(yamlLineList, yamlNode.children, false, IndentBlanks+IndentBlanks+blanks)
 			} else {
-				formatPropertiesToYaml(yamlLineList, YamlNode.getChildren(), false, INDENT_BLANKS + blanks);
+				yamlLineList = formatPropertiesToYaml(yamlLineList, yamlNode.children, false, IndentBlanks+blanks)
 			}
 		}
 	}
+	return yamlLineList
 }
 
 func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode, lastNodeArrayFlag bool, index int, value string) ([]string, []YamlNode) {
@@ -264,7 +238,7 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 		}
 	} else {
 		nodeName := lineWordList[0]
-		nodeName, nextIndex := peelArray(nodeName);
+		nodeName, nextIndex := peelArray(nodeName)
 
 		var node YamlNode
 		if nil != parentNode {
@@ -438,9 +412,20 @@ func appendSpaceForArrayValue(value string) string {
 		if strings.HasSuffix(element, "\\") {
 			tem = element[:len(element)-1]
 		}
-		strs = append(strs, IndentBlanks + tem)
+		strs = append(strs, IndentBlanks+tem)
 	}
 	return YamlNewLineDom + strings.Join(strs, "\n")
+}
+
+func stringValueWrap(value string) string {
+	if "" == value {
+		return ""
+	}
+	// 对数组的数据进行特殊处理
+	if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
+		return "'" + value + "'"
+	}
+	return value
 }
 
 type YamlNode struct {
@@ -470,22 +455,22 @@ type YamlNode struct {
 	valueList []YamlNode
 }
 
-func (yamlNode *YamlNode) resortValue()  {
-	// todo
-	//
-	if (!arrayFlag || valueList.isEmpty()) {
-		return;
+func (yamlNode *YamlNode) resortValue() {
+	if !yamlNode.arrayFlag || len(yamlNode.valueList) == 0 {
+		return
 	}
 
-	// 升序
-	valueList.sort((a, b) -> {
-		if (null == a.getLastNodeIndex() || null == b.getLastNodeIndex()) {
-			return 0;
+	sort.Slice(yamlNode.valueList, func(i, j int) bool {
+		a := yamlNode.valueList[i]
+		b := yamlNode.valueList[j]
+
+		if -1 == a.lastNodeIndex || -1 == b.lastNodeIndex {
+			return false
 		}
+		return a.lastNodeIndex < b.lastNodeIndex
+	})
 
-		return a.getLastNodeIndex() - b.getLastNodeIndex();
-	});
-
-	// 是数组的节点也循环下
-	valueList.forEach(YamlNode::resortValue);
+	for _, node := range yamlNode.valueList {
+		node.resortValue()
+	}
 }

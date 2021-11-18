@@ -108,6 +108,12 @@ func TestYamlToMap(t *testing.T) {
 	yamlToMapTest(t, "./resources/yml/array5.yml")
 	//yamlToMapTest(t, "./resources/yml/array6.yml")
 	yamlToMapTest(t, "./resources/yml/array7.yml")
+	//yamlToMapTest(t, "./resources/yml/cron.yml")
+	yamlToMapTest(t, "./resources/yml/multi_line.yml")
+}
+
+func TestPropertiesToYaml1(t *testing.T) {
+	propertiesToYamlTest(t, "./resources/properties/base.properties")
 }
 
 func yamlToMapTest(t *testing.T, filePath string) {
@@ -124,5 +130,27 @@ func yamlToMapTest(t *testing.T, filePath string) {
 	}
 
 	act := strings.TrimSpace(tools.MapToYaml(dataMap))
+	//fmt.Println(act)
+	//fmt.Println(expect)
+	Equal(t, act, expect)
+}
+
+func propertiesToYamlTest(t *testing.T, filePath string) {
+	bytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		Err(t, err)
+		return
+	}
+	expect := strings.TrimSpace(string(bytes))
+	yamlContent, err := tools.PropertiesToYaml(expect)
+	if err != nil {
+		log.Fatalf("转换错误：%v", err)
+		return
+	}
+
+	act, err := tools.YamlToProperties(yamlContent)
+	act = strings.TrimSpace(act)
+	//fmt.Println(act)
+	//fmt.Println(expect)
 	Equal(t, act, expect)
 }

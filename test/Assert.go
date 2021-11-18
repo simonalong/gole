@@ -36,7 +36,7 @@ func Equal(t *testing.T, objects ...interface{}) {
 
 	for i := 0; i < len(objects); i += 2 {
 		if objects[i] != objects[i+1] {
-			t.Errorf("期望：%v \n          实际：%v", objects[i+1], objects[i])
+			t.Errorf("\n期望：\n%v\n实际：\n%v", objects[i+1], objects[i])
 		}
 	}
 }
