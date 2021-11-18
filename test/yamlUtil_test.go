@@ -2,7 +2,6 @@ package test
 
 import (
 	"testing"
-	"github.com/simonalong/go-util"
 )
 
 func TestMapToProperties1(t *testing.T) {
@@ -12,5 +11,5 @@ func TestMapToProperties1(t *testing.T) {
 	dataMap["b"] = 13
 	dataMap["c"] = 14
 
-	go-util.MapToProperties(dataMap)
+	tools.MapToProperties(dataMap)
 }

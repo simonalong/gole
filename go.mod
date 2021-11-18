@@ -1,3 +1,3 @@
-module github.com/simonalong/go-util
+module github.com/simonalong/tools
 
 go 1.17

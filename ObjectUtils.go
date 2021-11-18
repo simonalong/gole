@@ -1,4 +1,4 @@
-package go_util
+package tools
 
 import "reflect"
 
@@ -47,7 +47,7 @@ func IsBaseKind(fieldType reflect.Type) bool {
 
 func IsBaseObject(object interface{}) bool {
 	if nil == object {
-		 return false
+		return false
 	}
 
 	fieldKind := reflect.TypeOf(object).Kind()
