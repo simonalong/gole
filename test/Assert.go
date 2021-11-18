@@ -40,3 +40,7 @@ func Equal(t *testing.T, objects ...interface{}) {
 		}
 	}
 }
+
+func Err(t *testing.T, err error) {
+	t.Errorf("系统异常：%v", err)
+}

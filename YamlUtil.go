@@ -22,11 +22,17 @@ type KeyValue struct {
 	Value interface{}
 }
 
-//func YamlToPropertiesStr(contentOfYaml string) string {
-//	// yaml 到 map
-//	dataMap := YamlToMap(contentOfYaml)
-//
-//}
+func YamlToProperties(contentOfYaml string) (string, error) {
+	// yaml 到 map
+	dataMap, err := YamlToMap(contentOfYaml)
+	if err != nil {
+		log.Fatalf("YamlToPropertiesStr error: %v", err)
+		return "", err
+	}
+
+	return MapToProperties(dataMap)
+}
+
 //
 //
 //
@@ -34,15 +40,15 @@ type KeyValue struct {
 //
 //}
 //
-func YamlToMap(contentOfYaml string) map[string]interface{} {
+func YamlToMap(contentOfYaml string) (map[string]interface{}, error) {
 	resultMap := make(map[string]interface{})
 	err := yaml.Unmarshal([]byte(contentOfYaml), &resultMap)
 	if err != nil {
 		log.Fatalf("YamlToMap error: %v", err)
-		return nil
+		return nil, err
 	}
 
-	return resultMap
+	return resultMap, nil
 }
 
 func MapToYaml(dataMap map[string]interface{}) string {
@@ -72,7 +78,7 @@ func MapToYaml(dataMap map[string]interface{}) string {
 //}
 
 // 进行深层嵌套的map数据处理
-func MapToProperties(dataMap map[string]interface{}) string {
+func MapToProperties(dataMap map[string]interface{}) (string, error) {
 	propertyStrList := []string{}
 	for key, value := range dataMap {
 		valueKind := reflect.TypeOf(value).Kind()
@@ -101,7 +107,7 @@ func MapToProperties(dataMap map[string]interface{}) string {
 		resultStr += propertyStr + "\n"
 	}
 
-	return resultStr
+	return resultStr, nil
 }
 
 func doMapToProperties(propertyStrList []string, value interface{}, prefix string) []string {
