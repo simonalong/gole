@@ -87,7 +87,7 @@ func PropertiesToYaml(contentOfProperties string) (string, error) {
 			}
 		}
 	}
-	formatPropertiesToYaml(yamlLineList, yamlNodes, false, "")
+	yamlLineList = formatPropertiesToYaml(yamlLineList, yamlNodes, false, "")
 	return strings.Join(yamlLineList, "\n") + "\n", nil
 }
 
@@ -189,9 +189,7 @@ func formatPropertiesToYaml(yamlLineList []string, yamlNodes []YamlNode, lastNod
 		value := yamlNode.value
 
 		equalSign = SignSemicolon
-		if "" == value {
-			value = ""
-		} else {
+		if "" != value {
 			equalSign = SignSemicolon + " "
 		}
 
@@ -210,7 +208,7 @@ func formatPropertiesToYaml(yamlLineList []string, yamlNodes []YamlNode, lastNod
 			}
 			beforeNodeIndex = yamlNode.lastNodeIndex
 		} else {
-			yamlLineList = append(yamlLineList, blanks+ArrayBlanks+name+equalSign+stringValueWrap(value))
+			yamlLineList = append(yamlLineList, blanks+name+equalSign+stringValueWrap(value))
 		}
 
 		if yamlNode.arrayFlag {
@@ -267,31 +265,40 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 					yamlNodeIndex := yamlNode.lastNodeIndex
 					if 0 == yamlNodeIndex || index == yamlNodeIndex {
 						hasEqualsName = true
-						lineWordList, yamlNode.valueList = wordToNode(lineWordList, yamlNode.valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
+						lineWordListTem, valueListTem := wordToNode(lineWordList, yamlNode.valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
+						yamlNode.valueList = valueListTem
+						lineWordList = lineWordListTem
 					}
 				}
 			}
 
 			//如果遍历结果为节点名称不存在，则递归添加剩下的数据节点，并把新节点添加到上级yamlTree的子节点中
 			if !hasEqualsName {
-				lineWordList, node.valueList = wordToNode(lineWordList, node.valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
+				lineWordListTem, valueListTem := wordToNode(lineWordList, node.valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
+				lineWordList = lineWordListTem
+				node.valueList = valueListTem
+				nodeList = append(nodeList, node)
 			}
 		} else {
 			var hasEqualsName = false
-			for _, yamlNode := range nodeList {
+			for index := range nodeList {
 				if !lastNodeArrayFlag {
 					//如果节点名称已存在，则递归添加剩下的数据节点
-					if nodeName == yamlNode.name {
+					if nodeName == nodeList[index].name {
 						hasEqualsName = true
-						lineWordList, yamlNode.children = wordToNode(lineWordList, yamlNode.children, &yamlNode, false, nextIndex, appendSpaceForArrayValue(value))
+						lineWordListTem, childrenTem := wordToNode(lineWordList, nodeList[index].children, &nodeList[index], false, nextIndex, appendSpaceForArrayValue(value))
+						lineWordList = lineWordListTem
+						nodeList[index].children = childrenTem
 					}
 				} else {
 					//如果节点名称已存在，则递归添加剩下的数据节点
-					if nodeName == yamlNode.name {
-						yamlNodeIndex := yamlNode.lastNodeIndex
+					if nodeName == nodeList[index].name {
+						yamlNodeIndex := nodeList[index].lastNodeIndex
 						if -1 == yamlNodeIndex {
 							hasEqualsName = true
-							lineWordList, yamlNode.children = wordToNode(lineWordList, yamlNode.children, &yamlNode, true, nextIndex, appendSpaceForArrayValue(value))
+							lineWordListTem, childrenTem := wordToNode(lineWordList, nodeList[index].children, &nodeList[index], true, nextIndex, appendSpaceForArrayValue(value))
+							lineWordList = lineWordListTem
+							nodeList[index].children = childrenTem
 						}
 					}
 				}
@@ -299,7 +306,9 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 
 			//如果遍历结果为节点名称不存在，则递归添加剩下的数据节点，并把新节点添加到上级yamlTree的子节点中
 			if !hasEqualsName {
-				lineWordList, node.children = wordToNode(lineWordList, node.children, &node, false, nextIndex, appendSpaceForArrayValue(value))
+				lineWordListTem, childrenTem := wordToNode(lineWordList, node.children, &node, false, nextIndex, appendSpaceForArrayValue(value))
+				lineWordList = lineWordListTem
+				node.children = childrenTem
 				nodeList = append(nodeList, node)
 			}
 		}
@@ -350,7 +359,7 @@ func prefixWithDOT(prefix string) string {
 
 func peelArray(nodeName string) (string, int) {
 	var index = -1
-	var name string
+	var name = nodeName
 	var err error
 
 	subData := rangePattern.FindAllStringSubmatch(nodeName, -1)
