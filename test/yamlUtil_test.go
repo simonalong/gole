@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"github.com/simonalong/tools"
 	"io/ioutil"
 	"log"
@@ -114,16 +113,16 @@ func TestYamlToMap(t *testing.T) {
 }
 
 func TestPropertiesToYaml1(t *testing.T) {
-	//propertiesToYamlTest(t, "./resources/properties/base.properties")
+	propertiesToYamlTest(t, "./resources/properties/base.properties")
 	//propertiesToYamlTest(t, "./resources/properties/base1.properties")
 	//propertiesToYamlTest(t, "./resources/properties/base2.properties")
 	//propertiesToYamlTest(t, "./resources/properties/array1.properties")
 	//propertiesToYamlTest(t, "./resources/properties/array2.properties")
-	//propertiesToYamlTest(t, "./resources/properties/array3.properties")
-	//propertiesToYamlTest(t, "./resources/properties/array4.properties")
-	propertiesToYamlTest(t, "./resources/properties/array5.properties")
-	//propertiesToYamlTest(t, "./resources/properties/array6.properties")
-	//propertiesToYamlTest(t, "./resources/properties/array6.properties")
+	propertiesToYamlTest(t, "./resources/properties/array3.properties")
+	propertiesToYamlTest(t, "./resources/properties/array4.properties")
+	//propertiesToYamlTest(t, "./resources/properties/array5.properties")
+	propertiesToYamlTest(t, "./resources/properties/array6.properties")
+	//propertiesToYamlTest(t, "./resources/properties/array7.properties")
 }
 
 func yamlToMapTest(t *testing.T, filePath string) {
@@ -151,7 +150,7 @@ func propertiesToYamlTest(t *testing.T, filePath string) {
 	}
 	expect := strings.TrimSpace(string(bytes))
 	yamlContent, err := tools.PropertiesToYaml(expect)
-	fmt.Println(yamlContent)
+	//fmt.Println(yamlContent)
 	if err != nil {
 		log.Fatalf("转换错误：%v", err)
 		return

@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/magiconair/properties"
 	"gopkg.in/yaml.v2"
@@ -51,6 +52,14 @@ type KeyValue struct {
 	Value interface{}
 }
 
+type ConvertError struct {
+	errMsg string
+}
+
+func (convertError *ConvertError) Error() string {
+	return convertError.errMsg
+}
+
 func YamlToProperties(contentOfYaml string) (string, error) {
 	// yaml 到 map
 	dataMap, err := YamlToMap(contentOfYaml)
@@ -60,6 +69,50 @@ func YamlToProperties(contentOfYaml string) (string, error) {
 	}
 
 	return MapToProperties(dataMap)
+}
+
+func YamlToMap(contentOfYaml string) (map[string]interface{}, error) {
+	resultMap := make(map[string]interface{})
+	err := yaml.Unmarshal([]byte(contentOfYaml), &resultMap)
+	if err != nil {
+		log.Fatalf("YamlToMap, error: %v, content: %v", err, contentOfYaml)
+		return nil, err
+	}
+
+	return resultMap, nil
+}
+
+func YamlToJson(contentOfYaml string) (string, error) {
+	if contentOfYaml != "-" && strings.Contains(contentOfYaml, ":") {
+		return "", &ConvertError{errMsg: "the content is invalidate for json"}
+	}
+
+	var data interface{}
+	err := yaml.Unmarshal([]byte(contentOfYaml), &data)
+	if err != nil {
+		log.Fatalf("YamlToList, error: %v, content: %v", err, contentOfYaml)
+		return "", err
+	}
+
+	jsonStr, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonStr), nil
+}
+
+func YamlToList(contentOfYaml string) ([]interface{}, error) {
+	if contentOfYaml != "-" {
+		return []interface{}{}, &ConvertError{errMsg: "the content of yaml not start with '-'"}
+	}
+	var resultList []interface{}
+	err := yaml.Unmarshal([]byte(contentOfYaml), &resultList)
+	if err != nil {
+		log.Fatalf("YamlToList, error: %v, content: %v", err, contentOfYaml)
+		return nil, err
+	}
+
+	return resultList, nil
 }
 
 func PropertiesToMap(contentOfProperties string) (map[string]interface{}, error) {
@@ -149,17 +202,6 @@ func PropertiesToYaml(contentOfProperties string) (string, error) {
 	}
 	yamlLineList = formatPropertiesToYaml(yamlLineList, yamlNodes, false, "")
 	return strings.Join(yamlLineList, "\n") + "\n", nil
-}
-
-func YamlToMap(contentOfYaml string) (map[string]interface{}, error) {
-	resultMap := make(map[string]interface{})
-	err := yaml.Unmarshal([]byte(contentOfYaml), &resultMap)
-	if err != nil {
-		log.Fatalf("YamlToMap, error: %v, content: %v", err, contentOfYaml)
-		return nil, err
-	}
-
-	return resultMap, nil
 }
 
 func MapToYaml(dataMap map[string]interface{}) string {
@@ -291,7 +333,7 @@ func formatPropertiesToYaml(yamlLineList []string, yamlNodes []YamlNode, lastNod
 func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode, lastNodeArrayFlag bool, index int, value string) ([]string, []YamlNode) {
 	if len(lineWordList) == 0 {
 		if lastNodeArrayFlag {
-			node := YamlNode{value: value}
+			node := YamlNode{value: value, lastNodeIndex: -1}
 			nodeList = append(nodeList, node)
 		}
 	} else {
@@ -348,7 +390,7 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 					//如果节点名称已存在，则递归添加剩下的数据节点
 					if nodeName == nodeList[innerIndex].name {
 						yamlNodeIndex := nodeList[innerIndex].lastNodeIndex
-						if -1 == yamlNodeIndex {
+						if -1 == yamlNodeIndex || index == yamlNodeIndex {
 							hasEqualsName = true
 							lineWordList, nodeList[innerIndex].children = wordToNode(lineWordList, nodeList[innerIndex].children, &nodeList[innerIndex], true, nextIndex, appendSpaceForArrayValue(value))
 						}
