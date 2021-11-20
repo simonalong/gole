@@ -24,9 +24,6 @@ import (
 // NewLine 换行符
 var NewLine = "\n"
 
-// RemarkPre 注释标识
-var RemarkPre = "# "
-
 // IndentBlanks 缩进空格
 var IndentBlanks = "  "
 
@@ -145,7 +142,7 @@ func YamlToKvList(contentOfYaml string) ([]StringPair, error) {
 		if "" == element {
 			continue
 		}
-		values := strings.SplitN(element, "=", 2)
+		values := strings.SplitN(element, SignEqual, 2)
 		pairs = append(pairs, StringPair{Left: values[0], Right: values[1]})
 	}
 
@@ -191,12 +188,12 @@ func propertiesAppendPrefixKey(key string, propertiesContent string) (string, er
 	itemLines := getPropertiesItemLineList(propertiesContent)
 	var datas []string
 	for _, line := range itemLines {
-		if !strings.Contains(line, "=") {
+		if !strings.Contains(line, SignEqual) {
 			continue
 		}
 
-		kvs := strings.SplitN(line, "=", 2)
-		datas = append(datas, key+Dot+kvs[0]+"="+kvs[1])
+		kvs := strings.SplitN(line, SignEqual, 2)
+		datas = append(datas, key+Dot+kvs[0]+SignEqual+kvs[1])
 	}
 
 	return strings.Join(datas, NewLine), nil
@@ -252,7 +249,7 @@ func PropertiesToYaml(contentOfProperties string) (string, error) {
 				continue
 			}
 
-			index := strings.Index(line, "=")
+			index := strings.Index(line, SignEqual)
 			if index > -1 {
 				key := line[:index]
 				value := line[index+1:]
@@ -316,9 +313,9 @@ func MapToProperties(dataMap map[string]interface{}) (string, error) {
 		case reflect.String:
 			objectValue := reflect.ValueOf(value)
 			objectValueStr := strings.ReplaceAll(objectValue.String(), "\n", "\\\n")
-			propertyStrList = append(propertyStrList, prefixWithDOT("")+key+"="+objectValueStr)
+			propertyStrList = append(propertyStrList, prefixWithDOT("")+key+SignEqual+objectValueStr)
 		default:
-			propertyStrList = append(propertyStrList, prefixWithDOT("")+key+"="+fmt.Sprintf("%v", value))
+			propertyStrList = append(propertyStrList, prefixWithDOT("")+key+SignEqual+fmt.Sprintf("%v", value))
 		}
 	}
 	resultStr := ""
@@ -500,10 +497,10 @@ func doMapToProperties(propertyStrList []string, value interface{}, prefix strin
 	case reflect.String:
 		objectValue := reflect.ValueOf(value)
 		objectValueStr := strings.ReplaceAll(objectValue.String(), "\n", "\\\n")
-		propertyStrList = append(propertyStrList, prefix+"="+objectValueStr)
+		propertyStrList = append(propertyStrList, prefix+SignEqual+objectValueStr)
 	default:
 		objectValue := fmt.Sprintf("%v", reflect.ValueOf(value))
-		propertyStrList = append(propertyStrList, prefix+"="+objectValue)
+		propertyStrList = append(propertyStrList, prefix+SignEqual+objectValue)
 	}
 	return propertyStrList
 }
