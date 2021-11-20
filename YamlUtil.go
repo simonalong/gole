@@ -47,9 +47,9 @@ var YamlNewLineDom = "|\n"
 
 var rangePattern = regexp.MustCompile("^(.*)\\[(\\d*)\\]$")
 
-type KeyValue struct {
-	Key   string
-	Value interface{}
+type StringPair struct {
+	Left  string
+	Right string
 }
 
 type ConvertError struct {
@@ -99,6 +99,30 @@ func YamlToJson(contentOfYaml string) (string, error) {
 		return "", err
 	}
 	return string(jsonStr), nil
+}
+
+func YamlToKvList(contentOfYaml string) ([]StringPair, error) {
+	if !strings.Contains(contentOfYaml, ":") && !strings.Contains(contentOfYaml, "-") {
+		return nil, nil
+	}
+
+	property, err := YamlToProperties(contentOfYaml)
+	if err != nil {
+		return nil, err
+	}
+
+	propertiesLineWordList := getPropertiesItemLineList(property)
+	pairs := []StringPair{}
+	for _, element := range propertiesLineWordList {
+		element = strings.TrimSpace(element)
+		if "" == element {
+			continue
+		}
+		values := strings.SplitN(element, "=", 2)
+		pairs = append(pairs, StringPair{Left: values[0], Right: values[1]})
+	}
+
+	return pairs, nil
 }
 
 func YamlToList(contentOfYaml string) ([]interface{}, error) {
@@ -226,7 +250,7 @@ func MapToYaml(dataMap map[string]interface{}) string {
 //
 //}
 //
-//func KvListToYaml(kvList []KeyValue) string {
+//func KvListToYaml(kvList []StringPair) string {
 //
 //}
 

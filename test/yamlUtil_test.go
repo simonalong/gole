@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/magiconair/properties"
 	"github.com/simonalong/tools"
 	"io/ioutil"
 	"log"
@@ -123,6 +124,58 @@ func TestPropertiesToYaml1(t *testing.T) {
 	//propertiesToYamlTest(t, "./resources/properties/array5.properties")
 	propertiesToYamlTest(t, "./resources/properties/array6.properties")
 	//propertiesToYamlTest(t, "./resources/properties/array7.properties")
+}
+
+func TestYamlToKvList1(t *testing.T) {
+	yamlToKvListTest(t, "./resources/yml/base.yml")
+	yamlToKvListTest(t, "./resources/yml/base1.yml")
+	yamlToKvListTest(t, "./resources/yml/base2.yml")
+	yamlToKvListTest(t, "./resources/yml/array1.yml")
+	yamlToKvListTest(t, "./resources/yml/array2.yml")
+	yamlToKvListTest(t, "./resources/yml/array3.yml")
+	yamlToKvListTest(t, "./resources/yml/array4.yml")
+	yamlToKvListTest(t, "./resources/yml/array5.yml")
+	yamlToKvListTest(t, "./resources/yml/array6.yml")
+	yamlToKvListTest(t, "./resources/yml/array7.yml")
+}
+
+func yamlToKvListTest(t *testing.T, filePath string) {
+	bytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		Err(t, err)
+		return
+	}
+
+	expect := strings.TrimSpace(string(bytes))
+	kvPairs, err := tools.YamlToKvList(expect)
+	if err != nil {
+		log.Fatalf("转换错误：%v", err)
+		return
+	}
+
+	// 获取实际数据
+	actMap := map[string]string{}
+	for _, pair := range kvPairs {
+		actMap[pair.Left] = pair.Right
+	}
+
+	// 获取标准的数据
+	property, err := tools.YamlToProperties(expect)
+	pro := properties.NewProperties()
+	err = pro.Load([]byte(property), properties.UTF8)
+	if err != nil {
+		log.Fatalf("转换错误：%v", err)
+		return
+	}
+	resultMap := pro.Map()
+
+	// 数据进行对比
+	for key := range resultMap {
+		actValue, exist := actMap[key]
+		if !exist || actValue != resultMap[key] {
+			t.Errorf("有数据不一致，\n期望：key=%v, value=%v\n实际：key=%v, value=%v\n", key, resultMap[key], key, actMap[key])
+		}
+	}
 }
 
 func yamlToMapTest(t *testing.T, filePath string) {
