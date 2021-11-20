@@ -71,6 +71,33 @@ func YamlToProperties(contentOfYaml string) (string, error) {
 	return MapToProperties(dataMap)
 }
 
+func YamlToPropertiesWithKey(key string, contentOfYaml string) (string, error) {
+	if !strings.Contains(contentOfYaml, ":") && !strings.Contains(contentOfYaml, "-") {
+		return "", &ConvertError{errMsg: "content is illegal for yaml"}
+	}
+
+	contentOfYaml = strings.TrimSpace(contentOfYaml)
+	if strings.HasPrefix(contentOfYaml, "-") {
+		var dataMap map[string]interface{}
+		kvList, err := YamlToList(contentOfYaml)
+		if err != nil {
+			log.Fatalf("YamlToPropertiesWithKey error: %v, content: %v", err, contentOfYaml)
+			return "", err
+		}
+
+		dataMap[key] = kvList
+		return YamlToProperties(MapToYaml(dataMap))
+	}
+
+	property, err := YamlToProperties(contentOfYaml)
+	if err != nil {
+		log.Fatalf("YamlToPropertiesWithKey error: %v, content: %v", err, contentOfYaml)
+		return "", err
+	}
+
+	return propertiesAppendPrefixKey(key, property)
+}
+
 func YamlToMap(contentOfYaml string) (map[string]interface{}, error) {
 	resultMap := make(map[string]interface{})
 	err := yaml.Unmarshal([]byte(contentOfYaml), &resultMap)
@@ -158,6 +185,21 @@ func PropertiesToMap(contentOfProperties string) (map[string]interface{}, error)
 		deepValueMap = deepPut(deepValueMap, shortKey, shortValue)
 	}
 	return deepValueMap, nil
+}
+
+func propertiesAppendPrefixKey(key string, propertiesContent string) (string, error) {
+	itemLines := getPropertiesItemLineList(propertiesContent)
+	var datas []string
+	for _, line := range itemLines {
+		if !strings.Contains(line, "=") {
+			continue
+		}
+
+		kvs := strings.SplitN(line, "=", 2)
+		datas = append(datas, key+Dot+kvs[0]+"="+kvs[1])
+	}
+
+	return strings.Join(datas, NewLine), nil
 }
 
 func deepPut(dataMap map[string]interface{}, key string, value interface{}) map[string]interface{} {

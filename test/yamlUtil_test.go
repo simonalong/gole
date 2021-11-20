@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"github.com/magiconair/properties"
 	"github.com/simonalong/tools"
 	"io/ioutil"
@@ -137,6 +138,36 @@ func TestYamlToKvList1(t *testing.T) {
 	yamlToKvListTest(t, "./resources/yml/array5.yml")
 	yamlToKvListTest(t, "./resources/yml/array6.yml")
 	yamlToKvListTest(t, "./resources/yml/array7.yml")
+}
+
+func TestYamlToPropertiesWithKey(t *testing.T) {
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/base.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/base1.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/base2.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/array1.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/array2.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/array3.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/array4.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/array5.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/array6.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/array7.yml")
+}
+
+func yamlToPropertiesWithKeyTest(t *testing.T, filePath string) {
+	bytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		Err(t, err)
+		return
+	}
+
+	expect := strings.TrimSpace(string(bytes))
+	property, err := tools.YamlToPropertiesWithKey("t", expect)
+	if err != nil {
+		log.Fatalf("转换错误：%v", err)
+		return
+	}
+
+	fmt.Println(property)
 }
 
 func yamlToKvListTest(t *testing.T, filePath string) {
