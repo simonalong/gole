@@ -114,7 +114,15 @@ func TestYamlToMap(t *testing.T) {
 
 func TestPropertiesToYaml1(t *testing.T) {
 	//propertiesToYamlTest(t, "./resources/properties/base.properties")
-	propertiesToYamlTest(t, "./resources/properties/base1.properties")
+	//propertiesToYamlTest(t, "./resources/properties/base1.properties")
+	//propertiesToYamlTest(t, "./resources/properties/base2.properties")
+	propertiesToYamlTest(t, "./resources/properties/array1.properties")
+	//propertiesToYamlTest(t, "./resources/properties/array2.properties")
+	//propertiesToYamlTest(t, "./resources/properties/array3.properties")
+	//propertiesToYamlTest(t, "./resources/properties/array4.properties")
+	//propertiesToYamlTest(t, "./resources/properties/array5.properties")
+	//propertiesToYamlTest(t, "./resources/properties/array6.properties")
+	//propertiesToYamlTest(t, "./resources/properties/array6.properties")
 }
 
 func yamlToMapTest(t *testing.T, filePath string) {
@@ -131,8 +139,6 @@ func yamlToMapTest(t *testing.T, filePath string) {
 	}
 
 	act := strings.TrimSpace(tools.MapToYaml(dataMap))
-	//fmt.Println(act)
-	//fmt.Println(expect)
 	Equal(t, act, expect)
 }
 

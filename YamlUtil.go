@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"github.com/magiconair/properties"
 	"gopkg.in/yaml.v2"
 	"log"
 	"reflect"
@@ -54,11 +55,70 @@ func YamlToProperties(contentOfYaml string) (string, error) {
 	// yaml 到 map
 	dataMap, err := YamlToMap(contentOfYaml)
 	if err != nil {
-		log.Fatalf("YamlToPropertiesStr error: %v", err)
+		log.Fatalf("YamlToPropertiesStr error: %v, content: %v", err, contentOfYaml)
 		return "", err
 	}
 
 	return MapToProperties(dataMap)
+}
+
+func PropertiesToMap(contentOfProperties string) (map[string]interface{}, error) {
+	pro := properties.NewProperties()
+	err := pro.Load([]byte(contentOfProperties), properties.UTF8)
+	if err != nil {
+		log.Fatalf("PropertiesToMap error: %v, content: %v", err, contentOfProperties)
+		return nil, err
+	}
+	valueMap := map[string]string{}
+	for _, key := range pro.Keys() {
+		value, _ := pro.Get(key)
+		valueMap[key] = value
+	}
+
+	deepValueMap := map[string]interface{}{}
+	for key := range valueMap {
+		shortKey, shortValue := shortKeyValue(key, valueMap[key])
+		deepValueMap = deepPut(deepValueMap, shortKey, shortValue)
+	}
+	return deepValueMap, nil
+}
+
+func deepPut(dataMap map[string]interface{}, key string, value interface{}) map[string]interface{} {
+	mapValue, exist := dataMap[key]
+	if !exist {
+		dataMap[key] = value
+	} else {
+		if reflect.Map == reflect.TypeOf(value).Kind() {
+			leftMap := mapValue.(map[string]interface{})
+			rightMap := value.(map[string]interface{})
+
+			for rightMapKey := range rightMap {
+				leftMap = deepPut(leftMap, rightMapKey, rightMap[rightMapKey])
+			}
+			dataMap[key] = leftMap
+		}
+	}
+
+	return dataMap
+}
+
+// a.b.c=12转换为，a={b:{c:12}}
+func shortKeyValue(key string, value string) (string, interface{}) {
+	if strings.Contains(key, ".") {
+		innerKeys := strings.SplitN(key, ".", 2)
+
+		newKey, newValue := shortKeyValue(innerKeys[1], value)
+
+		innerValue := map[string]interface{}{}
+		innerValue[newKey] = newValue
+
+		return innerKeys[0], innerValue
+	} else if strings.Contains(key, "[") && strings.HasSuffix(key, "]") {
+		// todo
+		return key, value
+	} else {
+		return key, value
+	}
 }
 
 func PropertiesToYaml(contentOfProperties string) (string, error) {
@@ -95,7 +155,7 @@ func YamlToMap(contentOfYaml string) (map[string]interface{}, error) {
 	resultMap := make(map[string]interface{})
 	err := yaml.Unmarshal([]byte(contentOfYaml), &resultMap)
 	if err != nil {
-		log.Fatalf("YamlToMap error: %v", err)
+		log.Fatalf("YamlToMap, error: %v, content: %v", err, contentOfYaml)
 		return nil, err
 	}
 
@@ -105,7 +165,7 @@ func YamlToMap(contentOfYaml string) (map[string]interface{}, error) {
 func MapToYaml(dataMap map[string]interface{}) string {
 	bytes2, err := yaml.Marshal(dataMap)
 	if err != nil {
-		log.Fatalf("MapToYaml error: %v", err)
+		log.Fatalf("MapToYaml error: %v, content: %v", err, dataMap)
 		return ""
 	}
 	return string(bytes2)
@@ -259,14 +319,14 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 			var hasEqualsName = false
 
 			//遍历查询节点是否存在
-			for _, yamlNode := range nodeList {
+			for index := range nodeList {
 				//如果节点名称已存在，则递归添加剩下的数据节点
-				if nodeName == yamlNode.name && yamlNode.arrayFlag {
-					yamlNodeIndex := yamlNode.lastNodeIndex
-					if 0 == yamlNodeIndex || index == yamlNodeIndex {
+				if nodeName == nodeList[index].name && nodeList[index].arrayFlag {
+					yamlNodeIndex := nodeList[index].lastNodeIndex
+					if -1 == yamlNodeIndex || index == yamlNodeIndex {
 						hasEqualsName = true
-						lineWordListTem, valueListTem := wordToNode(lineWordList, yamlNode.valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
-						yamlNode.valueList = valueListTem
+						lineWordListTem, valueListTem := wordToNode(lineWordList, nodeList[index].valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
+						nodeList[index].valueList = valueListTem
 						lineWordList = lineWordListTem
 					}
 				}
@@ -336,7 +396,7 @@ func doMapToProperties(propertyStrList []string, value interface{}, prefix strin
 		{
 			objectValue := reflect.ValueOf(value)
 			for index := 0; index < objectValue.Len(); index++ {
-				propertyStrList = doMapToProperties(propertyStrList, objectValue.Index(index), prefix+"["+strconv.Itoa(index)+"]")
+				propertyStrList = doMapToProperties(propertyStrList, objectValue.Index(index).Interface(), prefix+"["+strconv.Itoa(index)+"]")
 			}
 		}
 	case reflect.String:
