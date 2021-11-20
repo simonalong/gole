@@ -325,18 +325,14 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 					yamlNodeIndex := nodeList[index].lastNodeIndex
 					if -1 == yamlNodeIndex || index == yamlNodeIndex {
 						hasEqualsName = true
-						lineWordListTem, valueListTem := wordToNode(lineWordList, nodeList[index].valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
-						nodeList[index].valueList = valueListTem
-						lineWordList = lineWordListTem
+						lineWordList, nodeList[index].valueList = wordToNode(lineWordList, nodeList[index].valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
 					}
 				}
 			}
 
 			//如果遍历结果为节点名称不存在，则递归添加剩下的数据节点，并把新节点添加到上级yamlTree的子节点中
 			if !hasEqualsName {
-				lineWordListTem, valueListTem := wordToNode(lineWordList, node.valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
-				lineWordList = lineWordListTem
-				node.valueList = valueListTem
+				lineWordList, node.valueList = wordToNode(lineWordList, node.valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
 				nodeList = append(nodeList, node)
 			}
 		} else {
@@ -346,9 +342,7 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 					//如果节点名称已存在，则递归添加剩下的数据节点
 					if nodeName == nodeList[index].name {
 						hasEqualsName = true
-						lineWordListTem, childrenTem := wordToNode(lineWordList, nodeList[index].children, &nodeList[index], false, nextIndex, appendSpaceForArrayValue(value))
-						lineWordList = lineWordListTem
-						nodeList[index].children = childrenTem
+						lineWordList, nodeList[index].children = wordToNode(lineWordList, nodeList[index].children, &nodeList[index], false, nextIndex, appendSpaceForArrayValue(value))
 					}
 				} else {
 					//如果节点名称已存在，则递归添加剩下的数据节点
@@ -356,9 +350,7 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 						yamlNodeIndex := nodeList[index].lastNodeIndex
 						if -1 == yamlNodeIndex {
 							hasEqualsName = true
-							lineWordListTem, childrenTem := wordToNode(lineWordList, nodeList[index].children, &nodeList[index], true, nextIndex, appendSpaceForArrayValue(value))
-							lineWordList = lineWordListTem
-							nodeList[index].children = childrenTem
+							lineWordList, nodeList[index].children = wordToNode(lineWordList, nodeList[index].children, &nodeList[index], true, nextIndex, appendSpaceForArrayValue(value))
 						}
 					}
 				}
@@ -366,9 +358,7 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 
 			//如果遍历结果为节点名称不存在，则递归添加剩下的数据节点，并把新节点添加到上级yamlTree的子节点中
 			if !hasEqualsName {
-				lineWordListTem, childrenTem := wordToNode(lineWordList, node.children, &node, false, nextIndex, appendSpaceForArrayValue(value))
-				lineWordList = lineWordListTem
-				node.children = childrenTem
+				lineWordList, node.children = wordToNode(lineWordList, node.children, &node, false, nextIndex, appendSpaceForArrayValue(value))
 				nodeList = append(nodeList, node)
 			}
 		}

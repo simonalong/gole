@@ -113,10 +113,10 @@ func TestYamlToMap(t *testing.T) {
 }
 
 func TestPropertiesToYaml1(t *testing.T) {
-	//propertiesToYamlTest(t, "./resources/properties/base.properties")
+	propertiesToYamlTest(t, "./resources/properties/base.properties")
 	//propertiesToYamlTest(t, "./resources/properties/base1.properties")
 	//propertiesToYamlTest(t, "./resources/properties/base2.properties")
-	propertiesToYamlTest(t, "./resources/properties/array1.properties")
+	//propertiesToYamlTest(t, "./resources/properties/array1.properties")
 	//propertiesToYamlTest(t, "./resources/properties/array2.properties")
 	//propertiesToYamlTest(t, "./resources/properties/array3.properties")
 	//propertiesToYamlTest(t, "./resources/properties/array4.properties")
