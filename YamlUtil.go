@@ -242,7 +242,7 @@ func getPropertiesItemLineList(content string) []string {
 }
 
 func formatPropertiesToYaml(yamlLineList []string, yamlNodes []YamlNode, lastNodeArrayFlag bool, blanks string) []string {
-	var beforeNodeIndex int
+	var beforeNodeIndex = -1
 	var equalSign string
 
 	for _, yamlNode := range yamlNodes {
@@ -319,13 +319,13 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 			var hasEqualsName = false
 
 			//遍历查询节点是否存在
-			for index := range nodeList {
+			for innerIndex := range nodeList {
 				//如果节点名称已存在，则递归添加剩下的数据节点
-				if nodeName == nodeList[index].name && nodeList[index].arrayFlag {
-					yamlNodeIndex := nodeList[index].lastNodeIndex
+				if nodeName == nodeList[innerIndex].name && nodeList[innerIndex].arrayFlag {
+					yamlNodeIndex := nodeList[innerIndex].lastNodeIndex
 					if -1 == yamlNodeIndex || index == yamlNodeIndex {
 						hasEqualsName = true
-						lineWordList, nodeList[index].valueList = wordToNode(lineWordList, nodeList[index].valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
+						lineWordList, nodeList[innerIndex].valueList = wordToNode(lineWordList, nodeList[innerIndex].valueList, node.parent, true, nextIndex, appendSpaceForArrayValue(value))
 					}
 				}
 			}
@@ -337,20 +337,20 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 			}
 		} else {
 			var hasEqualsName = false
-			for index := range nodeList {
+			for innerIndex := range nodeList {
 				if !lastNodeArrayFlag {
 					//如果节点名称已存在，则递归添加剩下的数据节点
-					if nodeName == nodeList[index].name {
+					if nodeName == nodeList[innerIndex].name {
 						hasEqualsName = true
-						lineWordList, nodeList[index].children = wordToNode(lineWordList, nodeList[index].children, &nodeList[index], false, nextIndex, appendSpaceForArrayValue(value))
+						lineWordList, nodeList[innerIndex].children = wordToNode(lineWordList, nodeList[innerIndex].children, &nodeList[innerIndex], false, nextIndex, appendSpaceForArrayValue(value))
 					}
 				} else {
 					//如果节点名称已存在，则递归添加剩下的数据节点
-					if nodeName == nodeList[index].name {
-						yamlNodeIndex := nodeList[index].lastNodeIndex
+					if nodeName == nodeList[innerIndex].name {
+						yamlNodeIndex := nodeList[innerIndex].lastNodeIndex
 						if -1 == yamlNodeIndex {
 							hasEqualsName = true
-							lineWordList, nodeList[index].children = wordToNode(lineWordList, nodeList[index].children, &nodeList[index], true, nextIndex, appendSpaceForArrayValue(value))
+							lineWordList, nodeList[innerIndex].children = wordToNode(lineWordList, nodeList[innerIndex].children, &nodeList[innerIndex], true, nextIndex, appendSpaceForArrayValue(value))
 						}
 					}
 				}
