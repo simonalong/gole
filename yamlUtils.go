@@ -3,7 +3,6 @@ package tools
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/magiconair/properties"
 	"gopkg.in/yaml.v2"
 	"log"
 	"reflect"
@@ -164,24 +163,30 @@ func YamlToList(contentOfYaml string) ([]interface{}, error) {
 }
 
 func PropertiesToMap(contentOfProperties string) (map[string]interface{}, error) {
-	pro := properties.NewProperties()
-	err := pro.Load([]byte(contentOfProperties), properties.UTF8)
-	if err != nil {
-		log.Fatalf("PropertiesToMap error: %v, content: %v", err, contentOfProperties)
-		return nil, err
-	}
-	valueMap := map[string]string{}
-	for _, key := range pro.Keys() {
-		value, _ := pro.Get(key)
-		valueMap[key] = value
+	if !strings.Contains(contentOfProperties, "=") {
+		return nil, &ConvertError{errMsg: "the content is illegal for properties"}
 	}
 
-	deepValueMap := map[string]interface{}{}
-	for key := range valueMap {
-		shortKey, shortValue := shortKeyValue(key, valueMap[key])
-		deepValueMap = deepPut(deepValueMap, shortKey, shortValue)
+	var resultMap = make(map[string]interface{})
+	propertiesLineWordList := getPropertiesItemLineList(contentOfProperties)
+	for _, line := range propertiesLineWordList {
+		line = strings.TrimSpace(line)
+		if "" == line {
+			continue
+		}
+
+		lineKVs := strings.SplitN(line, "=", 2)
+		key := lineKVs[0]
+		value := lineKVs[1]
+
+		if strings.Contains(value, "\n") {
+			value = YamlNewLineDom + value
+		}
+
+		resultMap[key] = value
 	}
-	return deepValueMap, nil
+
+	return resultMap, nil
 }
 
 func propertiesAppendPrefixKey(key string, propertiesContent string) (string, error) {
@@ -216,25 +221,6 @@ func deepPut(dataMap map[string]interface{}, key string, value interface{}) map[
 	}
 
 	return dataMap
-}
-
-// a.b.c=12转换为，a={b:{c:12}}
-func shortKeyValue(key string, value string) (string, interface{}) {
-	if strings.Contains(key, ".") {
-		innerKeys := strings.SplitN(key, ".", 2)
-
-		newKey, newValue := shortKeyValue(innerKeys[1], value)
-
-		innerValue := map[string]interface{}{}
-		innerValue[newKey] = newValue
-
-		return innerKeys[0], innerValue
-	} else if strings.Contains(key, "[") && strings.HasSuffix(key, "]") {
-		// todo
-		return key, value
-	} else {
-		return key, value
-	}
 }
 
 func PropertiesToYaml(contentOfProperties string) (string, error) {
@@ -295,7 +281,7 @@ func MapToYaml(dataMap map[string]interface{}) string {
 
 // 进行深层嵌套的map数据处理
 func MapToProperties(dataMap map[string]interface{}) (string, error) {
-	propertyStrList := []string{}
+	var propertyStrList []string
 	for key, value := range dataMap {
 		valueKind := reflect.TypeOf(value).Kind()
 		switch valueKind {

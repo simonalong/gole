@@ -153,6 +153,30 @@ func TestYamlToPropertiesWithKey(t *testing.T) {
 	yamlToPropertiesWithKeyTest(t, "./resources/yml/array7.yml")
 }
 
+func TestPropertiesToMap5(t *testing.T) {
+	propertiesToMap(t, "./resources/properties/base.properties")
+	propertiesToMap(t, "./resources/properties/base1.properties")
+	propertiesToMap(t, "./resources/properties/base2.properties")
+	propertiesToMap(t, "./resources/properties/array1.properties")
+}
+
+func propertiesToMap(t *testing.T, filePath string) {
+	bytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		Err(t, err)
+		return
+	}
+
+	expect := strings.TrimSpace(string(bytes))
+	actMap, err := tools.PropertiesToMap(expect)
+	if err != nil {
+		log.Fatalf("转换错误：%v", err)
+		return
+	}
+
+	fmt.Println(actMap)
+}
+
 func yamlToPropertiesWithKeyTest(t *testing.T, filePath string) {
 	bytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
