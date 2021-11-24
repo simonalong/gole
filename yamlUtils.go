@@ -162,6 +162,26 @@ func YamlToList(contentOfYaml string) ([]interface{}, error) {
 	return resultList, nil
 }
 
+func YamlCheck(content string) error {
+	if "" == content {
+		return &ConvertError{errMsg: "yaml is empty"}
+	}
+
+	if !strings.Contains(content, ":") && !strings.Contains(content, "-") {
+		return &ConvertError{errMsg: "yaml content does not contain ':' nor '-'"}
+	}
+
+	if strings.Contains(content, "---\n") {
+		return &ConvertError{errMsg: "yaml not support import for content of '---'"}
+	}
+
+	_, err := YamlToProperties(content)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func PropertiesToMap(contentOfProperties string) (map[string]interface{}, error) {
 	if !strings.Contains(contentOfProperties, "=") {
 		return nil, &ConvertError{errMsg: "the content is illegal for properties"}
