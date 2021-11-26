@@ -43,6 +43,19 @@ var YamlNewLineDom = "|\n"
 
 var rangePattern = regexp.MustCompile("^(.*)\\[(\\d*)\\]$")
 
+type TypeEnum int8
+
+const (
+	YAML       TypeEnum = 0
+	PROPERTIES TypeEnum = 1
+	JSON       TypeEnum = 2
+	STRING     TypeEnum = 3
+)
+
+type Properties struct {
+	Value map[string]string
+}
+
 type StringPair struct {
 	Left  string
 	Right string
@@ -82,7 +95,11 @@ func YamlToPropertiesWithKey(key string, contentOfYaml string) (string, error) {
 		}
 
 		dataMap[key] = kvList
-		return YamlToProperties(MapToYaml(dataMap))
+		yamlStr, err := ObjectToYaml(dataMap)
+		if err != nil {
+			return "", err
+		}
+		return YamlToProperties(yamlStr)
 	}
 
 	property, err := YamlToProperties(contentOfYaml)
@@ -273,13 +290,13 @@ func PropertiesToYaml(contentOfProperties string) (string, error) {
 	return strings.Join(yamlLineList, "\n") + "\n", nil
 }
 
-func MapToYaml(dataMap map[string]interface{}) string {
-	bytes2, err := yaml.Marshal(dataMap)
+func ObjectToYaml(value interface{}) (string, error) {
+	bytes2, err := yaml.Marshal(value)
 	if err != nil {
-		log.Fatalf("MapToYaml error: %v, content: %v", err, dataMap)
-		return ""
+		log.Fatalf("ObjectToYaml error: %v, content: %v", err, value)
+		return "", &ConvertError{errMsg: "ObjectToYaml error"}
 	}
-	return string(bytes2)
+	return string(bytes2), nil
 }
 
 //
@@ -330,6 +347,52 @@ func MapToProperties(dataMap map[string]interface{}) (string, error) {
 	}
 
 	return resultStr, nil
+}
+
+func KvToProperties(key, value string, valueType TypeEnum) (string, error) {
+	switch valueType {
+	case YAML:
+		return YamlToPropertiesWithKey(key, value)
+	case JSON:
+		value, err := JsonToYaml(value)
+		if err != nil {
+			return "", err
+		}
+		return YamlToPropertiesWithKey(key, value)
+	case PROPERTIES:
+		return propertiesAppendPrefixKey(key, value)
+	case STRING:
+		return key + "=" + appendSpaceForArrayValue(value), nil
+	default:
+		break
+	}
+	return "", nil
+}
+
+func JsonToYaml(contentOfJson string) (string, error) {
+	if !strings.HasPrefix(contentOfJson, "{") && !strings.HasPrefix(contentOfJson, "[") {
+		return "", &ConvertError{errMsg: "content is not json"}
+	}
+
+	var object interface{}
+	err := json.Unmarshal([]byte(contentOfJson), &object)
+	if err != nil {
+		return "", err
+	}
+
+	return ObjectToYaml(object)
+}
+
+func PropertiesEntityToYaml(properties Properties) (string, error) {
+	if properties.Value == nil {
+		return "", &ConvertError{"PropertiesEntityToYaml value is empty"}
+	}
+
+	var content = ""
+	for key, value := range properties.Value {
+		content += key + "=" + value + "\n"
+	}
+	return PropertiesToYaml(content)
 }
 
 func getPropertiesItemLineList(content string) []string {
@@ -553,7 +616,7 @@ func peelArray(nodeName string) (string, int) {
 // value3
 // }
 //
-// @param value 待转换的值比如{@code
+// @param Value 待转换的值比如{@code
 //              test:
 //              key1: |
 //              value1

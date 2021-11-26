@@ -246,7 +246,8 @@ func yamlToMapTest(t *testing.T, filePath string) {
 		return
 	}
 
-	act := strings.TrimSpace(tools.MapToYaml(dataMap))
+	value, _ := tools.ObjectToYaml(dataMap)
+	act := strings.TrimSpace(value)
 	Equal(t, act, expect)
 }
 
