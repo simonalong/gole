@@ -151,7 +151,7 @@ func YamlToKvList(contentOfYaml string) ([]StringPair, error) {
 		return nil, err
 	}
 
-	propertiesLineWordList := getPropertiesItemLineList(property)
+	propertiesLineWordList := GetPropertiesItemLineList(property)
 	pairs := []StringPair{}
 	for _, element := range propertiesLineWordList {
 		element = strings.TrimSpace(element)
@@ -205,7 +205,7 @@ func PropertiesToMap(contentOfProperties string) (map[string]interface{}, error)
 	}
 
 	var resultMap = make(map[string]interface{})
-	propertiesLineWordList := getPropertiesItemLineList(contentOfProperties)
+	propertiesLineWordList := GetPropertiesItemLineList(contentOfProperties)
 	for _, line := range propertiesLineWordList {
 		line = strings.TrimSpace(line)
 		if "" == line {
@@ -227,7 +227,7 @@ func PropertiesToMap(contentOfProperties string) (map[string]interface{}, error)
 }
 
 func propertiesAppendPrefixKey(key string, propertiesContent string) (string, error) {
-	itemLines := getPropertiesItemLineList(propertiesContent)
+	itemLines := GetPropertiesItemLineList(propertiesContent)
 	var datas []string
 	for _, line := range itemLines {
 		if !strings.Contains(line, SignEqual) {
@@ -263,7 +263,7 @@ func deepPut(dataMap map[string]interface{}, key string, value interface{}) map[
 func PropertiesToYaml(contentOfProperties string) (string, error) {
 	var yamlLineList []string
 	var yamlNodes []YamlNode
-	propertiesLineWordList := getPropertiesItemLineList(contentOfProperties)
+	propertiesLineWordList := GetPropertiesItemLineList(contentOfProperties)
 	for _, line := range propertiesLineWordList {
 		line = strings.TrimSpace(line)
 		if line != "" {
@@ -395,7 +395,7 @@ func PropertiesEntityToYaml(properties Properties) (string, error) {
 	return PropertiesToYaml(content)
 }
 
-func getPropertiesItemLineList(content string) []string {
+func GetPropertiesItemLineList(content string) []string {
 	if "" == content {
 		return []string{}
 	}
