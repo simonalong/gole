@@ -299,23 +299,6 @@ func ObjectToYaml(value interface{}) (string, error) {
 	return string(bytes2), nil
 }
 
-//
-//func YamlToJson(contentOfYaml string) string {
-//
-//}
-//
-//func JsonToYaml(contentOfJson string) string {
-//
-//}
-//
-//func YamlToList(contentOfYaml string) []interface{} {
-//
-//}
-//
-//func KvListToYaml(kvList []StringPair) string {
-//
-//}
-
 // 进行深层嵌套的map数据处理
 func MapToProperties(dataMap map[string]interface{}) (string, error) {
 	var propertyStrList []string
