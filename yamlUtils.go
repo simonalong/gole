@@ -69,6 +69,44 @@ func (convertError *ConvertError) Error() string {
 	return convertError.errMsg
 }
 
+func IsYaml(content string) bool {
+	if !strings.Contains(content, ":") && !strings.Contains(content, "-") {
+		return false
+	}
+
+	_, err := YamlToProperties(content)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func IsProperty(content string) bool {
+	if !strings.Contains(content, "=") {
+		return false
+	}
+
+	yml, _ := PropertiesToYaml(content)
+	_, err := YamlToProperties(yml)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func IsJson(content string) bool {
+	if !strings.HasPrefix(content, "{") && !strings.HasPrefix(content, "[") {
+		return false
+	}
+
+	var object interface{}
+	err := json.Unmarshal([]byte(content), &object)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func YamlToProperties(contentOfYaml string) (string, error) {
 	// yaml 到 map
 	dataMap, err := YamlToMap(contentOfYaml)
