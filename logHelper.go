@@ -52,8 +52,27 @@ func LoggerGet(loggerName string) *logrus.Logger {
 		loggerMap = map[string]*logrus.Logger{}
 	}
 	logger := logrus.New()
-	logger.Formatter = &StandardFormatter{}
-	logger.AddHook(lfshook.NewHook(rotateMap(gFilePath), &StandardFormatter{}))
+
+	formatters := &StandardFormatter{}
+	logger.Formatter = formatters
+	//logger.AddHook(lfshook.NewHook(lfshook.WriterMap{
+	//	logrus.DebugLevel: rotateLog(gFilePath, "debug"),
+	//	logrus.InfoLevel:  rotateLog(gFilePath, "info"),
+	//	logrus.WarnLevel:  rotateLog(gFilePath, "warn"),
+	//	logrus.ErrorLevel: rotateLog(gFilePath, "error"),
+	//	logrus.FatalLevel: rotateLog(gFilePath, "fatal"),
+	//	logrus.PanicLevel: rotateLog(gFilePath, "panic"),
+	//}, &StandardFormatter{}))
+
+	lfHook := lfshook.NewHook(lfshook.WriterMap{
+		logrus.DebugLevel: rotateLog(gFilePath, "info"),
+		logrus.InfoLevel:  rotateLog(gFilePath, "info"),
+		logrus.WarnLevel:  rotateLog(gFilePath, "info"),
+		logrus.ErrorLevel: rotateLog(gFilePath, "info"),
+		logrus.FatalLevel: rotateLog(gFilePath, "info"),
+		logrus.PanicLevel: rotateLog(gFilePath, "info"),
+	}, formatters)
+	logger.AddHook(lfHook)
 
 	loggerMap[loggerName] = logger
 	return logger
@@ -86,6 +105,13 @@ func rotateLog(path, level string) *rotatelogs.RotateLogs {
 }
 
 type StandardFormatter struct {
+}
+
+func getPackage() []byte {
+	pc, _, _, _ := runtime.Caller(0)
+	fullFuncName := runtime.FuncForPC(pc).Name()
+	idx := strings.LastIndex(fullFuncName, ".")
+	return []byte(fullFuncName[:idx]) // trim off function details
 }
 
 func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
@@ -147,28 +173,39 @@ func getCaller() *runtime.Frame {
 		// dynamic get the package name and the minimum caller depth
 		for i := 0; i < maximumCallerDepth; i++ {
 			funcName := runtime.FuncForPC(pcs[i]).Name()
-			if strings.Contains(funcName, "getCaller") {
-				logrusPackage = getPackageName(funcName)
-				break
-			}
+			fmt.Println("datas ~~~~~ " + funcName)
+			//if strings.Contains(funcName, "getCaller") {
+			//	logrusPackage = getPackageName(funcName)
+			//	break
+			//}
 		}
 
 		minimumCallerDepth = knownLogrusFrames
 	})
 
+	logrusPackage = string(getPackage())
+	fmt.Println("---------")
+	fmt.Println(logrusPackage)
+	fmt.Println("---------")
 	// Restrict the lookback frames to avoid runaway lookups
 	pcs := make([]uintptr, maximumCallerDepth)
 	depth := runtime.Callers(minimumCallerDepth, pcs)
 	frames := runtime.CallersFrames(pcs[:depth])
 
+	//var finalFun *runtime.Frame
 	for f, again := frames.Next(); again; f, again = frames.Next() {
-		pkg := getPackageName(f.Function)
+		//pkg := getPackageName(f.Function)
+		fmt.Println("========= " + f.Function)
 
-		//If the caller isn't part of this package, we're done
-		if pkg == logrusPackage {
-			return &f //nolint:scopelint
-		}
+		////If the caller isn't part of this package, we're done
+		//if strings.HasPrefix(pkg, logrusPackage) {
+		//	finalFun = &f
+		//	fmt.Println(finalFun.File)
+		//}
 	}
+	fmt.Println("final=====")
+	//fmt.Println(finalFun.File)
+	//return finalFun
 
 	// if we got here, we failed to find the caller's context
 	return nil
