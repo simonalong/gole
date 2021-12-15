@@ -34,7 +34,7 @@ var loggerMap map[string]*logrus.Logger
 var fileMap map[string]map[logrus.Level]io.Writer
 var gFilePath string
 
-func InitFilePath(fileName string) {
+func InitLogPath(fileName string) {
 	rotateMap(fileName)
 	gFilePath = fileName
 }
