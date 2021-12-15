@@ -34,18 +34,22 @@ var loggerMap map[string]*logrus.Logger
 var fileMap map[string]map[logrus.Level]io.Writer
 var gFilePath string
 
-func InitLogPath(fileName string) {
+func LogInit(fileName string) {
 	rotateMap(fileName)
 	gFilePath = fileName
 }
 
-func GetLogger(loggerName string) *logrus.Logger {
+func LoggerGet(loggerName string) *logrus.Logger {
 	if logger, exit := loggerMap[loggerName]; exit {
 		return logger
 	}
 
 	if gFilePath == "" {
 		log.Errorf("please set file path")
+	}
+
+	if loggerMap == nil {
+		loggerMap = map[string]*logrus.Logger{}
 	}
 	logger := logrus.New()
 	logger.Formatter = &StandardFormatter{}
@@ -59,6 +63,11 @@ func rotateMap(fileName string) map[logrus.Level]io.Writer {
 	if rotate, exist := fileMap[fileName]; exist {
 		return rotate
 	}
+
+	if fileMap == nil {
+		fileMap = map[string]map[logrus.Level]io.Writer{}
+	}
+
 	writeMap := lfshook.WriterMap{
 		logrus.DebugLevel: rotateLog(fileName, "debug"),
 		logrus.InfoLevel:  rotateLog(fileName, "info"),
