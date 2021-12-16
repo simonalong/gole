@@ -77,8 +77,7 @@ func rotateLog(path, level string) *rotatelogs.RotateLogs {
 	return data
 }
 
-type StandardFormatter struct {
-}
+type StandardFormatter struct{}
 
 func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	var b *bytes.Buffer
