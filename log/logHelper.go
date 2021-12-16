@@ -63,8 +63,6 @@ func GetLogger(loggerName string) *logrus.Logger {
 		logrus.InfoLevel:  rotateLog(gFilePath, "info"),
 		logrus.WarnLevel:  rotateLog(gFilePath, "warn"),
 		logrus.ErrorLevel: rotateLog(gFilePath, "error"),
-		logrus.FatalLevel: rotateLog(gFilePath, "fatal"),
-		logrus.PanicLevel: rotateLog(gFilePath, "panic"),
 	}, formatters)
 	logger.AddHook(lfHook)
 
@@ -220,14 +218,6 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		if gColor {
 			levelColor = red
 		}
-	case logrus.FatalLevel:
-		if gColor {
-			levelColor = purple
-		}
-	case logrus.PanicLevel:
-		if gColor {
-			levelColor = blue
-		}
 	}
 
 	if gColor {
@@ -237,7 +227,6 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	}
 
 	b.WriteString(newLog)
-
 	return b.Bytes(), nil
 }
 
