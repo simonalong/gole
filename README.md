@@ -30,9 +30,9 @@ tools是go代码写的的个人工具包。
 1. 支持日志文件切分
 2. 支持日志颜色
 3. 增加logger维度
-4. 增加对logger的级别管控
+4. 增加对logger的日志级别管控
 
-#### 用法
+#### 日志路径配置用法
 
 ```go
 // 文件: xxx.go
@@ -43,18 +43,20 @@ func init() {
     // 在路径/home/isc-xxx-service/logs/路径下生成文件，app-info.log、app-warn.log、app-err.log，以及相关的切片日志，默认保存30天
     log.GetLoggerWithConfig("appLog", "/home/isc-xxx-service/logs/app", "/api/xxx/", true)
 }
+```
 
+#### 日志管控
+如下，添加日志的Router，添加后就可以对日志进行管控了
+```go
 func main() {
-    r := gin.Default()
+    engine := gin.Default()
 
     // 添加日志的管控api
     log.LogRouters(engine)
 
-    r.Run(":8082")
+    engine.Run(":8082")
 }
 ```
-
-#### 日志管控
 使用日志管控时候，调用如下，可以查看到可以管控的logger的命令，其中/api/xxx/是上面配置的
 > curl http://localhost:port/api/xxx/help
 
