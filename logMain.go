@@ -3,18 +3,26 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/simonalong/tools/log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
-var serviceLogger = log.GetLogger("service")
-var testLogger = log.GetLogger("test")
+var serviceLogger *logrus.Logger
+var testLogger *logrus.Logger
 
 func main() {
+	log.LogPathSet("/Users/zhouzhenyong/tem/tools/logs/tools")
+	log.LogApiConfig("/api/core/troy")
+
+	serviceLogger = log.GetLogger("service")
+	testLogger = log.GetLogger("test")
+
 	r := gin.Default()
 	r.GET("/get", get1)
 	r.GET("/test", test)
 	r.GET("/service", service)
 	log.LogRouters(r)
+	log.LogColor(true)
 	r.Run(":8082")
 }
 

@@ -33,6 +33,7 @@ var (
 	gHost    = "localhost"
 	gPort    = "port"
 	gApiPath = "/api/tools/"
+	gColor   = false
 )
 
 func LogPathSet(fileName string) {
@@ -77,6 +78,11 @@ func LogApiConfig(apiPath string) {
 	}
 
 	gApiPath = apiPath
+}
+
+// 日志是否配置颜色
+func LogColor(haveColor bool) {
+	gColor = haveColor
 }
 
 func LogRouters(r *gin.Engine) {
@@ -196,20 +202,40 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		fieldsStr = fmt.Sprintf("[\x1b[%dm%s\x1b[0m]", blue, strings.Join(fields, " "))
 	}
 	var newLog string
+	var levelColor = gray
 	switch level {
 	case logrus.DebugLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", white, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
+		if gColor {
+			levelColor = blue
+		}
 	case logrus.InfoLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", green, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
+		if gColor {
+			levelColor = blue
+		}
 	case logrus.WarnLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", yellow, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
+		if gColor {
+			levelColor = blue
+		}
 	case logrus.ErrorLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", red, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
+		if gColor {
+			levelColor = red
+		}
 	case logrus.FatalLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", purple, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
+		if gColor {
+			levelColor = purple
+		}
 	case logrus.PanicLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s", blue, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
+		if gColor {
+			levelColor = blue
+		}
 	}
+
+	if gColor {
+		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", levelColor, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
+	} else {
+		newLog = fmt.Sprintf("%s\t %s %s %s %s\n", strings.ToUpper(entry.Level.String()), timestamp, funPath, entry.Message, fieldsStr)
+	}
+
 	b.WriteString(newLog)
 
 	return b.Bytes(), nil
