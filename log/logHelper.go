@@ -84,7 +84,7 @@ func LogRouters(r *gin.Engine) {
 	{
 		// 获取帮助列表
 		appRouter.GET("help", getLogToolsHelp)
-		// 获取Logger集合
+		// 获取Logger集合curl
 		appRouter.GET("logger/list", getLoggerList)
 		// 修改host和port
 		appRouter.POST("host/change/:host/:port", setHostAndPort)
@@ -97,12 +97,12 @@ func LogRouters(r *gin.Engine) {
 
 func getLogToolsHelp(c *gin.Context) {
 	helpStr := map[string]string{}
-	helpStr["帮助"] = fmt.Sprintf("curl %s%shelp\n", getHostAndPort(), gApiPath)
-	helpStr["获取Logger集合"] = fmt.Sprintf("curl %s%logger/list\n", getHostAndPort(), gApiPath)
-	helpStr["修改host和port"] = fmt.Sprintf("curl -X POST %s%lhost/change/{host}/{port}\n", getHostAndPort(), gApiPath)
-	helpStr["修改logger的级别"] = fmt.Sprintf("curl -X POST %s%llogger/level/{loggerName}/{level}\n", getHostAndPort(), gApiPath)
-	helpStr["修改总logger的级别"] = fmt.Sprintf("curl -X POST %s%llogger/root/level/{level}\n", getHostAndPort(), gApiPath)
-	SuccessOfStandard(c, helpStr)
+	helpStr["查询：帮助"] = fmt.Sprintf("curl %v%vhelp", getHostAndPort(), gApiPath)
+	helpStr["查询：Logger集合"] = fmt.Sprintf("curl %v%vlogger/list", getHostAndPort(), gApiPath)
+	helpStr["修改：host和port"] = fmt.Sprintf("curl -X POST %v%vhost/change/{host}/{port}", getHostAndPort(), gApiPath)
+	helpStr["修改：logger的级别"] = fmt.Sprintf("curl -X POST %v%vlogger/level/{loggerName}/{level}", getHostAndPort(), gApiPath)
+	helpStr["修改：所有logger的级别"] = fmt.Sprintf("curl -X POST %v%vlogger/root/level/{level}", getHostAndPort(), gApiPath)
+	Success(c, helpStr)
 }
 
 func getLoggerList(c *gin.Context) {
@@ -146,7 +146,7 @@ func setLoggerRootLevel(c *gin.Context) {
 }
 
 func getHostAndPort() string {
-	return "http:" + gHost + ":" + gPort
+	return "http://" + gHost + ":" + gPort
 }
 
 func rotateLog(path, level string) *rotatelogs.RotateLogs {
@@ -158,6 +158,9 @@ func rotateLog(path, level string) *rotatelogs.RotateLogs {
 		rotateMap = map[string]*rotatelogs.RotateLogs{}
 	}
 
+	if path == "" {
+		path = "./logs/app"
+	}
 	data, _ := rotatelogs.New(path+"-"+level+".log.%Y%m%d", rotatelogs.WithLinkName(path+"-"+level+".log"), rotatelogs.WithMaxAge(30*24*time.Hour), rotatelogs.WithRotationTime(24*time.Hour))
 	rotateMap[path+"-"+level] = data
 	return data
@@ -214,20 +217,4 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 func Success(ctx *gin.Context, object interface{}) {
 	ctx.JSON(http.StatusOK, object)
-}
-
-func SuccessOfStandard(ctx *gin.Context, v interface{}) {
-	ctx.JSON(http.StatusOK, map[string]interface{}{
-		"code":    "success",
-		"message": "成功",
-		"data":    v,
-	})
-}
-
-func FailedOfStandard(ctx *gin.Context, code int, message string) {
-	ctx.JSON(http.StatusOK, map[string]interface{}{
-		"code":    code,
-		"message": message,
-		"data":    nil,
-	})
 }
