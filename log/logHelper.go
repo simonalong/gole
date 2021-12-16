@@ -28,6 +28,7 @@ const (
 var loggerMap map[string]*logrus.Logger
 var rotateMap map[string]*rotatelogs.RotateLogs
 var gFilePath string
+var unInit = false
 
 var (
 	gHost    = "localhost"
@@ -47,6 +48,14 @@ func LogConfig(fileName, apiPath string, haveColor bool) {
 
 	gApiPath = apiPath
 	gColor = haveColor
+}
+
+func GetLoggerWithConfig(loggerName, filePath, apiPath string, haveColor bool) *logrus.Logger {
+	if !unInit {
+		LogConfig(filePath, apiPath, haveColor)
+		unInit = true
+	}
+	return GetLogger(loggerName)
 }
 
 func GetLogger(loggerName string) *logrus.Logger {
