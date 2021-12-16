@@ -2,6 +2,7 @@ package log
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -71,7 +72,7 @@ func GetLogger(loggerName string) *logrus.Logger {
 	return logger
 }
 
-func LogManagerApi(apiPath string) {
+func LogApiConfig(apiPath string) {
 	if apiPath == "" {
 		apiPath = "/api/tools/"
 	}
@@ -79,7 +80,7 @@ func LogManagerApi(apiPath string) {
 	gApiPath = apiPath
 }
 
-func LogManager(r *gin.Engine) {
+func LogRouters(r *gin.Engine) {
 	appRouter := r.Group(gApiPath)
 	{
 		// 获取帮助列表
@@ -96,9 +97,14 @@ func LogManager(r *gin.Engine) {
 }
 
 func getLogToolsHelp(c *gin.Context) {
-	var helpStr string
-	//helpStr += "curl http:localhost:port" + gApiPath +
-	SuccessOfStandard(c, helpStr)
+	helpStr := map[string]string{}
+	helpStr["帮助"] = fmt.Sprintf("curl %s%shelp\n", getHostAndPort(), gApiPath)
+	helpStr["获取Logger集合"] = fmt.Sprintf("curl %s%logger/list\n", getHostAndPort(), gApiPath)
+	helpStr["修改host和port"] = fmt.Sprintf("curl -X POST %s%lhost/change/{host}/{port}\n", getHostAndPort(), gApiPath)
+	helpStr["修改logger的级别"] = fmt.Sprintf("curl -X POST %s%llogger/level/{loggerName}/{level}\n", getHostAndPort(), gApiPath)
+	helpStr["修改总logger的级别"] = fmt.Sprintf("curl -X POST %s%llogger/root/level/{level}\n", getHostAndPort(), gApiPath)
+	jsonStr, _ := json.Marshal(helpStr)
+	Success(c, jsonStr)
 }
 
 func getLoggerList(c *gin.Context) {
@@ -106,7 +112,7 @@ func getLoggerList(c *gin.Context) {
 	for key, _ := range loggerMap {
 		keys = append(keys, key)
 	}
-	SuccessOfStandard(c, keys)
+	Success(c, keys)
 }
 
 func setLoggerLevel(c *gin.Context) {
@@ -119,7 +125,7 @@ func setLoggerLevel(c *gin.Context) {
 		}
 		loggerValue.SetLevel(levelValue)
 	}
-	SuccessOfStandard(c, 1)
+	Success(c, 1)
 }
 
 func setHostAndPort(c *gin.Context) {
@@ -138,7 +144,7 @@ func setLoggerRootLevel(c *gin.Context) {
 		}
 		logger.SetLevel(levelValue)
 	}
-	SuccessOfStandard(c, len(loggerMap))
+	Success(c, len(loggerMap))
 }
 
 func getHostAndPort() string {
