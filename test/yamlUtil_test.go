@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/magiconair/properties"
-	"github.com/simonalong/tools"
+	"github.com/simonalong/tools/yaml"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -16,7 +16,7 @@ func TestMapToProperties1(t *testing.T) {
 	dataMap["b"] = 13
 	dataMap["c"] = 14
 
-	act, err := tools.MapToProperties(dataMap)
+	act, err := yaml.MapToProperties(dataMap)
 	if err != nil {
 		log.Fatalf("转换错误：%v", err)
 		return
@@ -168,7 +168,7 @@ func propertiesToMap(t *testing.T, filePath string) {
 	}
 
 	expect := strings.TrimSpace(string(bytes))
-	actMap, err := tools.PropertiesToMap(expect)
+	actMap, err := yaml.PropertiesToMap(expect)
 	if err != nil {
 		log.Fatalf("转换错误：%v", err)
 		return
@@ -185,7 +185,7 @@ func yamlToPropertiesWithKeyTest(t *testing.T, filePath string) {
 	}
 
 	expect := strings.TrimSpace(string(bytes))
-	property, err := tools.YamlToPropertiesWithKey("t", expect)
+	property, err := yaml.YamlToPropertiesWithKey("t", expect)
 	if err != nil {
 		log.Fatalf("转换错误：%v", err)
 		return
@@ -202,7 +202,7 @@ func yamlToKvListTest(t *testing.T, filePath string) {
 	}
 
 	expect := strings.TrimSpace(string(bytes))
-	kvPairs, err := tools.YamlToKvList(expect)
+	kvPairs, err := yaml.YamlToKvList(expect)
 	if err != nil {
 		log.Fatalf("转换错误：%v", err)
 		return
@@ -215,7 +215,7 @@ func yamlToKvListTest(t *testing.T, filePath string) {
 	}
 
 	// 获取标准的数据
-	property, err := tools.YamlToProperties(expect)
+	property, err := yaml.YamlToProperties(expect)
 	pro := properties.NewProperties()
 	err = pro.Load([]byte(property), properties.UTF8)
 	if err != nil {
@@ -240,13 +240,13 @@ func yamlToMapTest(t *testing.T, filePath string) {
 		return
 	}
 	expect := strings.TrimSpace(string(bytes))
-	dataMap, err := tools.YamlToMap(expect)
+	dataMap, err := yaml.YamlToMap(expect)
 	if err != nil {
 		log.Fatalf("转换错误：%v", err)
 		return
 	}
 
-	value, _ := tools.ObjectToYaml(dataMap)
+	value, _ := yaml.ObjectToYaml(dataMap)
 	act := strings.TrimSpace(value)
 	Equal(t, act, expect)
 }
@@ -258,14 +258,14 @@ func propertiesToYamlTest(t *testing.T, filePath string) {
 		return
 	}
 	expect := strings.TrimSpace(string(bytes))
-	yamlContent, err := tools.PropertiesToYaml(expect)
+	yamlContent, err := yaml.PropertiesToYaml(expect)
 	//fmt.Println(yamlContent)
 	if err != nil {
 		log.Fatalf("转换错误：%v", err)
 		return
 	}
 
-	act, err := tools.YamlToProperties(yamlContent)
+	act, err := yaml.YamlToProperties(yamlContent)
 	act = strings.TrimSpace(act)
 	Equal(t, act, expect)
 }

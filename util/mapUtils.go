@@ -1,4 +1,4 @@
-package tools
+package util
 
 // 比较两个map是否相同
 func EqualMap(leftMap map[string]interface{}, rightMap map[string]interface{}) bool {

@@ -1,12 +1,14 @@
-package tools
+package log
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/lunny/log"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
+	"net/http"
 	"path/filepath"
 	"strings"
 	"time"
@@ -26,6 +28,12 @@ const (
 var loggerMap map[string]*logrus.Logger
 var rotateMap map[string]*rotatelogs.RotateLogs
 var gFilePath string
+var gApiPath string
+
+var (
+	gHost = "localhost"
+	gPort = "port"
+)
 
 func LogPathSet(fileName string) {
 	gFilePath = fileName
@@ -61,6 +69,77 @@ func GetLogger(loggerName string) *logrus.Logger {
 
 	loggerMap[loggerName] = logger
 	return logger
+}
+
+func LogManager(r *gin.Engine, apiPath string) {
+	if apiPath == "" {
+		apiPath = "/api/tools/"
+	}
+
+	gApiPath = apiPath
+	appRouter := r.Group(apiPath)
+	{
+		// 获取帮助列表
+		appRouter.GET("help", getLogToolsHelp)
+		// 获取Logger集合
+		appRouter.GET("logger/list", getLoggerList)
+		// 修改host和port
+		appRouter.POST("host/change/:host/:port", setHostAndPort)
+		// 修改logger的级别
+		appRouter.POST("logger/level/:loggerName/:level", setLoggerLevel)
+		// 修改所有logger的级别
+		appRouter.POST("logger/root/level/:level", setLoggerRootLevel)
+	}
+}
+
+func getLogToolsHelp(c *gin.Context) {
+	var helpStr string
+	//helpStr += "curl http:localhost:port" + gApiPath +
+	SuccessOfStandard(c, helpStr)
+}
+
+func getLoggerList(c *gin.Context) {
+	var keys []string
+	for key, _ := range loggerMap {
+		keys = append(keys, key)
+	}
+	SuccessOfStandard(c, keys)
+}
+
+func setLoggerLevel(c *gin.Context) {
+	loggerName := c.Param("loggerName")
+	level := c.Param("level")
+	if loggerValue, exist := loggerMap[loggerName]; exist {
+		levelValue, err := logrus.ParseLevel(strings.ToLower(level))
+		if err != nil {
+			return
+		}
+		loggerValue.SetLevel(levelValue)
+	}
+	SuccessOfStandard(c, 1)
+}
+
+func setHostAndPort(c *gin.Context) {
+	host := c.Param("host")
+	port := c.Param("port")
+	gHost = host
+	gPort = port
+}
+
+func setLoggerRootLevel(c *gin.Context) {
+	level := c.Param("level")
+	for _, logger := range loggerMap {
+		levelValue, err := logrus.ParseLevel(strings.ToLower(level))
+		if err != nil {
+			return
+		}
+		logger.SetLevel(levelValue)
+	}
+	SuccessOfStandard(c, len(loggerMap))
+}
+
+func getHostAndPort() string {
+	return "http:" + gHost + ":" + gPort
 }
 
 func rotateLog(path, level string) *rotatelogs.RotateLogs {
@@ -124,4 +203,24 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	b.WriteString(newLog)
 
 	return b.Bytes(), nil
+}
+
+func Success(ctx *gin.Context, object interface{}) {
+	ctx.JSON(http.StatusOK, object)
+}
+
+func SuccessOfStandard(ctx *gin.Context, v interface{}) {
+	ctx.JSON(http.StatusOK, map[string]interface{}{
+		"code":    "success",
+		"message": "成功",
+		"data":    v,
+	})
+}
+
+func FailedOfStandard(ctx *gin.Context, code int, message string) {
+	ctx.JSON(http.StatusOK, map[string]interface{}{
+		"code":    code,
+		"message": message,
+		"data":    nil,
+	})
 }
