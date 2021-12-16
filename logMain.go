@@ -10,13 +10,16 @@ import (
 var serviceLogger *logrus.Logger
 var testLogger *logrus.Logger
 
-func main() {
+func init() {
 	// 配置日志路径
 	log.LogPathSet("/Users/zhouzhenyong/tem/tools/logs/tools")
 	// 日志管理api的前缀
 	log.LogApiConfig("/api/core/troy")
 	// 是否配置日志颜色
 	log.LogColor(true)
+}
+
+func main() {
 
 	serviceLogger = log.GetLogger("service")
 	testLogger = log.GetLogger("test")

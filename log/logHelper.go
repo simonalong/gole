@@ -36,8 +36,17 @@ var (
 	gColor   = false
 )
 
-func LogPathSet(fileName string) {
+// LogConfig fileName 日志文件名
+// apiPath 日志管理api路径
+// haveColor 日志是否显示颜色
+func LogConfig(fileName, apiPath string, haveColor bool) {
 	gFilePath = fileName
+	if apiPath == "" {
+		apiPath = "/api/tools/"
+	}
+
+	gApiPath = apiPath
+	gColor = haveColor
 }
 
 func GetLogger(loggerName string) *logrus.Logger {
@@ -68,19 +77,6 @@ func GetLogger(loggerName string) *logrus.Logger {
 
 	loggerMap[loggerName] = logger
 	return logger
-}
-
-func LogApiConfig(apiPath string) {
-	if apiPath == "" {
-		apiPath = "/api/tools/"
-	}
-
-	gApiPath = apiPath
-}
-
-// 日志是否配置颜色
-func LogColor(haveColor bool) {
-	gColor = haveColor
 }
 
 func LogRouters(r *gin.Engine) {
