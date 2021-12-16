@@ -7,10 +7,8 @@ import (
 	"github.com/lunny/log"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
-	"io"
-	"runtime"
+	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -25,21 +23,15 @@ const (
 	gray   = 37
 )
 
-const (
-	maximumCallerDepth int = 25
-	knownLogrusFrames  int = 4
-)
-
 var loggerMap map[string]*logrus.Logger
-var fileMap map[string]map[logrus.Level]io.Writer
+var rotateMap map[string]*rotatelogs.RotateLogs
 var gFilePath string
 
-func LogInit(fileName string) {
-	rotateMap(fileName)
+func LogPathSet(fileName string) {
 	gFilePath = fileName
 }
 
-func LoggerGet(loggerName string) *logrus.Logger {
+func GetLogger(loggerName string) *logrus.Logger {
 	if logger, exit := loggerMap[loggerName]; exit {
 		return logger
 	}
@@ -53,24 +45,17 @@ func LoggerGet(loggerName string) *logrus.Logger {
 	}
 	logger := logrus.New()
 
+	logger.SetReportCaller(true)
 	formatters := &StandardFormatter{}
 	logger.Formatter = formatters
-	//logger.AddHook(lfshook.NewHook(lfshook.WriterMap{
-	//	logrus.DebugLevel: rotateLog(gFilePath, "debug"),
-	//	logrus.InfoLevel:  rotateLog(gFilePath, "info"),
-	//	logrus.WarnLevel:  rotateLog(gFilePath, "warn"),
-	//	logrus.ErrorLevel: rotateLog(gFilePath, "error"),
-	//	logrus.FatalLevel: rotateLog(gFilePath, "fatal"),
-	//	logrus.PanicLevel: rotateLog(gFilePath, "panic"),
-	//}, &StandardFormatter{}))
 
 	lfHook := lfshook.NewHook(lfshook.WriterMap{
-		logrus.DebugLevel: rotateLog(gFilePath, "info"),
+		logrus.DebugLevel: rotateLog(gFilePath, "debug"),
 		logrus.InfoLevel:  rotateLog(gFilePath, "info"),
-		logrus.WarnLevel:  rotateLog(gFilePath, "info"),
-		logrus.ErrorLevel: rotateLog(gFilePath, "info"),
-		logrus.FatalLevel: rotateLog(gFilePath, "info"),
-		logrus.PanicLevel: rotateLog(gFilePath, "info"),
+		logrus.WarnLevel:  rotateLog(gFilePath, "warn"),
+		logrus.ErrorLevel: rotateLog(gFilePath, "error"),
+		logrus.FatalLevel: rotateLog(gFilePath, "fatal"),
+		logrus.PanicLevel: rotateLog(gFilePath, "panic"),
 	}, formatters)
 	logger.AddHook(lfHook)
 
@@ -78,40 +63,21 @@ func LoggerGet(loggerName string) *logrus.Logger {
 	return logger
 }
 
-func rotateMap(fileName string) map[logrus.Level]io.Writer {
-	if rotate, exist := fileMap[fileName]; exist {
-		return rotate
-	}
-
-	if fileMap == nil {
-		fileMap = map[string]map[logrus.Level]io.Writer{}
-	}
-
-	writeMap := lfshook.WriterMap{
-		logrus.DebugLevel: rotateLog(fileName, "debug"),
-		logrus.InfoLevel:  rotateLog(fileName, "info"),
-		logrus.WarnLevel:  rotateLog(fileName, "warn"),
-		logrus.ErrorLevel: rotateLog(fileName, "error"),
-		logrus.FatalLevel: rotateLog(fileName, "fatal"),
-		logrus.PanicLevel: rotateLog(fileName, "panic"),
-	}
-	fileMap[fileName] = writeMap
-	return writeMap
-}
-
 func rotateLog(path, level string) *rotatelogs.RotateLogs {
+	if pRotateValue, exist := rotateMap[path+"-"+level]; exist {
+		return pRotateValue
+	}
+
+	if rotateMap == nil {
+		rotateMap = map[string]*rotatelogs.RotateLogs{}
+	}
+
 	data, _ := rotatelogs.New(path+"-"+level+".log.%Y%m%d", rotatelogs.WithLinkName(path+"-"+level+".log"), rotatelogs.WithMaxAge(30*24*time.Hour), rotatelogs.WithRotationTime(24*time.Hour))
+	rotateMap[path+"-"+level] = data
 	return data
 }
 
 type StandardFormatter struct {
-}
-
-func getPackage() []byte {
-	pc, _, _, _ := runtime.Caller(0)
-	fullFuncName := runtime.FuncForPC(pc).Name()
-	idx := strings.LastIndex(fullFuncName, ".")
-	return []byte(fullFuncName[:idx]) // trim off function details
 }
 
 func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
@@ -122,107 +88,41 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		b = &bytes.Buffer{}
 	}
 
-	entry.Caller = getCaller()
-
 	var fields []string
 	for k, v := range entry.Data {
-		fields = append(fields, fmt.Sprintf("%s=%s", k, v))
+		fields = append(fields, fmt.Sprintf("%v=%v", k, v))
 	}
 
 	level := entry.Level
 	timestamp := entry.Time.Format("2006-01-02 15:04:05")
-	funPath := fmt.Sprintf("%s:%d", entry.Caller.File, entry.Caller.Line)
-	fieldsStr := strings.Join(fields, " ")
+	var funPath string
+	if entry.HasCaller() {
+		fName := filepath.Base(entry.Caller.File)
+		funPath = fmt.Sprintf("%s %s:%d", entry.Caller.Function, fName, entry.Caller.Line)
+	} else {
+		funPath = fmt.Sprintf("%s", entry.Message)
+	}
+
+	var fieldsStr string
+	if len(fields) != 0 {
+		fieldsStr = fmt.Sprintf("[\x1b[%dm%s\x1b[0m]", blue, strings.Join(fields, " "))
+	}
 	var newLog string
 	switch level {
 	case logrus.DebugLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s [\x1b[%dm%s\x1b[0m]\n", white, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, blue, fieldsStr)
+		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", white, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
 	case logrus.InfoLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s [\x1b[%dm%s\x1b[0m]\n", green, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, blue, fieldsStr)
+		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", green, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
 	case logrus.WarnLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s [\x1b[%dm%s\x1b[0m]\n", yellow, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, blue, fieldsStr)
+		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", yellow, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
 	case logrus.ErrorLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s [\x1b[%dm%s\x1b[0m]\n", red, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, blue, fieldsStr)
+		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", red, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
 	case logrus.FatalLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s [\x1b[%dm%s\x1b[0m]\n", purple, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, blue, fieldsStr)
+		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s\n", purple, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
 	case logrus.PanicLevel:
-		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s [\x1b[%dm%s\x1b[0m]\n", blue, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, blue, fieldsStr)
+		newLog = fmt.Sprintf("\x1b[%dm%s\t\x1b[0m%s \x1b[%dm%s\x1b[0m %s %s", blue, strings.ToUpper(entry.Level.String()), timestamp, black, funPath, entry.Message, fieldsStr)
 	}
 	b.WriteString(newLog)
 
 	return b.Bytes(), nil
-}
-
-var (
-	// qualified package name, cached at first use
-	logrusPackage string
-
-	// Positions in the call stack when tracing to report the calling method
-	minimumCallerDepth int
-
-	// Used for caller information initialisation
-	callerInitOnce sync.Once
-)
-
-func getCaller() *runtime.Frame {
-	// cache this package's fully-qualified name
-	callerInitOnce.Do(func() {
-		pcs := make([]uintptr, maximumCallerDepth)
-		_ = runtime.Callers(0, pcs)
-
-		// dynamic get the package name and the minimum caller depth
-		for i := 0; i < maximumCallerDepth; i++ {
-			funcName := runtime.FuncForPC(pcs[i]).Name()
-			fmt.Println("datas ~~~~~ " + funcName)
-			//if strings.Contains(funcName, "getCaller") {
-			//	logrusPackage = getPackageName(funcName)
-			//	break
-			//}
-		}
-
-		minimumCallerDepth = knownLogrusFrames
-	})
-
-	logrusPackage = string(getPackage())
-	fmt.Println("---------")
-	fmt.Println(logrusPackage)
-	fmt.Println("---------")
-	// Restrict the lookback frames to avoid runaway lookups
-	pcs := make([]uintptr, maximumCallerDepth)
-	depth := runtime.Callers(minimumCallerDepth, pcs)
-	frames := runtime.CallersFrames(pcs[:depth])
-
-	//var finalFun *runtime.Frame
-	for f, again := frames.Next(); again; f, again = frames.Next() {
-		//pkg := getPackageName(f.Function)
-		fmt.Println("========= " + f.Function)
-
-		////If the caller isn't part of this package, we're done
-		//if strings.HasPrefix(pkg, logrusPackage) {
-		//	finalFun = &f
-		//	fmt.Println(finalFun.File)
-		//}
-	}
-	fmt.Println("final=====")
-	//fmt.Println(finalFun.File)
-	//return finalFun
-
-	// if we got here, we failed to find the caller's context
-	return nil
-}
-
-// getPackageName reduces a fully qualified function name to the package name
-// There really ought to be to be a better way...
-func getPackageName(f string) string {
-	for {
-		lastPeriod := strings.LastIndex(f, ".")
-		lastSlash := strings.LastIndex(f, "/")
-		if lastPeriod > lastSlash {
-			f = f[:lastPeriod]
-		} else {
-			break
-		}
-	}
-
-	return f
 }
