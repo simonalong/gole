@@ -56,6 +56,7 @@ func GetLogger(loggerName string) *logrus.Logger {
 
 	if gFilePath == "" {
 		log.Errorf("please set file path")
+		return nil
 	}
 
 	if loggerMap == nil {
