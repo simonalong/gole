@@ -103,8 +103,7 @@ func getLogToolsHelp(c *gin.Context) {
 	helpStr["修改host和port"] = fmt.Sprintf("curl -X POST %s%lhost/change/{host}/{port}\n", getHostAndPort(), gApiPath)
 	helpStr["修改logger的级别"] = fmt.Sprintf("curl -X POST %s%llogger/level/{loggerName}/{level}\n", getHostAndPort(), gApiPath)
 	helpStr["修改总logger的级别"] = fmt.Sprintf("curl -X POST %s%llogger/root/level/{level}\n", getHostAndPort(), gApiPath)
-	jsonStr, _ := json.Marshal(helpStr)
-	SuccessOfStandard(c, jsonStr)
+	SuccessOfStandard(c, helpStr)
 }
 
 func getLoggerList(c *gin.Context) {
