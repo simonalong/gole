@@ -28,11 +28,11 @@ const (
 var loggerMap map[string]*logrus.Logger
 var rotateMap map[string]*rotatelogs.RotateLogs
 var gFilePath string
-var gApiPath string
 
 var (
-	gHost = "localhost"
-	gPort = "port"
+	gHost    = "localhost"
+	gPort    = "port"
+	gApiPath = "/api/tools/"
 )
 
 func LogPathSet(fileName string) {
@@ -71,13 +71,16 @@ func GetLogger(loggerName string) *logrus.Logger {
 	return logger
 }
 
-func LogManager(r *gin.Engine, apiPath string) {
+func LogManagerApi(apiPath string) {
 	if apiPath == "" {
 		apiPath = "/api/tools/"
 	}
 
 	gApiPath = apiPath
-	appRouter := r.Group(apiPath)
+}
+
+func LogManager(r *gin.Engine) {
+	appRouter := r.Group(gApiPath)
 	{
 		// 获取帮助列表
 		appRouter.GET("help", getLogToolsHelp)
