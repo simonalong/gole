@@ -41,7 +41,7 @@ var appLog *logrus.Logger
 
 func init() {
     // 在路径/home/isc-xxx-service/logs/路径下生成文件，app-info.log、app-warn.log、app-err.log，以及相关的切片日志，默认保存30天
-    log.GetLoggerWithConfig("appLog", "/home/isc-xxx-service/logs/app", "/api/xxx", true)
+    log.GetLoggerWithConfig("appLog", "/home/isc-xxx-service/logs/app", "/api/xxx/", true)
 }
 
 func main() {
@@ -55,16 +55,16 @@ func main() {
 ```
 
 #### 日志管控
-使用日志管控时候，调用如下，可以查看到可以管控的logger的命令
-> curl http://localhost:port/api/tools/help
+使用日志管控时候，调用如下，可以查看到可以管控的logger的命令，其中/api/xxx/是上面配置的
+> curl http://localhost:port/api/xxx/help
 
 ```json
 {
-  "修改：host和port-----":"curl -X POST http://localhost:port/api/tools/host/change/{host}/{port}",
-  "修改：logger的级别----":"curl -X POST http://localhost:port/api/tools/logger/level/{loggerName}/{level}",
-  "修改：所有logger的级别":"curl -X POST http://localhost:port/api/tools/logger/root/level/{level}",
-  "查询：Logger集合-----":"curl http://localhost:port/api/tools/logger/list",
-  "查询：帮助-----------":"curl http://localhost:port/api/tools/help"
+  "修改：host和port-----":"curl -X POST http://localhost:port/api/xxx/host/change/{host}/{port}",
+  "修改：logger的级别----":"curl -X POST http://localhost:port/api/xxx/logger/level/{loggerName}/{level}",
+  "修改：所有logger的级别":"curl -X POST http://localhost:port/api/xxx/logger/root/level/{level}",
+  "查询：Logger集合-----":"curl http://localhost:port/api/xxx/logger/list",
+  "查询：帮助-----------":"curl http://localhost:port/api/xxx/help"
 }
 ```
 
