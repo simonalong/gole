@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/simonalong/tools/log"
+	"github.com/simonalong/tools/web"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -20,6 +21,11 @@ func main() {
 	testLogger = log.GetLogger("test")
 
 	r := gin.Default()
+	//gin.SetMode(gin.ReleaseMode)
+	//gin.DefaultWriter = ioutil.Discard
+	//gin.DisableConsoleColor()
+
+	r.Use(web.ResponseHandler())
 	r.GET("/get", get1)
 	r.GET("/test", test)
 	r.GET("/service", service)
@@ -46,9 +52,9 @@ func test(c *gin.Context) {
 	//testLogger.Fatalf("test-debug")
 
 	c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    "success",
-		"message": "成功",
-		"data":    "12",
+		"code":    "32",
+		"message": "失败",
+		"data":    "dfs",
 	})
 }
 
