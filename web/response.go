@@ -7,6 +7,7 @@ import (
 	http2 "github.com/simonalong/tools/http"
 	"github.com/simonalong/tools/log"
 	"github.com/sirupsen/logrus"
+	"net/http"
 	"time"
 )
 
@@ -67,4 +68,32 @@ func ResponseHandler() gin.HandlerFunc {
 			}
 		}
 	}
+}
+
+func Success(ctx *gin.Context, object interface{}) {
+	ctx.JSON(http.StatusOK, object)
+}
+
+func SuccessOfStandard(ctx *gin.Context, v interface{}) {
+	ctx.JSON(http.StatusOK, map[string]interface{}{
+		"code":    "success",
+		"message": "成功",
+		"data":    v,
+	})
+}
+
+func FailedOfStandard(ctx *gin.Context, code int, message string) {
+	ctx.JSON(http.StatusOK, map[string]interface{}{
+		"code":    code,
+		"message": message,
+		"data":    nil,
+	})
+}
+
+func FailedWithDataOfStandard(ctx *gin.Context, code string, message string, v interface{}) {
+	ctx.JSON(http.StatusOK, map[string]interface{}{
+		"code":    code,
+		"message": message,
+		"data":    v,
+	})
 }

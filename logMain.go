@@ -12,7 +12,7 @@ var serviceLogger *logrus.Logger
 var testLogger *logrus.Logger
 
 func init() {
-	log.LogConfig("/Users/zhouzhenyong/tem/tools/logs/tools", "/api/core/troy", true)
+	log.LogConfig("/Users/zhouzhenyong/tem/tools/logs/tools", "/api/tools/", true)
 }
 
 func main() {

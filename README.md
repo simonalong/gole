@@ -1,36 +1,81 @@
-## tools
+# tools
 tools是go代码写的的个人工具包。
 
 目前有以下功能
 - yaml、properties、json、map互转的工具
 - http的简单封装工具  
-- 日志的工具封装： 
-  - 文件自动切分级别划分
-  - 日志配置颜色
-  - 控制日志logger的级别  
+- 日志的工具封装
+- web返回值的异常打印
 
+### 1. yaml功能
+提供如下格式的转换
+```text
+ 1.yaml <---> properties
+ 2.yaml <---> json
+ 3.yaml <---> map
+ 4.yaml <---> list
+ 5.yaml <---> kvList
+```
+### 2. http 功能
+提供http客户端的协议工具，对返回值增加结构的解析
+```json
+{
+  "code": "xxx",
+  "message": "xxx",
+  "data": "xxx"
+}
+```
 
-### yaml用法
-### http用法
-### log 工具
+### 3. log 功能
+1. 支持日志文件切分
+2. 支持日志颜色
+3. 增加logger维度
+4. 增加对logger的级别管控
+
+#### 用法
 
 ```go
+// 文件: xxx.go
+
+var appLog *logrus.Logger
+
+func init() {
+    // 在路径/home/isc-xxx-service/logs/路径下生成文件，app-info.log、app-warn.log、app-err.log，以及相关的切片日志，默认保存30天
+    log.GetLoggerWithConfig("appLog", "/home/isc-xxx-service/logs/app", "/api/xxx", true)
+}
+
 func main() {
-	// 配置日志路径，会在对应目录下生成文件，biz-debug.log、biz-warn.log、biz-error.log、biz-fatal.log
-	log.LogPathSet("/user/xxxx/logs/biz")
-	// 日志管理api的前缀
-	log.LogApiConfig("/api/core/troy")
-	// 是否配置日志颜色
-	log.LogColor(true)
+    r := gin.Default()
 
-	// 获取对应的logger
-	bizLogger = log.GetLogger("biz")
+    // 添加日志的管控api
+    log.LogRouters(engine)
 
-	r := gin.Default()
+    r.Run(":8082")
+}
+```
 
-	// 添加日志api到web
-	log.LogRouters(r)
+#### 日志管控
+使用日志管控时候，调用如下，可以查看到可以管控的logger的命令
+> curl http://localhost:port/api/tools/help
 
-	r.Run(":8082")
+```json
+{
+  "修改：host和port-----":"curl -X POST http://localhost:port/api/tools/host/change/{host}/{port}",
+  "修改：logger的级别----":"curl -X POST http://localhost:port/api/tools/logger/level/{loggerName}/{level}",
+  "修改：所有logger的级别":"curl -X POST http://localhost:port/api/tools/logger/root/level/{level}",
+  "查询：Logger集合-----":"curl http://localhost:port/api/tools/logger/list",
+  "查询：帮助-----------":"curl http://localhost:port/api/tools/help"
+}
+```
+
+### 4. 返回值异常打印
+```go
+func main() {
+    r := gin.Default()
+
+    // 配置：返回值异常情况的打印
+    engine.Use(web.ResponseHandler())
+
+    r.Run(":8082")
 }
 ```

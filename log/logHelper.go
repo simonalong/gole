@@ -107,10 +107,10 @@ func LogRouters(r *gin.Engine) {
 
 func getLogToolsHelp(c *gin.Context) {
 	helpStr := map[string]string{}
-	helpStr["查询：帮助"] = fmt.Sprintf("curl %v%vhelp", getHostAndPort(), gApiPath)
-	helpStr["查询：Logger集合"] = fmt.Sprintf("curl %v%vlogger/list", getHostAndPort(), gApiPath)
-	helpStr["修改：host和port"] = fmt.Sprintf("curl -X POST %v%vhost/change/{host}/{port}", getHostAndPort(), gApiPath)
-	helpStr["修改：logger的级别"] = fmt.Sprintf("curl -X POST %v%vlogger/level/{loggerName}/{level}", getHostAndPort(), gApiPath)
+	helpStr["查询：帮助-----------"] = fmt.Sprintf("curl %v%vhelp", getHostAndPort(), gApiPath)
+	helpStr["查询：Logger集合-----"] = fmt.Sprintf("curl %v%vlogger/list", getHostAndPort(), gApiPath)
+	helpStr["修改：host和port-----"] = fmt.Sprintf("curl -X POST %v%vhost/change/{host}/{port}", getHostAndPort(), gApiPath)
+	helpStr["修改：logger的级别----"] = fmt.Sprintf("curl -X POST %v%vlogger/level/{loggerName}/{level}", getHostAndPort(), gApiPath)
 	helpStr["修改：所有logger的级别"] = fmt.Sprintf("curl -X POST %v%vlogger/root/level/{level}", getHostAndPort(), gApiPath)
 	Success(c, helpStr)
 }
