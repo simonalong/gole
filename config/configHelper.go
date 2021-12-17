@@ -8,6 +8,8 @@ import (
 	"github.com/simonalong/tools/yaml"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
+	"os"
+	"path"
 	"reflect"
 	"strings"
 )
@@ -23,25 +25,24 @@ func init() {
 // 支持yml、yaml、json、properties格式
 // 优先级yaml > yml > properties > json
 func LoadConfig() {
-	LoadConfigWithPath("./resources/")
+	//LoadConfigWithPath("./resources/")
 }
 
-// LoadConfigWithPath resourcePath 为资源路径目录名，比如：./resources/，默认为./resources/
+// LoadConfigWithRelativePath 加载相对文件路径，相对路径是相对系统启动的位置部分
+func LoadConfigWithRelativePath(resourceAbsPath string) {
+	dir, _ := os.Getwd()
+	pkg := strings.Replace(dir, "\\", "/", -1)
+	LoadConfigWithRelativePath(path.Join(pkg, "", resourceAbsPath))
+}
+
+// LoadConfigWithAbsPath 加载资源文件目录的绝对路径内容，比如：/user/xxx/mmm-biz-service/resources/
 // 支持yml、yaml、json、properties格式
 // 优先级yaml > yml > properties > json
 // 支持命令行：--app.profile xxx
-func LoadConfigWithPath(resourcePath string) {
-	if resourcePath == "" {
-		resourcePath = "./resources/"
-	}
-
-	if !strings.HasSuffix(resourcePath, "/") {
-		resourcePath += "/"
-	}
-
-	files, err := ioutil.ReadDir(resourcePath)
+func LoadConfigWithAbsPath(resourceAbsPath string) {
+	files, err := ioutil.ReadDir(resourceAbsPath)
 	if err != nil {
-		configLog.WithField("resourcePath", resourcePath).Errorf("read fail, %v", err.Error())
+		configLog.WithField("resourceAbsPath", resourceAbsPath).Errorf("read fail, %v", err.Error())
 		return
 	}
 
@@ -59,22 +60,22 @@ func LoadConfigWithPath(resourcePath string) {
 			switch fileName {
 			case "application.yaml":
 				{
-					LoadYamlFile(resourcePath + "application.yaml")
+					LoadYamlFile(resourceAbsPath + "application.yaml")
 					return
 				}
 			case "application.yml":
 				{
-					LoadYamlFile(resourcePath + "application.yml")
+					LoadYamlFile(resourceAbsPath + "application.yml")
 					return
 				}
 			case "application.properties":
 				{
-					LoadYamlFile(resourcePath + "application.properties")
+					LoadYamlFile(resourceAbsPath + "application.properties")
 					return
 				}
 			case "application.json":
 				{
-					LoadYamlFile(resourcePath + "application.json")
+					LoadYamlFile(resourceAbsPath + "application.json")
 					return
 				}
 			}
@@ -87,22 +88,22 @@ func LoadConfigWithPath(resourcePath string) {
 				switch extend {
 				case "yaml":
 					{
-						LoadYamlFile(resourcePath + fileName)
+						LoadYamlFile(resourceAbsPath + fileName)
 						return
 					}
 				case "yml":
 					{
-						LoadYamlFile(resourcePath + fileName)
+						LoadYamlFile(resourceAbsPath + fileName)
 						return
 					}
 				case "properties":
 					{
-						LoadPropertyFile(resourcePath + fileName)
+						LoadPropertyFile(resourceAbsPath + fileName)
 						return
 					}
 				case "json":
 					{
-						LoadJsonFile(resourcePath + fileName)
+						LoadJsonFile(resourceAbsPath + fileName)
 						return
 					}
 				}
