@@ -32,7 +32,7 @@ func LoadConfig() {
 func LoadConfigWithRelativePath(resourceAbsPath string) {
 	dir, _ := os.Getwd()
 	pkg := strings.Replace(dir, "\\", "/", -1)
-	LoadConfigWithRelativePath(path.Join(pkg, "", resourceAbsPath))
+	LoadConfigWithAbsPath(path.Join(pkg, "", resourceAbsPath))
 }
 
 // LoadConfigWithAbsPath 加载资源文件目录的绝对路径内容，比如：/user/xxx/mmm-biz-service/resources/
