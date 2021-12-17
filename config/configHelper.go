@@ -40,6 +40,9 @@ func LoadConfigWithRelativePath(resourceAbsPath string) {
 // 优先级yaml > yml > properties > json
 // 支持命令行：--app.profile xxx
 func LoadConfigWithAbsPath(resourceAbsPath string) {
+	if !strings.HasSuffix(resourceAbsPath, "/") {
+		resourceAbsPath += "/"
+	}
 	files, err := ioutil.ReadDir(resourceAbsPath)
 	if err != nil {
 		configLog.WithField("resourceAbsPath", resourceAbsPath).Errorf("read fail, %v", err.Error())
