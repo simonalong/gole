@@ -22,8 +22,9 @@ func init() {
 // LoadConfig 默认读取./resources/下面的配置文件
 // 支持yml、yaml、json、properties格式
 // 优先级yaml > yml > properties > json
-func LoadConfig() {
+func LoadConfig() *ApplicationProperty {
 	LoadConfigWithPath("./resources/")
+	return appProperty
 }
 
 // LoadConfigWithPath resourcePath 为资源路径目录名，比如：./resources/，默认为./resources/
