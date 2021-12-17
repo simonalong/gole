@@ -7,7 +7,6 @@ import (
 )
 
 func TestLoggerGet(t *testing.T) {
-	log.LogPathSet("/Users/zhouzhenyong/tem/tools/app")
 	serviceLog := log.GetLogger("service")
 	serviceLog.Info("haode")
 	serviceLog.SetLevel(logrus.DebugLevel)

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/simonalong/tools/config"
 	"github.com/simonalong/tools/log"
-	"github.com/simonalong/tools/web"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -16,24 +17,61 @@ func init() {
 }
 
 func main() {
+	//定义命令行参数方式1
+	//var name string
+	//var age int
+	//var married bool
+	//var delay time.Duration
+	//flag.StringVar(&name, "name", "张三", "姓名")
+	//flag.IntVar(&age, "age", 18, "年龄")
+	//flag.BoolVar(&married, "married", false, "婚否")
+	//flag.DurationVar(&delay, "d", 0, "延迟的时间间隔")
+	//
+	////解析命令行参数
+	//flag.Parse()
+	//fmt.Println(name, age, married, delay)
 
-	serviceLogger = log.GetLogger("service")
-	testLogger = log.GetLogger("test")
+	config.LoadConfigWithPath("./test/resources/")
+	////config.LoadYmlProfile("./resources/")
+	//
+	////fmt.Println(config.GetValueString("a.b"))
+	////fmt.Println(config.GetValueBool("a.e"))
+	////fmt.Println(config.GetValueIntDefault("a.f", 33))
+	fmt.Println(config.GetValueObject("a.b"))
 
-	r := gin.Default()
-	//gin.SetMode(gin.ReleaseMode)
-	//gin.DefaultWriter = ioutil.Discard
-	//gin.DisableConsoleColor()
+	////返回命令行参数后的其他参数
+	//fmt.Println(flag.Args())
+	////返回命令行参数后的其他参数个数
+	//fmt.Println(flag.NArg())
+	////返回使用的命令行参数个数
+	//fmt.Println(flag.NFlag())
 
-	r.Use(web.ResponseHandler())
-	r.GET("/get", get1)
-	r.GET("/test", test)
-	r.GET("/service", service)
+	//
+	//if len(os.Args) < 0 {
+	//	return
+	//}
+	//fmt.Printf("====%s====\n", os.Args[1])
+	//fmt.Printf("====%s====\n", os.Args[2])
+	//fmt.Printf("====%s====\n", os.Args[3])
+	//fmt.Printf("%s\n", os.Args)
 
-	// 添加日志api到web
-	log.LogRouters(r)
-
-	r.Run(":8082")
+	//serviceLogger = log.GetLogger("service")
+	//testLogger = log.GetLogger("test")
+	//
+	//r := gin.Default()
+	////gin.SetMode(gin.ReleaseMode)
+	////gin.DefaultWriter = ioutil.Discard
+	////gin.DisableConsoleColor()
+	//
+	//r.Use(web.ResponseHandler())
+	//r.GET("/get", get1)
+	//r.GET("/test", test)
+	//r.GET("/service", service)
+	//
+	//// 添加日志api到web
+	//log.LogRouters(r)
+	//
+	//r.Run(":8082")
 }
 
 func get1(c *gin.Context) {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/lunny/log"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -64,7 +63,6 @@ func GetLogger(loggerName string) *logrus.Logger {
 	}
 
 	if gFilePath == "" {
-		log.Errorf("please set file path")
 		return nil
 	}
 
@@ -72,7 +70,6 @@ func GetLogger(loggerName string) *logrus.Logger {
 		loggerMap = map[string]*logrus.Logger{}
 	}
 	logger := logrus.New()
-
 	logger.SetReportCaller(true)
 	formatters := &StandardFormatter{}
 	logger.Formatter = formatters
