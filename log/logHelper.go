@@ -46,9 +46,10 @@ func LogConfig(fileName, apiPath string, haveColor bool) {
 	}
 
 	if !strings.HasSuffix(apiPath, "/") {
-		gApiPath = apiPath + "/"
+		apiPath = apiPath + "/"
 	}
 
+	gApiPath = apiPath
 	gColor = haveColor
 }
 
