@@ -45,7 +45,10 @@ func LogConfig(fileName, apiPath string, haveColor bool) {
 		apiPath = "/api/tools/"
 	}
 
-	gApiPath = apiPath
+	if !strings.HasSuffix(apiPath, "/") {
+		gApiPath = apiPath + "/"
+	}
+
 	gColor = haveColor
 }
 
@@ -153,7 +156,7 @@ func setLoggerRootLevel(c *gin.Context) {
 }
 
 func getHostAndPort() string {
-	return "http://" + gHost + ":" + gPort + "/"
+	return "http://" + gHost + ":" + gPort
 }
 
 func rotateLog(path, level string) *rotatelogs.RotateLogs {
