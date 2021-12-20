@@ -153,7 +153,7 @@ func setLoggerRootLevel(c *gin.Context) {
 }
 
 func getHostAndPort() string {
-	return "http://" + gHost + ":" + gPort
+	return "http://" + gHost + ":" + gPort + "/"
 }
 
 func rotateLog(path, level string) *rotatelogs.RotateLogs {
