@@ -60,7 +60,7 @@ func ResponseHandler() gin.HandlerFunc {
 			var response http2.StandardResponse
 			err := json.Unmarshal([]byte(blw.body.String()), &response)
 			if err != nil {
-				logger.Errorf("err: %v", err.Error())
+				return
 			} else {
 				if response.Code == nil {
 					return
