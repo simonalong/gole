@@ -7,6 +7,7 @@ import (
 	"github.com/simonalong/tools/yaml"
 	"io/ioutil"
 	"log"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -194,6 +195,26 @@ func TestObjectToYaml4(t *testing.T) {
 	util.MapToObject(inner1, &targetObj)
 	// {zhou 321}
 	fmt.Println(util.ToJsonString(targetObj))
+}
+
+func TestOb(t *testing.T) {
+	//dataMap := map[string]interface{}{}
+	//dataMap["a"] = 23
+	//
+	//mapValue := reflect.ValueOf(dataMap)
+	//mV := mapValue.MapIndex(reflect.ValueOf("b"))
+	//if !mV.IsValid() {
+	//	fmt.Println("nil")
+	//} else {
+	//	fmt.Println(mV.Interface())
+	//}
+	//
+	var mV = reflect.ValueOf(nil)
+	if !mV.IsValid() {
+		fmt.Println("nil")
+	} else {
+		fmt.Println(mV.Interface())
+	}
 }
 
 func TestYamlToMap(t *testing.T) {

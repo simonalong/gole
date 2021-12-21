@@ -285,11 +285,12 @@ func MapToObject(dataMap map[string]interface{}, targetObj interface{}) {
 		field := targetType.Elem().Field(index)
 		fieldValue := targetValue.Elem().Field(index)
 
-		doInvoke(dataMap, field, fieldValue)
+		//doInvoke(dataMap, field, fieldValue)
+		doInvokeValue(reflect.ValueOf(dataMap), field, fieldValue)
 	}
 }
 
-func doInvoke(dataMap map[string]interface{}, structField reflect.StructField, fieldValue reflect.Value) {
+func doInvoke(dataMapMap map[string]interface{}, structField reflect.StructField, fieldValue reflect.Value) {
 	// 私有字段不处理
 	if !isStartUpper(structField.Name) {
 		return
@@ -299,7 +300,7 @@ func doInvoke(dataMap map[string]interface{}, structField reflect.StructField, f
 
 	// 基本类型
 	if IsBaseType(structField.Type) {
-		if v, exist := getValue(dataMap, structField.Name); exist {
+		if v, exist := getValueFromMap(dataMapMap, structField.Name); exist {
 			if fieldValue.Kind() == reflect.Ptr {
 				fieldValue.Elem().FieldByName(structField.Name).Set(reflect.ValueOf(v))
 			} else {
@@ -308,22 +309,22 @@ func doInvoke(dataMap map[string]interface{}, structField reflect.StructField, f
 		}
 	} else if fieldKind == reflect.Struct {
 		// 结构体类型
-		if v, exist := getValue(dataMap, structField.Name); exist {
+		if v, exist := getValueFromMap(dataMapMap, structField.Name); exist {
 			if reflect.TypeOf(v).Kind() == reflect.Map {
 				fieldValueTem := reflect.New(structField.Type)
-				fMapValue := reflect.ValueOf(v)
+				//fMapValue := reflect.ValueOf(v)
 
-				for mapR := fMapValue.MapRange(); mapR.Next(); {
-					mapKey := mapR.Key()
-					mapValue := mapR.Value()
+				//for mapR := fMapValue.MapRange(); mapR.Next(); {
+				//	mapKey := mapR.Key()
+				//	mapValue := mapR.Value()
+				//
+				//	doInvoke(fieldDataMap, structField.Type.Field(fIndex), fieldValueTem)
+				//	fieldValueMap.SetMapIndex(mapKey, mapValue)
+				//}
 
-					doInvoke(fieldDataMap, structField.Type.Field(fIndex), fieldValueTem)
-					fieldValueMap.SetMapIndex(mapKey, mapValue)
-				}
-
-				for fIndex, fNum := 0, structField.Type.NumField(); fIndex < fNum; fIndex++ {
-					doInvoke(fieldDataMap, structField.Type.Field(fIndex), fieldValueTem)
-				}
+				//for fIndex, fNum := 0, structField.Type.NumField(); fIndex < fNum; fIndex++ {
+				//	doInvoke(fMapValue, structField.Type.Field(fIndex), fieldValueTem)
+				//}
 				d := fieldValueTem.Elem()
 
 				if fieldValue.Kind() == reflect.Ptr {
@@ -335,7 +336,7 @@ func doInvoke(dataMap map[string]interface{}, structField reflect.StructField, f
 		}
 	} else if fieldKind == reflect.Map {
 		// map结构
-		if v, exist := getValue(dataMap, structField.Name); exist {
+		if v, exist := getValueFromMap(dataMapMap, structField.Name); exist {
 			if reflect.TypeOf(v).Kind() == reflect.Map {
 				fieldValueMap := reflect.MakeMap(structField.Type)
 				fMapValue := reflect.ValueOf(v)
@@ -349,7 +350,7 @@ func doInvoke(dataMap map[string]interface{}, structField reflect.StructField, f
 					mapKey := mapR.Key()
 					mapValue := mapR.Value()
 
-					doInvoke(fieldDataMap, structField.Type.Field(fIndex), fieldValueTem)
+					//doInvoke(fieldDataMap, structField.Type.Field(fIndex), fieldValueTem)
 					fieldValueMap.SetMapIndex(mapKey, mapValue)
 				}
 
@@ -368,13 +369,95 @@ func doInvoke(dataMap map[string]interface{}, structField reflect.StructField, f
 	}
 }
 
-func getValue(dataMap map[string]interface{}, key string) (interface{}, bool) {
+func doInvokeValue(fieldMapValue reflect.Value, field reflect.StructField, fieldValue reflect.Value) {
+	// 私有字段不处理
+	if !isStartUpper(field.Name) {
+		return
+	}
+
+	if fieldMapValue.Kind() == reflect.Ptr {
+		fieldMapValue = fieldMapValue.Elem()
+	}
+
+	fieldKind := field.Type.Kind()
+
+	// 基本类型
+	if IsBaseType(field.Type) {
+		if v, exist := getValueFromMapValue(fieldMapValue, field.Name); exist {
+			if fieldValue.Kind() == reflect.Ptr {
+				fieldValue.Elem().FieldByName(field.Name).Set(reflect.ValueOf(v.Interface()))
+			} else {
+				fieldValue.Set(reflect.ValueOf(v.Interface()))
+			}
+		}
+	} else if fieldKind == reflect.Struct {
+		// 结构体类型
+		if v, exist := getValueFromMapValue(fieldMapValue, field.Name); exist {
+			if v.Elem().Kind() == reflect.Map {
+				fieldValueTem := reflect.New(field.Type)
+
+				for fIndex, fNum := 0, field.Type.NumField(); fIndex < fNum; fIndex++ {
+					doInvokeValue(v.Elem(), field.Type.Field(fIndex), fieldValueTem)
+				}
+				d := fieldValueTem.Elem()
+
+				if fieldValue.Kind() == reflect.Ptr {
+					fieldValue.Elem().FieldByName(field.Name).Set(d)
+				} else {
+					fieldValue.Set(d)
+				}
+			}
+		}
+	} else if fieldKind == reflect.Map {
+		// map结构
+		if v, exist := getValueFromMapValue(fieldMapValue, field.Name); exist {
+			if v.Elem().Kind() == reflect.Map {
+				fieldValueMap := reflect.MakeMap(field.Type)
+				fMapValue := v.Elem()
+
+				for mapR := fMapValue.MapRange(); mapR.Next(); {
+					mapKey := mapR.Key()
+					mapValue := mapR.Value()
+
+					doInvokeValue(mapValue, field.Type.Field(fIndex), fieldValueTem)
+					fieldValueMap.SetMapIndex(mapKey, mapValue)
+				}
+
+				if fieldValue.Kind() == reflect.Ptr {
+					fieldValue.Elem().FieldByName(field.Name).Set(fieldValueMap)
+				} else {
+					fieldValue.Set(fieldValueMap)
+				}
+			}
+		}
+	} else if fieldKind == reflect.Array || fieldKind == reflect.Slice {
+		// 数组结构
+
+	} else {
+
+	}
+}
+
+func getValueFromMap(dataMap map[string]interface{}, key string) (interface{}, bool) {
+	//val := dataMap.MapIndex(reflect.ValueOf(key))
+	//if val != nil {
+	//
+	//}
 	if v1, exits := dataMap[key]; exits {
 		return v1, true
 	} else if v2, exits := dataMap[ToLowerFirstPrefix(key)]; exits {
 		return v2, true
 	}
 	return nil, false
+}
+
+func getValueFromMapValue(dataMap reflect.Value, key string) (reflect.Value, bool) {
+	if v1 := dataMap.MapIndex(reflect.ValueOf(key)); v1.IsValid() {
+		return v1, true
+	} else if v2 := dataMap.MapIndex(reflect.ValueOf(ToLowerFirstPrefix(key))); v2.IsValid() {
+		return v2, true
+	}
+	return reflect.ValueOf(nil), false
 }
 
 func doMapToObject(dataMap map[string]interface{}, numField int, targetObj interface{}) {
