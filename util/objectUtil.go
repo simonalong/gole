@@ -285,87 +285,7 @@ func MapToObject(dataMap map[string]interface{}, targetObj interface{}) {
 		field := targetType.Elem().Field(index)
 		fieldValue := targetValue.Elem().Field(index)
 
-		//doInvoke(dataMap, field, fieldValue)
 		doInvokeValue(reflect.ValueOf(dataMap), field, fieldValue)
-	}
-}
-
-func doInvoke(dataMapMap map[string]interface{}, structField reflect.StructField, fieldValue reflect.Value) {
-	// 私有字段不处理
-	if !isStartUpper(structField.Name) {
-		return
-	}
-
-	fieldKind := structField.Type.Kind()
-
-	// 基本类型
-	if IsBaseType(structField.Type) {
-		if v, exist := getValueFromMap(dataMapMap, structField.Name); exist {
-			if fieldValue.Kind() == reflect.Ptr {
-				fieldValue.Elem().FieldByName(structField.Name).Set(reflect.ValueOf(v))
-			} else {
-				fieldValue.Set(reflect.ValueOf(v))
-			}
-		}
-	} else if fieldKind == reflect.Struct {
-		// 结构体类型
-		if v, exist := getValueFromMap(dataMapMap, structField.Name); exist {
-			if reflect.TypeOf(v).Kind() == reflect.Map {
-				fieldValueTem := reflect.New(structField.Type)
-				//fMapValue := reflect.ValueOf(v)
-
-				//for mapR := fMapValue.MapRange(); mapR.Next(); {
-				//	mapKey := mapR.Key()
-				//	mapValue := mapR.Value()
-				//
-				//	doInvoke(fieldDataMap, structField.Type.Field(fIndex), fieldValueTem)
-				//	fieldValueMap.SetMapIndex(mapKey, mapValue)
-				//}
-
-				//for fIndex, fNum := 0, structField.Type.NumField(); fIndex < fNum; fIndex++ {
-				//	doInvoke(fMapValue, structField.Type.Field(fIndex), fieldValueTem)
-				//}
-				d := fieldValueTem.Elem()
-
-				if fieldValue.Kind() == reflect.Ptr {
-					fieldValue.Elem().FieldByName(structField.Name).Set(d)
-				} else {
-					fieldValue.Set(d)
-				}
-			}
-		}
-	} else if fieldKind == reflect.Map {
-		// map结构
-		if v, exist := getValueFromMap(dataMapMap, structField.Name); exist {
-			if reflect.TypeOf(v).Kind() == reflect.Map {
-				fieldValueMap := reflect.MakeMap(structField.Type)
-				fMapValue := reflect.ValueOf(v)
-
-				// map结构
-				if fMapValue.Len() == 0 {
-					return
-				}
-
-				for mapR := fMapValue.MapRange(); mapR.Next(); {
-					mapKey := mapR.Key()
-					mapValue := mapR.Value()
-
-					//doInvoke(fieldDataMap, structField.Type.Field(fIndex), fieldValueTem)
-					fieldValueMap.SetMapIndex(mapKey, mapValue)
-				}
-
-				if fieldValue.Kind() == reflect.Ptr {
-					fieldValue.Elem().FieldByName(structField.Name).Set(fieldValueMap)
-				} else {
-					fieldValue.Set(fieldValueMap)
-				}
-			}
-		}
-	} else if fieldKind == reflect.Array || fieldKind == reflect.Slice {
-		// 数组结构
-
-	} else {
-
 	}
 }
 
@@ -379,63 +299,99 @@ func doInvokeValue(fieldMapValue reflect.Value, field reflect.StructField, field
 		fieldMapValue = fieldMapValue.Elem()
 	}
 
-	fieldKind := field.Type.Kind()
-
-	// 基本类型
-	if IsBaseType(field.Type) {
-		if v, exist := getValueFromMapValue(fieldMapValue, field.Name); exist {
+	if v, exist := getValueFromMapValue(fieldMapValue, field.Name); exist {
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		targetValue := valueToTarget(v, field.Type)
+		if targetValue.IsValid() {
 			if fieldValue.Kind() == reflect.Ptr {
-				fieldValue.Elem().FieldByName(field.Name).Set(reflect.ValueOf(v.Interface()))
+				if targetValue.Kind() == reflect.Ptr {
+					fieldValue.Elem().FieldByName(field.Name).Set(targetValue.Elem())
+				} else {
+					fieldValue.Elem().FieldByName(field.Name).Set(targetValue)
+				}
 			} else {
-				fieldValue.Set(reflect.ValueOf(v.Interface()))
-			}
-		}
-	} else if fieldKind == reflect.Struct {
-		// 结构体类型
-		if v, exist := getValueFromMapValue(fieldMapValue, field.Name); exist {
-			if v.Elem().Kind() == reflect.Map {
-				fieldValueTem := reflect.New(field.Type)
-
-				for fIndex, fNum := 0, field.Type.NumField(); fIndex < fNum; fIndex++ {
-					doInvokeValue(v.Elem(), field.Type.Field(fIndex), fieldValueTem)
-				}
-				d := fieldValueTem.Elem()
-
-				if fieldValue.Kind() == reflect.Ptr {
-					fieldValue.Elem().FieldByName(field.Name).Set(d)
+				if targetValue.Kind() == reflect.Ptr {
+					fieldValue.Set(targetValue.Elem())
 				} else {
-					fieldValue.Set(d)
+					fieldValue.Set(targetValue)
 				}
 			}
 		}
-	} else if fieldKind == reflect.Map {
-		// map结构
-		if v, exist := getValueFromMapValue(fieldMapValue, field.Name); exist {
-			if v.Elem().Kind() == reflect.Map {
-				fieldValueMap := reflect.MakeMap(field.Type)
-				fMapValue := v.Elem()
-
-				for mapR := fMapValue.MapRange(); mapR.Next(); {
-					mapKey := mapR.Key()
-					mapValue := mapR.Value()
-
-					doInvokeValue(mapValue, field.Type.Field(fIndex), fieldValueTem)
-					fieldValueMap.SetMapIndex(mapKey, mapValue)
-				}
-
-				if fieldValue.Kind() == reflect.Ptr {
-					fieldValue.Elem().FieldByName(field.Name).Set(fieldValueMap)
-				} else {
-					fieldValue.Set(fieldValueMap)
-				}
-			}
-		}
-	} else if fieldKind == reflect.Array || fieldKind == reflect.Slice {
-		// 数组结构
-
-	} else {
-
 	}
+}
+
+func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
+	if dstType.Kind() == reflect.Struct {
+		if srcValue.Kind() == reflect.Ptr {
+			srcValue = srcValue.Elem()
+		}
+		sourceValue := reflect.ValueOf(srcValue.Interface())
+		if sourceValue.Kind() == reflect.Map || sourceValue.Kind() == reflect.Struct {
+			mapFieldValue := reflect.New(dstType)
+			for index, num := 0, mapFieldValue.Type().Elem().NumField(); index < num; index++ {
+				field := mapFieldValue.Type().Elem().Field(index)
+				fieldValue := mapFieldValue.Elem().Field(index)
+
+				doInvokeValue(sourceValue, field, fieldValue)
+			}
+			return mapFieldValue
+		}
+	} else if dstType.Kind() == reflect.Map {
+		if srcValue.Kind() == reflect.Ptr {
+			srcValue = srcValue.Elem()
+		}
+		sourceValue := reflect.ValueOf(srcValue.Interface())
+		if sourceValue.Kind() == reflect.Map {
+			mapFieldValue := reflect.MakeMap(dstType)
+			for mapR := sourceValue.MapRange(); mapR.Next(); {
+				mapKey := mapR.Key()
+				mapValue := mapR.Value()
+
+				mapKeyRealValue, err := Cast(mapFieldValue.Type().Key().Kind(), fmt.Sprintf("%v", mapKey.Interface()))
+				mapValueRealValue := valueToTarget(mapValue, mapFieldValue.Type().Elem())
+				if err == nil {
+					if mapValueRealValue.Kind() == reflect.Ptr {
+						mapFieldValue.SetMapIndex(reflect.ValueOf(mapKeyRealValue), mapValueRealValue.Elem())
+					} else {
+						mapFieldValue.SetMapIndex(reflect.ValueOf(mapKeyRealValue), mapValueRealValue)
+					}
+				}
+			}
+			return mapFieldValue
+		}
+	} else if dstType.Kind() == reflect.Slice || dstType.Kind() == reflect.Array {
+		if srcValue.Kind() == reflect.Ptr {
+			srcValue = srcValue.Elem()
+		}
+		sourceValue := reflect.ValueOf(srcValue.Interface())
+		if sourceValue.Kind() == reflect.Slice || sourceValue.Kind() == reflect.Array {
+			arrayFieldValue := reflect.MakeSlice(dstType, 0, 0)
+			for arrayIndex := 0; arrayIndex < sourceValue.Len(); arrayIndex++ {
+				dataV := valueToTarget(sourceValue.Index(arrayIndex), dstType.Elem())
+				if dataV.IsValid() {
+					if dataV.Kind() == reflect.Ptr {
+						arrayFieldValue = reflect.Append(arrayFieldValue, dataV.Elem())
+					} else {
+						arrayFieldValue = reflect.Append(arrayFieldValue, dataV)
+					}
+				}
+			}
+			return arrayFieldValue
+		}
+	} else if IsBaseType(dstType) {
+		sourceValue := reflect.ValueOf(srcValue.Interface())
+		if IsBaseType(sourceValue.Type()) {
+			v, err := Cast(dstType.Kind(), fmt.Sprintf("%v", srcValue.Interface()))
+			if err == nil {
+				return reflect.ValueOf(v)
+			}
+		}
+	} else {
+		return reflect.ValueOf(nil)
+	}
+	return reflect.ValueOf(nil)
 }
 
 func getValueFromMap(dataMap map[string]interface{}, key string) (interface{}, bool) {
@@ -451,12 +407,21 @@ func getValueFromMap(dataMap map[string]interface{}, key string) (interface{}, b
 	return nil, false
 }
 
-func getValueFromMapValue(dataMap reflect.Value, key string) (reflect.Value, bool) {
-	if v1 := dataMap.MapIndex(reflect.ValueOf(key)); v1.IsValid() {
-		return v1, true
-	} else if v2 := dataMap.MapIndex(reflect.ValueOf(ToLowerFirstPrefix(key))); v2.IsValid() {
-		return v2, true
+func getValueFromMapValue(keyValues reflect.Value, key string) (reflect.Value, bool) {
+	if keyValues.Kind() == reflect.Map {
+		if v1 := keyValues.MapIndex(reflect.ValueOf(key)); v1.IsValid() {
+			return v1, true
+		} else if v2 := keyValues.MapIndex(reflect.ValueOf(ToLowerFirstPrefix(key))); v2.IsValid() {
+			return v2, true
+		}
+	} else if keyValues.Kind() == reflect.Struct {
+		if v1 := keyValues.FieldByName(key); v1.IsValid() {
+			return v1, true
+		} else if v2 := keyValues.FieldByName(ToLowerFirstPrefix(key)); v2.IsValid() {
+			return v2, true
+		}
 	}
+
 	return reflect.ValueOf(nil), false
 }
 

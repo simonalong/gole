@@ -3,11 +3,9 @@ package test
 import (
 	"fmt"
 	"github.com/magiconair/properties"
-	"github.com/simonalong/tools/util"
 	"github.com/simonalong/tools/yaml"
 	"io/ioutil"
 	"log"
-	"reflect"
 	"strings"
 	"testing"
 )
@@ -100,121 +98,6 @@ func TestMapToProperties4(t *testing.T) {
 	//}
 	//expect := "a=12\nb=13\nc=14\nd.a=inner1\nd.b=inner2\nd.c=inner3\nd.d[0]=a\nd.d[1]=b"
 	//Equal(t, act, expect)
-}
-
-type ValueInnerEntity1 struct {
-	Name string
-	Age  int
-}
-
-func TestObjectToYaml1(t *testing.T) {
-	inner1 := map[string]interface{}{}
-	inner1["name"] = "inner_1"
-	inner1["age"] = 1
-
-	var targetObj ValueInnerEntity1
-	util.MapToObject(inner1, &targetObj)
-	// {zhou 321}
-	fmt.Println(util.ToJsonString(targetObj))
-}
-
-type ValueInnerEntity2 struct {
-	Name   string
-	Age    int
-	Inner1 ValueInnerEntity1
-}
-
-func TestObjectToYaml2(t *testing.T) {
-	inner1 := map[string]interface{}{}
-	inner1["name"] = "inner_1"
-	inner1["age"] = 1
-
-	inner2 := map[string]interface{}{}
-	inner2["name"] = "inner_2"
-	inner2["age"] = 2
-	inner2["inner1"] = inner1
-
-	var targetObj ValueInnerEntity2
-	util.MapToObject(inner2, &targetObj)
-	// {zhou 321}
-	fmt.Println(util.ToJsonString(targetObj))
-}
-
-type ValueInnerEntity3 struct {
-	Name   string
-	Age    int
-	Inner2 ValueInnerEntity2
-}
-
-func TestObjectToYaml3(t *testing.T) {
-	inner1 := map[string]interface{}{}
-	inner1["name"] = "inner_1"
-	inner1["age"] = 1
-
-	inner2 := map[string]interface{}{}
-	inner2["name"] = "inner_2"
-	inner2["age"] = 2
-	inner2["inner1"] = inner1
-
-	inner3 := map[string]interface{}{}
-	inner3["name"] = "inner_3"
-	inner3["age"] = 3
-	inner3["inner2"] = inner2
-
-	var targetObj ValueInnerEntity3
-	util.MapToObject(inner3, &targetObj)
-	// {zhou 321}
-	fmt.Println(util.ToJsonString(targetObj))
-}
-
-type ValueInnerEntity4 struct {
-	Name    string
-	Age     int
-	DataMap map[string]ValueInnerEntity1
-}
-
-func TestObjectToYaml4(t *testing.T) {
-	v1 := map[string]interface{}{}
-	v1["name"] = "inner_1"
-	v1["age"] = 1
-
-	v2 := map[string]interface{}{}
-	v2["name"] = "inner_2"
-	v2["age"] = 2
-
-	kvMap := map[string]interface{}{}
-	kvMap["k1"] = v1
-	kvMap["k2"] = v2
-
-	inner1 := map[string]interface{}{}
-	inner1["name"] = "inner_1"
-	inner1["age"] = 1
-	inner1["dataMap"] = kvMap
-
-	var targetObj ValueInnerEntity4
-	util.MapToObject(inner1, &targetObj)
-	// {zhou 321}
-	fmt.Println(util.ToJsonString(targetObj))
-}
-
-func TestOb(t *testing.T) {
-	//dataMap := map[string]interface{}{}
-	//dataMap["a"] = 23
-	//
-	//mapValue := reflect.ValueOf(dataMap)
-	//mV := mapValue.MapIndex(reflect.ValueOf("b"))
-	//if !mV.IsValid() {
-	//	fmt.Println("nil")
-	//} else {
-	//	fmt.Println(mV.Interface())
-	//}
-	//
-	var mV = reflect.ValueOf(nil)
-	if !mV.IsValid() {
-		fmt.Println("nil")
-	} else {
-		fmt.Println(mV.Interface())
-	}
 }
 
 func TestYamlToMap(t *testing.T) {
