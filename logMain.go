@@ -31,7 +31,7 @@ func main() {
 	//flag.Parse()
 	//fmt.Println(name, age, married, delay)
 
-	config.LoadConfigWithPath("./test/resources/")
+	//config.LoadConfigWithPath("./test/resources/")
 	////config.LoadYmlProfile("./resources/")
 	//
 	////fmt.Println(config.GetValueString("a.b"))

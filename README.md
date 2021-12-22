@@ -6,9 +6,11 @@ tools是go代码写的的个人工具包。
 - http的简单封装工具  
 - 日志的工具封装
 - web返回值的异常打印
+- interface转换具体类型工具
+- json转object工具
 - 其他的一些简单工具
 
-### 1. yaml功能
+## 1. yaml功能
 提供如下格式的转换
 ```text
  1.yaml <---> properties
@@ -17,7 +19,7 @@ tools是go代码写的的个人工具包。
  4.yaml <---> list
  5.yaml <---> kvList
 ```
-### 2. http 功能
+## 2. http 功能
 提供http客户端的协议工具，对返回值增加结构的解析
 ```json
 {
@@ -27,13 +29,13 @@ tools是go代码写的的个人工具包。
 }
 ```
 
-### 3. log 功能
+## 3. log 功能
 1. 支持日志文件切分
 2. 支持日志颜色
 3. 增加logger维度
 4. 增加对logger的日志级别管控
 
-#### 日志路径配置用法
+### 日志路径配置用法
 
 ```go
 // 文件: xxx.go
@@ -46,7 +48,7 @@ func init() {
 }
 ```
 
-#### 日志管控
+### 日志管控
 如下，添加日志的Router，添加后就可以对日志进行管控了
 ```go
 func main() {
@@ -71,7 +73,8 @@ func main() {
 }
 ```
 
-### 4. 返回值异常打印
+## 4. gin框架返回值异常打印
+这里使用的是gin框架
 ```go
 func main() {
     r := gin.Default()
@@ -80,5 +83,216 @@ func main() {
     engine.Use(web.ResponseHandler())
 
     r.Run(":8082")
+}
+```
+## 5. interface转换具体类型工具
+在使用到interface时候，我们有时候需要使用具体类型，这种在go里面比较烦，就做了个简单的工具
+```go
+// ToInt ：  interface{} --> int
+// ToInt8 ： interface{} --> int8
+// ToInt16 ：interface{} --> int16
+// ToInt32 ：interface{} --> int32
+// ToInt64 ：interface{} --> int64
+
+// ToUInt ：  interface{} --> uint
+// ToUInt8 ： interface{} --> uint8
+// ToUInt16 ：interface{} --> uint16
+// ToUInt32 ：interface{} --> uint32
+// ToUInt64 ：interface{} --> uint64
+
+// ToFloat32 ：interface{} --> float32
+// ToFloat64 ：interface{} --> float64
+
+// ToBool ：interface{} --> bool
+
+// ToComplex64 ：interface{} --> complex64
+// ToComplex128 ：interface{} --> complex128
+
+// ToMap ：interface{} --> map[string]interface{}
+
+// Cast：向指定类型转换，比如：string转int
+```
+## 6. json和object互转工具
+这个工具是为了解决json反解析到对象这种时候，类型的tag中必须使用`json:"xxx"`这种，代码对外的实体中会存在非常多的这种，如下
+比如：
+```go
+type AppManagerUpdateReq struct {
+    Id           int64  `json:"id"`
+    AppName      string `json:"appName"`
+    AppDesc      string `json:"appDesc"`
+    ActiveStatus int8   `json:"activeStatus"`
+}
+```
+为了去掉后面的json，这里做了反解析化工具。提供三个api进行转换
+```go
+// MapToObject：         map         ——> 对象
+// JsonToObject：        jsonStr     ——> 对象
+// ReaderJsonToObject：  io.Reader   ——> 对象
+// ObjectToJson：        对象         ——> jsonStr
+```
+#### 提示：
+这里的转换支持如下三种特性
+- 无json标示：反解析不需要添加'json:"xxx"'，而且反解析时候对应的map中的key为消息
+- 类型无限制：map中对应的类型只要能转换进去即可，比如：map中的value值为string类型，但是存储的是数字，实体为int，也是可以的
+- 自定义类型：比如自定义类型`type myType int8` 这种类型修饰的也可以转换
+
+### 举例
+#### 1. 无`json:"xxx"`解析到对象
+```go
+type ValueInnerEntityT struct {
+    AppName string
+    Age  int
+}
+
+func TestMapToObjectT(t *testing.T) {
+    inner1 := map[string]interface{}{}
+    inner1["appName"] = "inner_1"
+    inner1["age"] = 1
+
+    var targetObj ValueInnerEntityT
+    util.MapToObject(inner1, &targetObj)
+    Equal(t, util.ToJsonString(targetObj), "{\"AppName\":\"inner_1\",\"Age\":1}")
+}
+```
+嵌套结构也支持
+```go
+type ValueInnerEntity1 struct {
+    Name string
+    Age  int
+}
+
+func TestMapToObject1(t *testing.T) {
+    inner1 := map[string]interface{}{}
+    inner1["name"] = "inner_1"
+    inner1["age"] = 1
+
+    var targetObj ValueInnerEntity1
+    util.MapToObject(inner1, &targetObj)
+    Equal(t, "{\"Name\":\"inner_1\",\"Age\":1}", util.ToJsonString(targetObj))
+}
+
+type ValueInnerEntity2 struct {
+    Name   string
+    Age    int
+    Inner1 ValueInnerEntity1
+}
+
+func TestMapToObject2(t *testing.T) {
+    inner1 := map[string]interface{}{}
+    inner1["name"] = "inner_1"
+    inner1["age"] = 1
+
+    inner2 := map[string]interface{}{}
+    inner2["name"] = "inner_2"
+    inner2["age"] = 2
+    inner2["inner1"] = inner1
+
+    var targetObj ValueInnerEntity2
+    util.MapToObject(inner2, &targetObj)
+    Equal(t, "{\"Name\":\"inner_2\",\"Age\":2,\"Inner1\":{\"Name\":\"inner_1\",\"Age\":1}}", util.ToJsonString(targetObj))
+}
+```
+#### 2. 无`json:"xxx"`解析
+```go
+type ValueObjectTest1 struct {
+    AppName string
+    Age  int
+}
+
+func TestObjectToJson1(t *testing.T) {
+    entity := ValueObjectTest1{AppName: "zhou", Age: 12}
+    Equal(t, util.ObjectToJson(entity), "{\"age\":12,\"appName\":\"zhou\"}")
+}
+```
+结果
+```json
+{
+    "age":12,
+    "appName":"zhou"
+}
+```
+复杂结构
+```go
+type ValueObjectTest3 struct {
+    AppName []string
+    Age1  map[string]interface{}
+}
+
+type ValueObjectTest4 struct {
+    AppName string
+    Inner  ValueObjectTest3
+}
+
+func TestObjectToJson4(t *testing.T) {
+    var arrays []string
+    arrays = append(arrays, "zhou")
+    arrays = append(arrays, "wang")
+
+    dataMap := map[string]interface{}{}
+    dataMap["a"] = 1
+    dataMap["b"] = 2
+
+    entity3 := ValueObjectTest3 {
+        AppName: arrays,
+        Age1: dataMap,
+    }
+
+    var entity4 ValueObjectTest4
+    entity4.Inner = entity3
+    entity4.AppName = "zhou"
+    Equal(t, util.ObjectToJson(entity4), "{\"appName\":\"zhou\",\"inner\":{\"age1\":{\"a\":1,\"b\":2},\"appName\":[\"zhou\",\"wang\"]}}")
+}
+```
+结果
+```json
+{
+    "appName":"zhou",
+    "inner":{
+        "age1":{
+            "a":1,
+            "b":2
+        },
+        "appName":[
+            "zhou",
+            "wang"
+        ]
+    }
+}
+```
+#### 3. 类型兼容（互转）
+如下string类型也可以转换为int
+```go
+type ValueInnerEntityTem struct {
+    Name string
+    Age  int
+}
+
+func TestMapToObjectTem(t *testing.T) {
+    inner1 := map[string]interface{}{}
+    inner1["name"] = "inner_1"
+    inner1["age"] = "123"
+
+    var targetObj ValueInnerEntity1
+    _ = util.MapToObject(inner1, &targetObj)
+    Equal(t, "{\"Name\":\"inner_1\",\"Age\":123}", util.ToJsonString(targetObj))
+}
+```
+#### 4. 支持自定义类型
+```go
+type MyEnum int
+
+type ValueInnerEntityTem struct {
+    Name string
+    Age  MyEnum
+}
+
+func TestMapToObjectTem(t *testing.T) {
+    inner1 := map[string]interface{}{}
+    inner1["name"] = "inner_1"
+    inner1["age"] = "1"
+
+    var targetObj ValueInnerEntity1
+    _ = util.MapToObject(inner1, &targetObj)
+    Equal(t, util.ToJsonString(targetObj), "{\"Name\":\"inner_1\",\"Age\":1}")
 }
 ```

@@ -28,7 +28,7 @@ func (error *ChangeError) Error() string {
 	return error.ErrMsg
 }
 
-func ObjectToMap(data interface{}) map[string]interface{} {
+func ToMap(data interface{}) map[string]interface{} {
 	if reflect.TypeOf(data).Kind() == reflect.Map {
 		resultMap := map[string]interface{}{}
 		dataValue := reflect.ValueOf(data)
@@ -118,16 +118,28 @@ func IsBaseType(fieldType reflect.Type) bool {
 	}
 }
 
-func ToJsonString(data interface{}) string {
-	bytes, _ := json.Marshal(data)
+func ToJsonString(value interface{}) string {
+	if value == nil {
+		return ""
+	}
+	bytes, err := json.Marshal(value)
+	if err != nil {
+		utilLog.Warn("%v", err.Error())
+	}
 	return string(bytes)
 }
 
 func ToString(value interface{}) string {
+	if value == nil {
+		return ""
+	}
 	return fmt.Sprintf("%v", value)
 }
 
 func ToInt(value interface{}) int {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Int)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -137,6 +149,9 @@ func ToInt(value interface{}) int {
 }
 
 func ToInt8(value interface{}) int8 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Int8)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -146,6 +161,9 @@ func ToInt8(value interface{}) int8 {
 }
 
 func ToInt16(value interface{}) int16 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Int16)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -155,6 +173,9 @@ func ToInt16(value interface{}) int16 {
 }
 
 func ToInt32(value interface{}) int32 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Int32)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -164,6 +185,9 @@ func ToInt32(value interface{}) int32 {
 }
 
 func ToInt64(value interface{}) int64 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Int64)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -173,6 +197,9 @@ func ToInt64(value interface{}) int64 {
 }
 
 func ToUInt(value interface{}) uint {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Uint)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -182,6 +209,9 @@ func ToUInt(value interface{}) uint {
 }
 
 func ToUInt8(value interface{}) uint8 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Uint8)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -191,6 +221,9 @@ func ToUInt8(value interface{}) uint8 {
 }
 
 func ToUInt16(value interface{}) uint16 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Uint16)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -200,6 +233,9 @@ func ToUInt16(value interface{}) uint16 {
 }
 
 func ToUInt32(value interface{}) uint32 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Uint32)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -209,6 +245,9 @@ func ToUInt32(value interface{}) uint32 {
 }
 
 func ToUInt64(value interface{}) uint64 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Uint64)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -218,6 +257,9 @@ func ToUInt64(value interface{}) uint64 {
 }
 
 func ToFloat32(value interface{}) float32 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Float32)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -227,6 +269,9 @@ func ToFloat32(value interface{}) float32 {
 }
 
 func ToFloat64(value interface{}) float64 {
+	if value == nil {
+		return 0
+	}
 	result, err := ToValue(value, reflect.Float64)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -236,6 +281,9 @@ func ToFloat64(value interface{}) float64 {
 }
 
 func ToBool(value interface{}) bool {
+	if value == nil {
+		return false
+	}
 	result, err := ToValue(value, reflect.Bool)
 	if err != nil {
 		utilLog.Errorf("%v", err.Error())
@@ -244,7 +292,34 @@ func ToBool(value interface{}) bool {
 	return result.(bool)
 }
 
+func ToComplex64(value interface{}) complex64 {
+	if value == nil {
+		return 0
+	}
+	result, err := ToValue(value, reflect.Complex64)
+	if err != nil {
+		utilLog.Errorf("%v", err.Error())
+		return 0
+	}
+	return result.(complex64)
+}
+
+func ToComplex128(value interface{}) complex128 {
+	if value == nil {
+		return 0
+	}
+	result, err := ToValue(value, reflect.Complex128)
+	if err != nil {
+		utilLog.Errorf("%v", err.Error())
+		return 0
+	}
+	return result.(complex128)
+}
+
 func ToValue(value interface{}, valueKind reflect.Kind) (interface{}, error) {
+	if value == nil {
+		return nil, nil
+	}
 	valueStr := ToString(value)
 	return Cast(valueKind, valueStr)
 }
@@ -310,6 +385,14 @@ func Cast(fieldKind reflect.Kind, valueStr string) (interface{}, error) {
 		return float32(v), nil
 	case reflect.Float64:
 		return strconv.ParseFloat(valueStr, 64)
+	case reflect.Complex64:
+		v, err := strconv.ParseComplex(valueStr, 64)
+		if err != nil {
+			return nil, err
+		}
+		return complex64(v), nil
+	case reflect.Complex128:
+		return strconv.ParseComplex(valueStr, 128)
 	case reflect.Bool:
 		return strconv.ParseBool(valueStr)
 	}
@@ -317,6 +400,9 @@ func Cast(fieldKind reflect.Kind, valueStr string) (interface{}, error) {
 }
 
 func ReaderJsonToObject(reader io.Reader, targetPtrObj interface{}) error {
+	if reader == nil {
+		return nil
+	}
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		if err != io.EOF {
@@ -328,6 +414,9 @@ func ReaderJsonToObject(reader io.Reader, targetPtrObj interface{}) error {
 }
 
 func JsonToObject(jsonStr string, targetPtrObj interface{}) error {
+	if jsonStr == "" {
+		return nil
+	}
 	dataMap, err := yaml.JsonToMap(jsonStr)
 	if err != nil {
 		utilLog.Warnf("JsonToObject is err: %v", err.Error())
@@ -338,6 +427,9 @@ func JsonToObject(jsonStr string, targetPtrObj interface{}) error {
 }
 
 func MapToObject(dataMap map[string]interface{}, targetPtrObj interface{}) error {
+	if dataMap == nil {
+		return nil
+	}
 	targetType := reflect.TypeOf(targetPtrObj)
 	if targetType.Kind() != reflect.Ptr {
 		utilLog.Warn("targetPtrObj type is not ptr")
@@ -457,6 +549,155 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 		return reflect.ValueOf(nil)
 	}
 	return reflect.ValueOf(nil)
+}
+
+// ObjectToJson 对象转化为json，其中map对应的key为小写
+func ObjectToJson(object interface{}) string {
+	if object == nil || reflect.ValueOf(object).Kind() == reflect.Ptr {
+		return "{}"
+	}
+
+	// 只接收 map、struct、array、slice进行解析
+	objKind := reflect.ValueOf(object).Kind()
+	if objKind != reflect.Map && objKind != reflect.Struct && objKind != reflect.Array && objKind != reflect.Slice {
+		utilLog.Warnf("not support the type %v change to json", objKind.String())
+		return "{}"
+	}
+
+	if objKind == reflect.Map {
+		// Map 结构
+		resultMap := map[string]interface{}{}
+		objValue := reflect.ValueOf(object)
+		if objValue.Len() == 0 {
+			return "{}"
+		}
+
+		for mapR := objValue.MapRange(); mapR.Next(); {
+			mapKey := mapR.Key()
+			mapValue := mapR.Value()
+
+			v := doObjectChange(reflect.TypeOf(mapValue.Interface()).Kind(), mapValue.Interface())
+			if v != nil {
+				resultMap[ToLowerFirstPrefix(ToString(mapKey.Interface()))] = v
+			}
+		}
+		return ToJsonString(resultMap)
+	} else if objKind == reflect.Struct {
+		// Struct 结构
+		resultMap := map[string]interface{}{}
+		objValue := reflect.ValueOf(object)
+		objType := objValue.Type()
+		for index, num := 0, objType.NumField(); index < num; index++ {
+			field := objType.Field(index)
+			fieldValue := objValue.Field(index)
+
+			// 私有字段不处理
+			if !isStartUpper(field.Name) {
+				continue
+			}
+			v := doObjectChange(reflect.TypeOf(fieldValue.Interface()).Kind(), fieldValue.Interface())
+			if v != nil {
+				resultMap[ToLowerFirstPrefix(field.Name)] = v
+			}
+		}
+		return ToJsonString(resultMap)
+	} else if objKind == reflect.Array || objKind == reflect.Slice {
+		// Array 结构
+		var resultSlice []interface{}
+		objValue := reflect.ValueOf(object)
+		for index := 0; index < objValue.Len(); index++ {
+			arrayItemValue := objValue.Index(index)
+
+			v := doObjectChange(reflect.TypeOf(object).Elem().Kind(), arrayItemValue)
+			if v != nil {
+				resultSlice = append(resultSlice, v)
+			}
+		}
+		return ToJsonString(resultSlice)
+	}
+	return "{}"
+}
+
+// 转换为对应类型
+//
+// 符号数字类型 		-> int
+// 无符号类型 		-> uint
+// float类型 		-> float
+// complex128类型 	-> complex128
+// boole类型 		-> bool
+// string类型 		-> string
+// 集合/分片类型 		-> [xx]；其中xx对应的类型集合中的对象再次进行转换
+// 结构体 			-> 转换为map
+// map 				-> 转换为map
+func doObjectChange(objKind reflect.Kind, object interface{}) interface{} {
+
+	//objKind := reflect.TypeOf(object).Kind()
+	if objKind == reflect.Ptr {
+		return nil
+	}
+	if objKind == reflect.Int || objKind == reflect.Int8 || objKind == reflect.Int16 || objKind == reflect.Int32 || objKind == reflect.Int64 {
+		return ToInt64(object)
+	} else if objKind == reflect.Uint || objKind == reflect.Uint8 || objKind == reflect.Uint16 || objKind == reflect.Uint32 || objKind == reflect.Uint64 {
+		return ToUInt64(object)
+	} else if objKind == reflect.Float32 || objKind == reflect.Float64 {
+		return ToFloat64(object)
+	} else if objKind == reflect.Complex64 {
+		return ToString(object)
+	} else if objKind == reflect.Complex128 {
+		return ToString(object)
+	} else if objKind == reflect.Bool {
+		return ToBool(object)
+	} else if objKind == reflect.String {
+		return ToString(object)
+	} else if objKind == reflect.Array || objKind == reflect.Slice {
+		var resultSlice []interface{}
+		objValue := reflect.ValueOf(object)
+		for index := 0; index < objValue.Len(); index++ {
+			arrayItemValue := objValue.Index(index)
+
+			v := doObjectChange(reflect.TypeOf(object).Elem().Kind(), arrayItemValue)
+			if v != nil {
+				resultSlice = append(resultSlice, v)
+			}
+		}
+		return resultSlice
+	} else if objKind == reflect.Struct {
+		resultMap := map[string]interface{}{}
+		objValue := reflect.ValueOf(object)
+		objType := objValue.Type()
+		for index, num := 0, objType.NumField(); index < num; index++ {
+			field := objType.Field(index)
+			fieldValue := objValue.Field(index)
+
+			// 私有字段不处理
+			if !isStartUpper(field.Name) {
+				continue
+			}
+			v := doObjectChange(reflect.TypeOf(fieldValue.Interface()).Kind(), fieldValue.Interface())
+			if v != nil {
+				resultMap[ToLowerFirstPrefix(field.Name)] = v
+			}
+		}
+		return resultMap
+	} else if objKind == reflect.Map {
+		resultMap := map[string]interface{}{}
+		objValue := reflect.ValueOf(object)
+		if objValue.Len() == 0 {
+			return resultMap
+		}
+
+		for mapR := objValue.MapRange(); mapR.Next(); {
+			mapKey := mapR.Key()
+			mapValue := mapR.Value()
+
+			v := doObjectChange(reflect.TypeOf(mapValue.Interface()).Kind(), mapValue.Interface())
+			if v != nil {
+				resultMap[ToLowerFirstPrefix(ToString(mapKey.Interface()))] = v
+			}
+		}
+		return resultMap
+	}
+	return nil
 }
 
 func getValueFromMapValue(keyValues reflect.Value, key string) (reflect.Value, bool) {
