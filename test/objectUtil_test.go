@@ -10,7 +10,7 @@ type ValueInnerEntity1 struct {
 	Age  int
 }
 
-func TestObjectToYaml1(t *testing.T) {
+func TestMapToObject1(t *testing.T) {
 	inner1 := map[string]interface{}{}
 	inner1["name"] = "inner_1"
 	inner1["age"] = 1
@@ -26,7 +26,7 @@ type ValueInnerEntity2 struct {
 	Inner1 ValueInnerEntity1
 }
 
-func TestObjectToYaml2(t *testing.T) {
+func TestMapToObject2(t *testing.T) {
 	inner1 := map[string]interface{}{}
 	inner1["name"] = "inner_1"
 	inner1["age"] = 1
@@ -47,7 +47,7 @@ type ValueInnerEntity3 struct {
 	Inner2 ValueInnerEntity2
 }
 
-func TestObjectToYaml3(t *testing.T) {
+func TestMapToObject3(t *testing.T) {
 	inner1 := map[string]interface{}{}
 	inner1["name"] = "inner_1"
 	inner1["age"] = 1
@@ -73,7 +73,7 @@ type ValueInnerEntity4 struct {
 	DataMap map[string]string
 }
 
-func TestObjectToYaml4(t *testing.T) {
+func TestMapToObject4(t *testing.T) {
 	kvMap := map[string]interface{}{}
 	kvMap["k1"] = "name1"
 	kvMap["k2"] = "name2"
@@ -94,7 +94,7 @@ type ValueInnerEntity5 struct {
 	DataMap map[string]ValueInnerEntity1
 }
 
-func TestObjectToYaml5(t *testing.T) {
+func TestMapToObject5(t *testing.T) {
 	v1 := map[string]interface{}{}
 	v1["name"] = "inner_1"
 	v1["age"] = 1
@@ -123,7 +123,7 @@ type ValueInnerEntity6 struct {
 	DataMap map[string][]int
 }
 
-func TestObjectToYaml6(t *testing.T) {
+func TestMapToObject6(t *testing.T) {
 	var dataList []int
 	dataList = append(dataList, 12)
 	dataList = append(dataList, 13)
@@ -148,7 +148,7 @@ type ValueInnerEntity7 struct {
 	DataMap map[string][]ValueInnerEntity1
 }
 
-func TestObjectToYaml7(t *testing.T) {
+func TestMapToObject7(t *testing.T) {
 	var dataList []ValueInnerEntity1
 	dataList = append(dataList, ValueInnerEntity1{Name: "name1", Age: 1})
 	dataList = append(dataList, ValueInnerEntity1{Name: "name2", Age: 2})
@@ -178,7 +178,7 @@ type ValueInnerEntity8 struct {
 	DataMap map[string][]ValueInnerEntity1Tem
 }
 
-func TestObjectToYaml8(t *testing.T) {
+func TestMapToObject8(t *testing.T) {
 	var dataList []ValueInnerEntity1
 	dataList = append(dataList, ValueInnerEntity1{Name: "name1", Age: 1})
 	dataList = append(dataList, ValueInnerEntity1{Name: "name2", Age: 2})
@@ -208,7 +208,41 @@ type ValueInnerEntity9 struct {
 	DataMap map[string][]ValueInnerEntity1
 }
 
-func TestObjectToYaml9(t *testing.T) {
+func TestMapToObject9(t *testing.T) {
+	var dataList []ValueInnerEntity9Tem
+	dataList = append(dataList, ValueInnerEntity9Tem{Name: "name1", Age: "1"})
+	dataList = append(dataList, ValueInnerEntity9Tem{Name: "name2", Age: "2"})
+
+	kvMap := map[string]interface{}{}
+	kvMap["k1"] = dataList
+	kvMap["k2"] = dataList
+
+	inner1 := map[string]interface{}{}
+	inner1["name"] = "inner_1"
+	inner1["age"] = 1
+	inner1["dataMap"] = kvMap
+
+	var targetObj ValueInnerEntity9
+	util.MapToObject(inner1, &targetObj)
+	Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}],\"k2\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}]}}", util.ToJsonString(targetObj))
+}
+
+type ConfigValueTypeEnum int
+
+const (
+	YAML       ConfigValueTypeEnum = 0
+	PROPERTIES ConfigValueTypeEnum = 1
+	JSON       ConfigValueTypeEnum = 2
+	STRING     ConfigValueTypeEnum = 3
+)
+
+type ValueInnerEntity10 struct {
+	Name    string
+	Age     ConfigValueTypeEnum
+	DataMap map[string][]ValueInnerEntity1
+}
+
+func TestMapToObject10(t *testing.T) {
 	var dataList []ValueInnerEntity9Tem
 	dataList = append(dataList, ValueInnerEntity9Tem{Name: "name1", Age: "1"})
 	dataList = append(dataList, ValueInnerEntity9Tem{Name: "name2", Age: "2"})

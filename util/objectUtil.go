@@ -257,25 +257,57 @@ func Cast(fieldKind reflect.Kind, valueStr string) (interface{}, error) {
 	case reflect.Int:
 		return strconv.Atoi(valueStr)
 	case reflect.Int8:
-		return strconv.ParseInt(valueStr, 10, 8)
+		v, err := strconv.ParseInt(valueStr, 10, 8)
+		if err != nil {
+			return nil, err
+		}
+		return int8(v), nil
 	case reflect.Int16:
-		return strconv.ParseInt(valueStr, 10, 16)
+		v, err := strconv.ParseInt(valueStr, 10, 16)
+		if err != nil {
+			return nil, err
+		}
+		return int16(v), nil
 	case reflect.Int32:
-		return strconv.ParseInt(valueStr, 10, 32)
+		v, err := strconv.ParseInt(valueStr, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		return int32(v), nil
 	case reflect.Int64:
 		return strconv.ParseInt(valueStr, 10, 64)
 	case reflect.Uint:
-		return strconv.ParseUint(valueStr, 10, 0)
+		v, err := strconv.ParseUint(valueStr, 10, 0)
+		if err != nil {
+			return nil, err
+		}
+		return uint(v), nil
 	case reflect.Uint8:
-		return strconv.ParseUint(valueStr, 10, 8)
+		v, err := strconv.ParseUint(valueStr, 10, 8)
+		if err != nil {
+			return nil, err
+		}
+		return uint8(v), nil
 	case reflect.Uint16:
-		return strconv.ParseUint(valueStr, 10, 16)
+		v, err := strconv.ParseUint(valueStr, 10, 16)
+		if err != nil {
+			return nil, err
+		}
+		return uint16(v), nil
 	case reflect.Uint32:
-		return strconv.ParseUint(valueStr, 10, 32)
+		v, err := strconv.ParseUint(valueStr, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		return uint32(v), nil
 	case reflect.Uint64:
 		return strconv.ParseUint(valueStr, 10, 64)
 	case reflect.Float32:
-		return strconv.ParseFloat(valueStr, 32)
+		v, err := strconv.ParseFloat(valueStr, 32)
+		if err != nil {
+			return nil, err
+		}
+		return float32(v), nil
 	case reflect.Float64:
 		return strconv.ParseFloat(valueStr, 64)
 	case reflect.Bool:
@@ -340,15 +372,15 @@ func doInvokeValue(fieldMapValue reflect.Value, field reflect.StructField, field
 		if targetValue.IsValid() {
 			if fieldValue.Kind() == reflect.Ptr {
 				if targetValue.Kind() == reflect.Ptr {
-					fieldValue.Elem().FieldByName(field.Name).Set(targetValue.Elem())
+					fieldValue.Elem().FieldByName(field.Name).Set(targetValue.Elem().Convert(field.Type))
 				} else {
-					fieldValue.Elem().FieldByName(field.Name).Set(targetValue)
+					fieldValue.Elem().FieldByName(field.Name).Set(targetValue.Convert(field.Type))
 				}
 			} else {
 				if targetValue.Kind() == reflect.Ptr {
-					fieldValue.Set(targetValue.Elem())
+					fieldValue.Set(targetValue.Elem().Convert(field.Type))
 				} else {
-					fieldValue.Set(targetValue)
+					fieldValue.Set(targetValue.Convert(field.Type))
 				}
 			}
 		}
@@ -427,19 +459,6 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 	return reflect.ValueOf(nil)
 }
 
-func getValueFromMap(dataMap map[string]interface{}, key string) (interface{}, bool) {
-	//val := dataMap.MapIndex(reflect.ValueOf(key))
-	//if val != nil {
-	//
-	//}
-	if v1, exits := dataMap[key]; exits {
-		return v1, true
-	} else if v2, exits := dataMap[ToLowerFirstPrefix(key)]; exits {
-		return v2, true
-	}
-	return nil, false
-}
-
 func getValueFromMapValue(keyValues reflect.Value, key string) (reflect.Value, bool) {
 	if keyValues.Kind() == reflect.Map {
 		if v1 := keyValues.MapIndex(reflect.ValueOf(key)); v1.IsValid() {
@@ -456,74 +475,6 @@ func getValueFromMapValue(keyValues reflect.Value, key string) (reflect.Value, b
 	}
 
 	return reflect.ValueOf(nil), false
-}
-
-func doMapToObject(dataMap map[string]interface{}, numField int, targetObj interface{}) {
-	targetType := reflect.TypeOf(targetObj)
-	targetValue := reflect.ValueOf(targetObj)
-
-	if targetType.Kind() != reflect.Ptr {
-		utilLog.Warn("targetObj type is not ptr")
-		return
-	}
-
-	targetTypeE := targetType.Elem()
-	if targetTypeE.Kind() == reflect.Ptr {
-		targetTypeE = targetType.Elem()
-	}
-
-	if targetTypeE.Kind() == reflect.Struct {
-		fmt.Println("hahaha")
-	}
-
-	for index, num := 0, numField; index < num; index++ {
-		field := targetTypeE.Field(index)
-		fieldValue := targetValue.Elem().Field(index)
-
-		// 私有字段不处理
-		if !isStartUpper(field.Name) {
-			continue
-		}
-
-		fieldKind := field.Type.Kind()
-
-		// 基本类型
-		if IsBaseType(field.Type) {
-			if v1, exits := dataMap[field.Name]; exits {
-				fieldValue.Set(reflect.ValueOf(v1))
-			} else if v2, exits := dataMap[ToLowerFirstPrefix(field.Name)]; exits {
-				fieldValue.Set(reflect.ValueOf(v2))
-			}
-		} else if fieldKind == reflect.Struct {
-			// 结构体类型
-			if v1, exits := dataMap[field.Name]; exits {
-				if reflect.TypeOf(v1).Kind() == reflect.Map {
-					fieldValueTem := reflect.New(field.Type)
-					fieldDataValue := fieldValueTem.Interface()
-					MapToObject(v1.(map[string]interface{}), &fieldDataValue)
-					fieldValue.Set(reflect.ValueOf(fieldDataValue))
-				}
-			} else if v2, exits := dataMap[ToLowerFirstPrefix(field.Name)]; exits {
-				if reflect.TypeOf(v2).Kind() == reflect.Map {
-					fieldValueTem := reflect.New(field.Type)
-					for index, num := 0, field.Type.NumField(); index < num; index++ {
-						fmt.Println("asdf")
-					}
-
-					fieldDataValue := fieldValueTem.Interface()
-					MapToObject(v2.(map[string]interface{}), &fieldDataValue)
-					fieldValue.Set(reflect.ValueOf(fieldDataValue))
-				}
-			}
-		} else if fieldKind == reflect.Map {
-			// map结构
-
-		} else if fieldKind == reflect.Array || fieldKind == reflect.Slice {
-			// 数组结构
-		} else {
-
-		}
-	}
 }
 
 // 判断首字母是否大写
