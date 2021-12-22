@@ -149,6 +149,17 @@ func YamlToPropertiesWithKey(key string, contentOfYaml string) (string, error) {
 	return propertiesAppendPrefixKey(key, property)
 }
 
+func JsonToMap(contentOfJson string) (map[string]interface{}, error) {
+	resultMap := make(map[string]interface{})
+	err := json.Unmarshal([]byte(contentOfJson), &resultMap)
+	if err != nil {
+		log.Fatalf("JsonToMap, error: %v, content: %v", err, contentOfJson)
+		return nil, err
+	}
+
+	return resultMap, nil
+}
+
 func YamlToMap(contentOfYaml string) (map[string]interface{}, error) {
 	resultMap := make(map[string]interface{})
 	err := yaml.Unmarshal([]byte(contentOfYaml), &resultMap)

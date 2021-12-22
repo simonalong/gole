@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/simonalong/tools/log"
+	"github.com/simonalong/tools/yaml"
 	"github.com/sirupsen/logrus"
+	"io"
+	"io/ioutil"
 	"reflect"
 	"strconv"
 	"strings"
@@ -273,14 +276,35 @@ func Cast(fieldKind reflect.Kind, valueStr string) (interface{}, error) {
 	return valueStr, nil
 }
 
-func MapToObject(dataMap map[string]interface{}, targetObj interface{}) {
-	targetType := reflect.TypeOf(targetObj)
-	if targetType.Kind() != reflect.Ptr {
-		utilLog.Warn("targetObj type is not ptr")
+func ReaderJsonToObject(reader io.Reader, targetPtrObj interface{}) {
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		if err != io.EOF {
+			fmt.Println("read error:", err)
+		}
+		panic(err)
+	}
+	JsonToObject(string(data), targetPtrObj)
+}
+
+func JsonToObject(jsonStr string, targetPtrObj interface{}) {
+	dataMap, err := yaml.JsonToMap(jsonStr)
+	if err != nil {
+		utilLog.Warn("JsonToObject is err: %v", err.Error())
 		return
 	}
 
-	targetValue := reflect.ValueOf(targetObj)
+	MapToObject(dataMap, targetPtrObj)
+}
+
+func MapToObject(dataMap map[string]interface{}, targetPtrObj interface{}) {
+	targetType := reflect.TypeOf(targetPtrObj)
+	if targetType.Kind() != reflect.Ptr {
+		utilLog.Warn("targetPtrObj type is not ptr")
+		return
+	}
+
+	targetValue := reflect.ValueOf(targetPtrObj)
 	for index, num := 0, targetType.Elem().NumField(); index < num; index++ {
 		field := targetType.Elem().Field(index)
 		fieldValue := targetValue.Elem().Field(index)
