@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"github.com/simonalong/tools/util"
 	"testing"
 )
@@ -195,5 +194,35 @@ func TestObjectToYaml8(t *testing.T) {
 
 	var targetObj ValueInnerEntity8
 	util.MapToObject(inner1, &targetObj)
-	fmt.Println(util.ToJsonString(targetObj))
+	Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":[{\"Name\":\"name1\",\"Address\":\"\"},{\"Name\":\"name2\",\"Address\":\"\"}],\"k2\":[{\"Name\":\"name1\",\"Address\":\"\"},{\"Name\":\"name2\",\"Address\":\"\"}]}}", util.ToJsonString(targetObj))
+}
+
+type ValueInnerEntity9Tem struct {
+	Name string
+	Age  string
+}
+
+type ValueInnerEntity9 struct {
+	Name    string
+	Age     int
+	DataMap map[string][]ValueInnerEntity1
+}
+
+func TestObjectToYaml9(t *testing.T) {
+	var dataList []ValueInnerEntity9Tem
+	dataList = append(dataList, ValueInnerEntity9Tem{Name: "name1", Age: "1"})
+	dataList = append(dataList, ValueInnerEntity9Tem{Name: "name2", Age: "2"})
+
+	kvMap := map[string]interface{}{}
+	kvMap["k1"] = dataList
+	kvMap["k2"] = dataList
+
+	inner1 := map[string]interface{}{}
+	inner1["name"] = "inner_1"
+	inner1["age"] = 1
+	inner1["dataMap"] = kvMap
+
+	var targetObj ValueInnerEntity9
+	util.MapToObject(inner1, &targetObj)
+	Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}],\"k2\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}]}}", util.ToJsonString(targetObj))
 }
