@@ -20,6 +20,14 @@ func init() {
 	utilLog = log.GetLogger("utilLog")
 }
 
+type ChangeError struct {
+	ErrMsg string
+}
+
+func (error *ChangeError) Error() string {
+	return error.ErrMsg
+}
+
 func ObjectToMap(data interface{}) map[string]interface{} {
 	if reflect.TypeOf(data).Kind() == reflect.Map {
 		resultMap := map[string]interface{}{}
@@ -276,32 +284,32 @@ func Cast(fieldKind reflect.Kind, valueStr string) (interface{}, error) {
 	return valueStr, nil
 }
 
-func ReaderJsonToObject(reader io.Reader, targetPtrObj interface{}) {
+func ReaderJsonToObject(reader io.Reader, targetPtrObj interface{}) error {
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		if err != io.EOF {
 			fmt.Println("read error:", err)
 		}
-		panic(err)
+		return err
 	}
-	JsonToObject(string(data), targetPtrObj)
+	return JsonToObject(string(data), targetPtrObj)
 }
 
-func JsonToObject(jsonStr string, targetPtrObj interface{}) {
+func JsonToObject(jsonStr string, targetPtrObj interface{}) error {
 	dataMap, err := yaml.JsonToMap(jsonStr)
 	if err != nil {
-		utilLog.Warn("JsonToObject is err: %v", err.Error())
-		return
+		utilLog.Warnf("JsonToObject is err: %v", err.Error())
+		return err
 	}
 
-	MapToObject(dataMap, targetPtrObj)
+	return MapToObject(dataMap, targetPtrObj)
 }
 
-func MapToObject(dataMap map[string]interface{}, targetPtrObj interface{}) {
+func MapToObject(dataMap map[string]interface{}, targetPtrObj interface{}) error {
 	targetType := reflect.TypeOf(targetPtrObj)
 	if targetType.Kind() != reflect.Ptr {
 		utilLog.Warn("targetPtrObj type is not ptr")
-		return
+		return &ChangeError{ErrMsg: "targetPtrObj type is not ptr"}
 	}
 
 	targetValue := reflect.ValueOf(targetPtrObj)
@@ -311,6 +319,7 @@ func MapToObject(dataMap map[string]interface{}, targetPtrObj interface{}) {
 
 		doInvokeValue(reflect.ValueOf(dataMap), field, fieldValue)
 	}
+	return nil
 }
 
 func doInvokeValue(fieldMapValue reflect.Value, field reflect.StructField, fieldValue reflect.Value) {
