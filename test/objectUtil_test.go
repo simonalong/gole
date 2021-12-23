@@ -13,8 +13,6 @@ import (
 // dataToObject：这个是总况
 //
 // objectToJson
-// objectToMap
-// objectToArray
 // objectToData：这个是总的
 
 // mapToObject

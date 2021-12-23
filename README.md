@@ -125,10 +125,14 @@ type AppManagerUpdateReq struct {
 ```
 为了去掉后面的json，这里做了反解析化工具。提供三个api进行转换
 ```go
-// MapToObject：         map         ——> 对象
-// JsonToObject：        jsonStr     ——> 对象
-// ReaderJsonToObject：  io.Reader   ——> 对象
-// ObjectToJson：        对象         ——> jsonStr
+// MapToObject              map         ——> 对象
+// ArrayToObject            array       ——> 对象
+// StrToObject              字符         ——> 对象
+// ReaderJsonToObject       io.Reader   ——> 对象
+// DataToObject：这个是总况   总数据       ——> 对象
+//
+// ObjectToJson             对象         ——>json字符
+// ObjectToData：这个是总的   对象         ——>转换后的对象
 ```
 #### 提示：
 这里的转换支持如下三种特性
