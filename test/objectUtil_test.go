@@ -526,6 +526,20 @@ func TestStrToObject7(t *testing.T) {
 	Equal(t, util.ObjectToJson(targetObj), "[{\"age\":12,\"name\":\"\"},{\"age\":14,\"name\":\"\"}]")
 }
 
+type ValueInnerEntityStr1 struct {
+	//Name    string
+	//Age     int
+	DataMap interface{}
+}
+
+func TestStrToObject8(t *testing.T) {
+	str := "{\"dataMap\":{\"haha\":12,\"innerKey\":\"ok\"}}"
+
+	var targetObj ValueInnerEntityStr1
+	_ = util.StrToObject(str, &targetObj)
+	Equal(t, util.ObjectToJson(targetObj), str)
+}
+
 // arrayToObject
 func TestArrayToObject1(t *testing.T) {
 	var dstValues []ValueInnerEntity1

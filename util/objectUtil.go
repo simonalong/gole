@@ -702,6 +702,8 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 				return reflect.ValueOf(v)
 			}
 		}
+	} else if dstType.Kind() == reflect.Interface {
+		return reflect.ValueOf(ObjectToData(srcValue.Interface()))
 	} else {
 		v, err := Cast(dstType.Kind(), fmt.Sprintf("%v", srcValue.Interface()))
 		if err == nil {
