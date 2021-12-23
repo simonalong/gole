@@ -137,7 +137,7 @@ type AppManagerUpdateReq struct {
 - 自定义类型：比如自定义类型`type myType int8` 这种类型修饰的也可以转换
 
 ### 举例
-#### 1. 无`json:"xxx"`解析到对象
+#### 1. 无`json:"xxx"`解析：json到对象
 ```go
 type ValueInnerEntityT struct {
     AppName string
@@ -161,16 +161,6 @@ type ValueInnerEntity1 struct {
     Age  int
 }
 
-func TestMapToObject1(t *testing.T) {
-    inner1 := map[string]interface{}{}
-    inner1["name"] = "inner_1"
-    inner1["age"] = 1
-
-    var targetObj ValueInnerEntity1
-    util.MapToObject(inner1, &targetObj)
-    Equal(t, "{\"Name\":\"inner_1\",\"Age\":1}", util.ToJsonString(targetObj))
-}
-
 type ValueInnerEntity2 struct {
     Name   string
     Age    int
@@ -192,7 +182,7 @@ func TestMapToObject2(t *testing.T) {
     Equal(t, "{\"Name\":\"inner_2\",\"Age\":2,\"Inner1\":{\"Name\":\"inner_1\",\"Age\":1}}", util.ToJsonString(targetObj))
 }
 ```
-#### 2. 无`json:"xxx"`解析
+#### 2. 无`json:"xxx"`解析：对象到json
 ```go
 type ValueObjectTest1 struct {
     AppName string
