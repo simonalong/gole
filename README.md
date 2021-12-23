@@ -3,11 +3,11 @@ tools是go代码写的的个人工具包。
 
 目前有以下功能
 - yaml、properties、json、map互转的工具
-- http的简单封装工具  
+- http的简单封装工具
 - 日志的工具封装
 - web返回值的异常打印
 - interface转换具体类型工具
-- json转object工具
+- json转object工具：省去`json:"xxx"`
 - 其他的一些简单工具
 
 ## 1. yaml功能
