@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/simonalong/tools/log"
-	"github.com/simonalong/tools/yaml"
 	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
@@ -399,9 +398,45 @@ func Cast(fieldKind reflect.Kind, valueStr string) (interface{}, error) {
 	return valueStr, nil
 }
 
-func ReaderJsonToObject(reader io.Reader, targetPtrObj interface{}) error {
+func DataToObject(data interface{}, targetPtrObj interface{}) error {
+	if data == nil {
+		utilLog.Warn("data is nil")
+		return nil
+	}
+	targetType := reflect.TypeOf(targetPtrObj)
+	if targetType.Kind() != reflect.Ptr {
+		utilLog.Warn("targetPtrObj type is not ptr")
+		return &ChangeError{ErrMsg: "targetPtrObj type is not ptr"}
+	}
+
+	switch data.(type) {
+	case io.Reader:
+		return ReaderToObject(data.(io.Reader), targetPtrObj)
+	case string:
+		return StrToObject(data.(string), targetPtrObj)
+	case map[string]interface{}:
+		return MapToObject(data.(map[string]interface{}), targetPtrObj)
+	case []interface{}:
+		return ArrayToObject(data.([]interface{}), targetPtrObj)
+	}
+
+	targetPtrValue := reflect.ValueOf(targetPtrObj)
+	rel, err := Cast(targetPtrValue.Elem().Kind(), fmt.Sprintf("%v", data))
+	if err != nil {
+		return err
+	}
+	targetPtrValue.Elem().Set(reflect.ValueOf(rel))
+	return nil
+}
+
+func ReaderToObject(reader io.Reader, targetPtrObj interface{}) error {
 	if reader == nil {
 		return nil
+	}
+	targetType := reflect.TypeOf(targetPtrObj)
+	if targetType.Kind() != reflect.Ptr {
+		utilLog.Warn("targetPtrObj type is not ptr")
+		return &ChangeError{ErrMsg: "targetPtrObj type is not ptr"}
 	}
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
@@ -410,23 +445,100 @@ func ReaderJsonToObject(reader io.Reader, targetPtrObj interface{}) error {
 		}
 		return err
 	}
-	return JsonToObject(string(data), targetPtrObj)
+	return StrToObject(string(data), targetPtrObj)
 }
 
-func JsonToObject(jsonStr string, targetPtrObj interface{}) error {
-	if jsonStr == "" {
+func StrToObject(contentOfJson string, targetPtrObj interface{}) error {
+	if contentOfJson == "" {
+		return &ChangeError{ErrMsg: "content is nil"}
+	}
+
+	targetType := reflect.TypeOf(targetPtrObj)
+	if targetType.Kind() != reflect.Ptr {
+		utilLog.Warn("targetPtrObj type is not ptr")
+		return &ChangeError{ErrMsg: "targetPtrObj type is not ptr"}
+	}
+
+	if !strings.HasPrefix(contentOfJson, "{") && !strings.HasPrefix(contentOfJson, "[") {
+		targetPtrValue := reflect.ValueOf(targetPtrObj)
+		rel, err := Cast(targetPtrValue.Elem().Kind(), contentOfJson)
+		if err != nil {
+			return err
+		}
+		targetPtrValue.Elem().Set(reflect.ValueOf(rel))
+	}
+
+	if strings.HasPrefix(contentOfJson, "{") && (reflect.ValueOf(targetPtrObj).Elem().Kind() == reflect.Map || reflect.ValueOf(targetPtrObj).Elem().Kind() == reflect.Struct) {
+		resultMap := make(map[string]interface{})
+		err := json.Unmarshal([]byte(contentOfJson), &resultMap)
+		if err != nil {
+			return err
+		}
+		return MapToObject(resultMap, targetPtrObj)
+	} else if strings.HasPrefix(contentOfJson, "[") && (reflect.ValueOf(targetPtrObj).Elem().Kind() == reflect.Slice || reflect.ValueOf(targetPtrObj).Elem().Kind() == reflect.Array) {
+		var srcArray []interface{}
+		err := json.Unmarshal([]byte(contentOfJson), &srcArray)
+		if err != nil {
+			return err
+		}
+		return ArrayToObject(srcArray, targetPtrObj)
+	} else {
+		targetPtrValue := reflect.ValueOf(targetPtrObj)
+		rel, err := Cast(targetPtrValue.Elem().Kind(), contentOfJson)
+		if err != nil {
+			return err
+		}
+		targetPtrValue.Elem().Set(reflect.ValueOf(rel))
 		return nil
 	}
-	dataMap, err := yaml.JsonToMap(jsonStr)
-	if err != nil {
-		utilLog.Warnf("JsonToObject is err: %v", err.Error())
-		return err
-	}
-
-	return MapToObject(dataMap, targetPtrObj)
 }
 
-func MapToObject(dataMap map[string]interface{}, targetPtrObj interface{}) error {
+func ArrayToObject(dataArray interface{}, targetPtrObj interface{}) error {
+	if dataArray == nil {
+		return nil
+	}
+
+	if reflect.ValueOf(dataArray).Kind() != reflect.Array && reflect.ValueOf(dataArray).Kind() != reflect.Slice {
+		return &ChangeError{ErrMsg: "dataArray is array type"}
+	}
+
+	targetType := reflect.TypeOf(targetPtrObj)
+	if targetType.Kind() != reflect.Ptr {
+		utilLog.Warn("targetPtrObj type is not ptr")
+		return &ChangeError{ErrMsg: "targetPtrObj type is not ptr"}
+	}
+
+	if targetType.Elem().Kind() != reflect.Slice && targetType.Elem().Kind() != reflect.Array {
+		utilLog.Warn("item of targetPtrObj type is not slice")
+		return &ChangeError{ErrMsg: "item of targetPtrObj type is not slice"}
+	}
+
+	srcValue := reflect.ValueOf(dataArray)
+	dstPtrValue := reflect.ValueOf(targetPtrObj)
+
+	dstPrtType := reflect.TypeOf(targetPtrObj)
+	dstType := dstPrtType.Elem()
+	dstItemType := dstType.Elem()
+
+	dstValue := reflect.MakeSlice(dstType, 0, 0)
+
+	fmt.Println(dstItemType.String())
+	for arrayIndex := 0; arrayIndex < srcValue.Len(); arrayIndex++ {
+		fmt.Println(srcValue.Index(arrayIndex))
+		dataV := valueToTarget(srcValue.Index(arrayIndex), dstItemType)
+		if dataV.IsValid() {
+			if dataV.Kind() == reflect.Ptr {
+				dstValue = reflect.Append(dstValue, dataV.Elem())
+			} else {
+				dstValue = reflect.Append(dstValue, dataV)
+			}
+		}
+	}
+	dstPtrValue.Elem().Set(dstValue)
+	return nil
+}
+
+func MapToObject(dataMap interface{}, targetPtrObj interface{}) error {
 	if dataMap == nil {
 		return nil
 	}
@@ -436,19 +548,49 @@ func MapToObject(dataMap map[string]interface{}, targetPtrObj interface{}) error
 		return &ChangeError{ErrMsg: "targetPtrObj type is not ptr"}
 	}
 
-	targetValue := reflect.ValueOf(targetPtrObj)
-	for index, num := 0, targetType.Elem().NumField(); index < num; index++ {
-		field := targetType.Elem().Field(index)
-		fieldValue := targetValue.Elem().Field(index)
+	if targetType.Elem().Kind() != reflect.Map && targetType.Elem().Kind() != reflect.Struct {
+		utilLog.Warn("item of targetPtrObj type is not Map or Struct")
+		return &ChangeError{ErrMsg: "item of targetPtrObj type is not slice"}
+	}
 
-		doInvokeValue(reflect.ValueOf(dataMap), field, fieldValue)
+	if targetType.Elem().Kind() == reflect.Map {
+		srcValue := reflect.ValueOf(dataMap)
+		dstValue := reflect.ValueOf(targetPtrObj)
+
+		dstPtrType := reflect.TypeOf(targetPtrObj)
+		dstType := dstPtrType.Elem()
+
+		mapFieldValue := reflect.MakeMap(dstType)
+		for mapR := srcValue.MapRange(); mapR.Next(); {
+			mapKey := mapR.Key()
+			mapValue := mapR.Value()
+
+			mapKeyRealValue, err := Cast(mapFieldValue.Type().Key().Kind(), fmt.Sprintf("%v", mapKey.Interface()))
+			mapValueRealValue := valueToTarget(mapValue, mapFieldValue.Type().Elem())
+			if err == nil {
+				if mapValueRealValue.Kind() == reflect.Ptr {
+					mapFieldValue.SetMapIndex(reflect.ValueOf(mapKeyRealValue), mapValueRealValue.Elem())
+				} else {
+					mapFieldValue.SetMapIndex(reflect.ValueOf(mapKeyRealValue), mapValueRealValue)
+				}
+			}
+		}
+		dstValue.Elem().Set(mapFieldValue)
+	} else {
+		targetValue := reflect.ValueOf(targetPtrObj)
+		for index, num := 0, targetType.Elem().NumField(); index < num; index++ {
+			field := targetType.Elem().Field(index)
+			fieldValue := targetValue.Elem().Field(index)
+
+			doInvokeValue(reflect.ValueOf(dataMap), field, fieldValue)
+		}
 	}
 	return nil
 }
 
 func doInvokeValue(fieldMapValue reflect.Value, field reflect.StructField, fieldValue reflect.Value) {
 	// 私有字段不处理
-	if !isStartUpper(field.Name) {
+	if IsPrivate(field.Name) {
 		return
 	}
 
@@ -517,6 +659,21 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 				}
 			}
 			return mapFieldValue
+		} else if sourceValue.Kind() == reflect.Struct {
+			srcType := reflect.TypeOf(sourceValue)
+			srcValue := reflect.ValueOf(sourceValue)
+			mapFieldValue := reflect.MakeMap(dstType)
+
+			for index, num := 0, srcType.NumField(); index < num; index++ {
+				field := srcType.Field(index)
+				fieldValue := srcValue.Field(index)
+
+				mapValueRealValue := ObjectToData(fieldValue.Interface())
+				mapFieldValue.SetMapIndex(reflect.ValueOf(ToLowerFirstPrefix(field.Name)), reflect.ValueOf(mapValueRealValue))
+
+				doInvokeValue(sourceValue, field, fieldValue)
+			}
+			return mapFieldValue
 		}
 	} else if dstType.Kind() == reflect.Slice || dstType.Kind() == reflect.Array {
 		if srcValue.Kind() == reflect.Ptr {
@@ -546,13 +703,16 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 			}
 		}
 	} else {
-		return reflect.ValueOf(nil)
+		v, err := Cast(dstType.Kind(), fmt.Sprintf("%v", srcValue.Interface()))
+		if err == nil {
+			return reflect.ValueOf(v)
+		}
 	}
 	return reflect.ValueOf(nil)
 }
 
-// ObjectToLower 字段转化，其中map对应的key为小写
-func ObjectToLower(object interface{}) interface{} {
+// ObjectToData 字段转化，其中对应字段为小写，map的话为小写
+func ObjectToData(object interface{}) interface{} {
 	if object == nil || reflect.ValueOf(object).Kind() == reflect.Ptr {
 		return "{}"
 	}
@@ -575,7 +735,7 @@ func ObjectToLower(object interface{}) interface{} {
 			mapKey := mapR.Key()
 			mapValue := mapR.Value()
 
-			v := doObjectChange(reflect.TypeOf(mapValue.Interface()).Kind(), mapValue.Interface())
+			v := doObjectChange(reflect.TypeOf(mapValue.Interface()), mapValue.Interface())
 			if v != nil {
 				resultMap[ToLowerFirstPrefix(ToString(mapKey.Interface()))] = v
 			}
@@ -591,10 +751,10 @@ func ObjectToLower(object interface{}) interface{} {
 			fieldValue := objValue.Field(index)
 
 			// 私有字段不处理
-			if !isStartUpper(field.Name) {
+			if IsPrivate(field.Name) {
 				continue
 			}
-			v := doObjectChange(reflect.TypeOf(fieldValue.Interface()).Kind(), fieldValue.Interface())
+			v := doObjectChange(reflect.TypeOf(fieldValue.Interface()), fieldValue.Interface())
 			if v != nil {
 				resultMap[ToLowerFirstPrefix(field.Name)] = v
 			}
@@ -607,7 +767,7 @@ func ObjectToLower(object interface{}) interface{} {
 		for index := 0; index < objValue.Len(); index++ {
 			arrayItemValue := objValue.Index(index)
 
-			v := doObjectChange(reflect.TypeOf(object).Elem().Kind(), arrayItemValue)
+			v := doObjectChange(reflect.TypeOf(object).Elem(), arrayItemValue.Interface())
 			if v != nil {
 				resultSlice = append(resultSlice, v)
 			}
@@ -642,7 +802,7 @@ func ObjectToJson(object interface{}) string {
 			mapKey := mapR.Key()
 			mapValue := mapR.Value()
 
-			v := doObjectChange(reflect.TypeOf(mapValue.Interface()).Kind(), mapValue.Interface())
+			v := doObjectChange(reflect.TypeOf(mapValue.Interface()), mapValue.Interface())
 			if v != nil {
 				resultMap[ToLowerFirstPrefix(ToString(mapKey.Interface()))] = v
 			}
@@ -658,10 +818,10 @@ func ObjectToJson(object interface{}) string {
 			fieldValue := objValue.Field(index)
 
 			// 私有字段不处理
-			if !isStartUpper(field.Name) {
+			if IsPrivate(field.Name) {
 				continue
 			}
-			v := doObjectChange(reflect.TypeOf(fieldValue.Interface()).Kind(), fieldValue.Interface())
+			v := doObjectChange(reflect.TypeOf(fieldValue.Interface()), fieldValue.Interface())
 			if v != nil {
 				resultMap[ToLowerFirstPrefix(field.Name)] = v
 			}
@@ -674,7 +834,7 @@ func ObjectToJson(object interface{}) string {
 		for index := 0; index < objValue.Len(); index++ {
 			arrayItemValue := objValue.Index(index)
 
-			v := doObjectChange(reflect.TypeOf(object).Elem().Kind(), arrayItemValue)
+			v := doObjectChange(reflect.TypeOf(object).Elem(), arrayItemValue.Interface())
 			if v != nil {
 				resultSlice = append(resultSlice, v)
 			}
@@ -695,9 +855,8 @@ func ObjectToJson(object interface{}) string {
 // 集合/分片类型 		-> [xx]；其中xx对应的类型集合中的对象再次进行转换
 // 结构体 			-> 转换为map
 // map 				-> 转换为map
-func doObjectChange(objKind reflect.Kind, object interface{}) interface{} {
-
-	//objKind := reflect.TypeOf(object).Kind()
+func doObjectChange(objType reflect.Type, object interface{}) interface{} {
+	objKind := objType.Kind()
 	if objKind == reflect.Ptr {
 		return nil
 	}
@@ -721,7 +880,7 @@ func doObjectChange(objKind reflect.Kind, object interface{}) interface{} {
 		for index := 0; index < objValue.Len(); index++ {
 			arrayItemValue := objValue.Index(index)
 
-			v := doObjectChange(reflect.TypeOf(object).Elem().Kind(), arrayItemValue)
+			v := doObjectChange(reflect.TypeOf(object).Elem(), arrayItemValue)
 			if v != nil {
 				resultSlice = append(resultSlice, v)
 			}
@@ -736,10 +895,10 @@ func doObjectChange(objKind reflect.Kind, object interface{}) interface{} {
 			fieldValue := objValue.Field(index)
 
 			// 私有字段不处理
-			if !isStartUpper(field.Name) {
+			if IsPrivate(field.Name) {
 				continue
 			}
-			v := doObjectChange(reflect.TypeOf(fieldValue.Interface()).Kind(), fieldValue.Interface())
+			v := doObjectChange(reflect.TypeOf(fieldValue.Interface()), fieldValue.Interface())
 			if v != nil {
 				resultMap[ToLowerFirstPrefix(field.Name)] = v
 			}
@@ -749,19 +908,21 @@ func doObjectChange(objKind reflect.Kind, object interface{}) interface{} {
 		resultMap := map[string]interface{}{}
 		objValue := reflect.ValueOf(object)
 		if objValue.Len() == 0 {
-			return resultMap
+			return nil
 		}
 
 		for mapR := objValue.MapRange(); mapR.Next(); {
 			mapKey := mapR.Key()
 			mapValue := mapR.Value()
 
-			v := doObjectChange(reflect.TypeOf(mapValue.Interface()).Kind(), mapValue.Interface())
+			v := doObjectChange(reflect.TypeOf(mapValue.Interface()), mapValue.Interface())
 			if v != nil {
 				resultMap[ToLowerFirstPrefix(ToString(mapKey.Interface()))] = v
 			}
 		}
 		return resultMap
+	} else if objKind == reflect.Interface {
+		return ObjectToData(object)
 	}
 	return nil
 }
@@ -784,9 +945,22 @@ func getValueFromMapValue(keyValues reflect.Value, key string) (reflect.Value, b
 	return reflect.ValueOf(nil), false
 }
 
+func IsPublic(s string) bool {
+	return isStartUpper(s)
+}
+
+func IsPrivate(s string) bool {
+	return isStartLower(s)
+}
+
 // 判断首字母是否大写
 func isStartUpper(s string) bool {
 	return unicode.IsUpper([]rune(s)[0])
+}
+
+// 判断首字母是否小写
+func isStartLower(s string) bool {
+	return unicode.IsLower([]rune(s)[0])
 }
 
 // ToLowerFirstPrefix 首字母小写

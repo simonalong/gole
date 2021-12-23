@@ -3,6 +3,7 @@ package yaml
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/simonalong/tools/util"
 	"gopkg.in/yaml.v2"
 	"log"
 	"reflect"
@@ -150,6 +151,9 @@ func YamlToPropertiesWithKey(key string, contentOfYaml string) (string, error) {
 }
 
 func JsonToMap(contentOfJson string) (map[string]interface{}, error) {
+	if contentOfJson == "" || strings.HasPrefix(contentOfJson, "{") || strings.HasPrefix(contentOfJson, "[") {
+		return nil, &util.ChangeError{ErrMsg: "不符合json格式"}
+	}
 	resultMap := make(map[string]interface{})
 	err := json.Unmarshal([]byte(contentOfJson), &resultMap)
 	if err != nil {
