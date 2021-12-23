@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"github.com/simonalong/tools/util"
 	"testing"
 )
@@ -705,6 +706,26 @@ func TestObjectToJson8(t *testing.T) {
 	act = append(act, map1)
 	act = append(act, map2)
 	Equal(t, util.ObjectToJson(act), "[{\"age\":1,\"name\":\"zhou1\"},{\"age\":2,\"name\":\"zhou2\"}]")
+}
+
+type PageRsp struct {
+
+	// 分页数据
+	Records []interface{}
+}
+
+func TestObjectToJson9(t *testing.T) {
+	rel := "{\"Records\":[{\"Id\":121,\"AppName\":\"asdf\",\"AppDesc\":\"fffds\",\"ActiveStatus\":1,\"CreateTime\":\"2021-12-20 14:05:10 +0800 CST\",\"UpdateTime\":\"2021-12-21 14:19:13 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":0,\"Version\":0},{\"Id\":117,\"AppName\":\"isc-apaas-service\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-12-06 10:32:11 +0800 CST\",\"UpdateTime\":\"2021-12-06 10:32:11 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":10,\"Version\":0},{\"Id\":116,\"AppName\":\"isc-config-sample-3\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-11-05 19:35:07 +0800 CST\",\"UpdateTime\":\"2021-11-05 19:35:07 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":4,\"Version\":0},{\"Id\":115,\"AppName\":\"isc-config-sample-2\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-11-05 19:27:55 +0800 CST\",\"UpdateTime\":\"2021-11-05 19:27:55 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":4,\"Version\":0},{\"Id\":113,\"AppName\":\"isc-config-sample1\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-11-05 19:21:18 +0800 CST\",\"UpdateTime\":\"2021-11-05 19:21:18 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":0,\"Version\":0},{\"Id\":112,\"AppName\":\"app-demo-xxx\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-28 14:29:46 +0800 CST\",\"UpdateTime\":\"2021-09-28 14:29:46 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":3,\"Version\":25},{\"Id\":84,\"AppName\":\"isc-config-sample3\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-22 13:46:36 +0800 CST\",\"UpdateTime\":\"2021-09-22 13:46:36 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":2,\"Version\":23},{\"Id\":83,\"AppName\":\"isc-config-sample-local\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-22 11:22:12 +0800 CST\",\"UpdateTime\":\"2021-09-22 11:22:12 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":29,\"Version\":22},{\"Id\":82,\"AppName\":\"isc-monitoring-service2\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-18 11:47:50 +0800 CST\",\"UpdateTime\":\"2021-09-18 11:47:50 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":15,\"Version\":0},{\"Id\":81,\"AppName\":\"isc-monitoring-service1\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-11 18:02:25 +0800 CST\",\"UpdateTime\":\"2021-09-11 18:02:25 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":15,\"Version\":21},{\"Id\":80,\"AppName\":\"lamp-demo-a\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-10 17:21:40 +0800 CST\",\"UpdateTime\":\"2021-09-10 17:28:18 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":1,\"Version\":20},{\"Id\":79,\"AppName\":\"pivotdemoa\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-10 17:17:33 +0800 CST\",\"UpdateTime\":\"2021-09-10 17:17:33 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":1,\"Version\":19},{\"Id\":78,\"AppName\":\"isc-config-sample2\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-09 16:16:55 +0800 CST\",\"UpdateTime\":\"2021-09-09 16:16:55 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":25,\"Version\":18},{\"Id\":77,\"AppName\":\"isc-config-sample-client\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-09 13:40:10 +0800 CST\",\"UpdateTime\":\"2021-09-09 13:40:10 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":25,\"Version\":17},{\"Id\":76,\"AppName\":\"isc-pivot-client\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-08-30 17:53:10 +0800 CST\",\"UpdateTime\":\"2021-08-31 10:08:53 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":2,\"Version\":16},{\"Id\":74,\"AppName\":\"isc-rpc-3-os0\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-08-30 17:52:17 +0800 CST\",\"UpdateTime\":\"2021-08-30 17:52:17 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":25,\"Version\":14},{\"Id\":73,\"AppName\":\"isc-rpc-os0\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-07-06 15:23:25 +0800 CST\",\"UpdateTime\":\"2021-07-06 15:23:25 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":25,\"Version\":13},{\"Id\":71,\"AppName\":\"isc-common-service-test\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-06-21 21:50:24 +0800 CST\",\"UpdateTime\":\"2021-06-21 21:50:24 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":63,\"Version\":11},{\"Id\":70,\"AppName\":\"isc-config-sample\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-06-21 15:33:39 +0800 CST\",\"UpdateTime\":\"2021-06-21 15:33:39 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":30,\"Version\":10},{\"Id\":68,\"AppName\":\"isc-route-service1\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-06-09 16:00:38 +0800 CST\",\"UpdateTime\":\"2021-06-09 16:00:38 +0800 CST\",\"CreateUser\":\"admin\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":1,\"Version\":8}]}\n"
+
+	rp := PageRsp{}
+	util.DataToObject(rel, &rp)
+
+	fmt.Println(util.ToJsonString(rp))
+
+	result := util.ObjectToData(rp)
+	fmt.Println(util.ToJsonString(result))
+
+	//Equal(t, util.ObjectToJson(act), "[{\"age\":1,\"name\":\"zhou1\"},{\"age\":2,\"name\":\"zhou2\"}]")
 }
 
 // objectToMap

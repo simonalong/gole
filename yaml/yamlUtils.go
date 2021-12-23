@@ -366,7 +366,7 @@ func MapToProperties(dataMap map[string]interface{}) (string, error) {
 			{
 				objectValue := reflect.ValueOf(value)
 				for index := 0; index < objectValue.Len(); index++ {
-					propertyStrList = doMapToProperties(propertyStrList, objectValue.Index(index), prefixWithDOT("")+key+"["+strconv.Itoa(index)+"]")
+					propertyStrList = doMapToProperties(propertyStrList, objectValue.Index(index).Interface(), prefixWithDOT("")+key+"["+strconv.Itoa(index)+"]")
 				}
 			}
 		case reflect.String:

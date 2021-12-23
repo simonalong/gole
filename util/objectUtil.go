@@ -882,7 +882,7 @@ func doObjectChange(objType reflect.Type, object interface{}) interface{} {
 		for index := 0; index < objValue.Len(); index++ {
 			arrayItemValue := objValue.Index(index)
 
-			v := doObjectChange(reflect.TypeOf(object).Elem(), arrayItemValue)
+			v := doObjectChange(reflect.TypeOf(object).Elem(), arrayItemValue.Interface())
 			if v != nil {
 				resultSlice = append(resultSlice, v)
 			}
