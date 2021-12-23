@@ -551,6 +551,72 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 	return reflect.ValueOf(nil)
 }
 
+// ObjectToLower 字段转化，其中map对应的key为小写
+func ObjectToLower(object interface{}) interface{} {
+	if object == nil || reflect.ValueOf(object).Kind() == reflect.Ptr {
+		return "{}"
+	}
+
+	// 只接收 map、struct、array、slice进行解析
+	objKind := reflect.ValueOf(object).Kind()
+	if objKind != reflect.Map && objKind != reflect.Struct && objKind != reflect.Array && objKind != reflect.Slice {
+		return object
+	}
+
+	if objKind == reflect.Map {
+		// Map 结构
+		resultMap := map[string]interface{}{}
+		objValue := reflect.ValueOf(object)
+		if objValue.Len() == 0 {
+			return "{}"
+		}
+
+		for mapR := objValue.MapRange(); mapR.Next(); {
+			mapKey := mapR.Key()
+			mapValue := mapR.Value()
+
+			v := doObjectChange(reflect.TypeOf(mapValue.Interface()).Kind(), mapValue.Interface())
+			if v != nil {
+				resultMap[ToLowerFirstPrefix(ToString(mapKey.Interface()))] = v
+			}
+		}
+		return resultMap
+	} else if objKind == reflect.Struct {
+		// Struct 结构
+		resultMap := map[string]interface{}{}
+		objValue := reflect.ValueOf(object)
+		objType := objValue.Type()
+		for index, num := 0, objType.NumField(); index < num; index++ {
+			field := objType.Field(index)
+			fieldValue := objValue.Field(index)
+
+			// 私有字段不处理
+			if !isStartUpper(field.Name) {
+				continue
+			}
+			v := doObjectChange(reflect.TypeOf(fieldValue.Interface()).Kind(), fieldValue.Interface())
+			if v != nil {
+				resultMap[ToLowerFirstPrefix(field.Name)] = v
+			}
+		}
+		return resultMap
+	} else if objKind == reflect.Array || objKind == reflect.Slice {
+		// Array 结构
+		var resultSlice []interface{}
+		objValue := reflect.ValueOf(object)
+		for index := 0; index < objValue.Len(); index++ {
+			arrayItemValue := objValue.Index(index)
+
+			v := doObjectChange(reflect.TypeOf(object).Elem().Kind(), arrayItemValue)
+			if v != nil {
+				resultSlice = append(resultSlice, v)
+			}
+		}
+		return resultSlice
+	}
+	return nil
+}
+
 // ObjectToJson 对象转化为json，其中map对应的key为小写
 func ObjectToJson(object interface{}) string {
 	if object == nil || reflect.ValueOf(object).Kind() == reflect.Ptr {
