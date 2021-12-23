@@ -398,7 +398,7 @@ func Cast(fieldKind reflect.Kind, valueStr string) (interface{}, error) {
 	return valueStr, nil
 }
 
-// 其他的类型能够按照小写字母转换到对象
+// DataToObject 其他的类型能够按照小写字母转换到对象
 // 其他类型：
 //  - 基本类型
 //  - 结构体类型：转换后对象
