@@ -398,6 +398,13 @@ func Cast(fieldKind reflect.Kind, valueStr string) (interface{}, error) {
 	return valueStr, nil
 }
 
+// 其他的类型能够按照小写字母转换到对象
+// 其他类型：
+//  - 基本类型
+//  - 结构体类型：转换后对象
+//  - map类型
+//  - 集合/分片类型
+//  - 字符串类型：如果是json，则按照json进行转换
 func DataToObject(data interface{}, targetPtrObj interface{}) error {
 	if data == nil {
 		utilLog.Warn("data is nil")
