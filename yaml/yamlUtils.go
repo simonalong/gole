@@ -126,7 +126,7 @@ func YamlToPropertiesWithKey(key string, contentOfYaml string) (string, error) {
 
 	contentOfYaml = strings.TrimSpace(contentOfYaml)
 	if strings.HasPrefix(contentOfYaml, "-") {
-		var dataMap map[string]interface{}
+		dataMap := map[string]interface{}{}
 		kvList, err := YamlToList(contentOfYaml)
 		if err != nil {
 			log.Fatalf("YamlToPropertiesWithKey error: %v, content: %v", err, contentOfYaml)
