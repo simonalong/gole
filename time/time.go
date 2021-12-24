@@ -21,7 +21,7 @@ var (
 	y         = "2006"
 	yyyyMMdd  = "20060102"
 
-	HmsSSSMore = "15:04:05.SSSSSSSSS"
+	HmsSSSMore = "15:04:05.000000000"
 	HmsSSS     = "15:04:05.000"
 	Hms        = "15:04:05"
 	Hm         = "15:04"
