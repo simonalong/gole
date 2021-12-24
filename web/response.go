@@ -66,7 +66,7 @@ func ResponseHandler() gin.HandlerFunc {
 					return
 				}
 				if response.Code != 0 && response.Code != 200 && response.Code != "200" && response.Code != "success" {
-					logger.WithFields(logrus.Fields{"code": statusCode, "method": reqMethod, "uri": reqUri, "costTime": costTime, "ip": clientIP, "errMsg": response.Message}).Error("请求异常")
+					logger.WithFields(logrus.Fields{"code": response.Code, "method": reqMethod, "uri": reqUri, "costTime": costTime, "ip": clientIP, "errMsg": response.Message}).Error("请求异常")
 				}
 			}
 		}

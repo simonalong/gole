@@ -205,7 +205,7 @@ func YamlToKvList(contentOfYaml string) ([]StringPair, error) {
 	}
 
 	propertiesLineWordList := GetPropertiesItemLineList(property)
-	pairs := []StringPair{}
+	var pairs []StringPair
 	for _, element := range propertiesLineWordList {
 		element = strings.TrimSpace(element)
 		if "" == element {
