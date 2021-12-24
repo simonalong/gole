@@ -219,7 +219,7 @@ func YamlToKvList(contentOfYaml string) ([]StringPair, error) {
 }
 
 func YamlToList(contentOfYaml string) ([]interface{}, error) {
-	if contentOfYaml != "-" {
+	if !strings.HasPrefix(strings.TrimSpace(contentOfYaml), "-") {
 		return []interface{}{}, &ConvertError{errMsg: "the content of yaml not start with '-'"}
 	}
 	var resultList []interface{}
