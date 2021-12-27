@@ -161,7 +161,7 @@ func TestPropertiesToMap5(t *testing.T) {
 }
 
 func TestJsonToYaml1(t *testing.T) {
-	fmt.Println(yaml.JsonToYaml("{\n  \"name\": 'zhou',\n  \"age\": 12\n}"))
+	fmt.Println(yaml.JsonToYaml("[]"))
 }
 
 func propertiesToMap(t *testing.T, filePath string) {

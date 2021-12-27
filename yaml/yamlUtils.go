@@ -410,6 +410,10 @@ func JsonToYaml(contentOfJson string) (string, error) {
 		return "", &ConvertError{errMsg: "content is not json"}
 	}
 
+	if "[]" == contentOfJson {
+		return "", nil
+	}
+
 	// go中的json转换不识别"'"字符，因此这里将其转换为"""这种字符
 	contentOfJsonTem := strings.ReplaceAll(contentOfJson, "'", "\"")
 
