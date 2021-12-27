@@ -160,6 +160,10 @@ func TestPropertiesToMap5(t *testing.T) {
 	propertiesToMap(t, "./resources/properties/array1.properties")
 }
 
+func TestJsonToYaml1(t *testing.T) {
+	fmt.Println(yaml.JsonToYaml("{\n  \"name\": 'zhou',\n  \"age\": 12\n}"))
+}
+
 func propertiesToMap(t *testing.T, filePath string) {
 	bytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
