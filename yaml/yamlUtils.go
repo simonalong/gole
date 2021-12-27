@@ -120,6 +120,12 @@ func YamlToProperties(contentOfYaml string) (string, error) {
 }
 
 func YamlToPropertiesWithKey(key string, contentOfYaml string) (string, error) {
+	if "" == key {
+		return "", &ConvertError{errMsg: "key is nil"}
+	}
+	if "" == contentOfYaml {
+		return key + "=\"\"", nil
+	}
 	if !strings.Contains(contentOfYaml, ":") && !strings.Contains(contentOfYaml, "-") {
 		return "", &ConvertError{errMsg: "content is illegal for yaml"}
 	}
