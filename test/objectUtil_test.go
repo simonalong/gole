@@ -561,6 +561,19 @@ func TestArrayToObject2(t *testing.T) {
 	Equal(t, util.ObjectToJson(dstArray), "[{\"age\":1,\"name\":\"zhou\"}]")
 }
 
+type ConfigItemFromCommonReq struct {
+	Profile       string `match:"customize=ExistProfile" errMsg:"环境变量：#current 不存在或没有激活"`
+	AppName       string
+	ConfigItemKey string
+}
+
+func TestTtt(t *testing.T) {
+	str := "{\"configItemKey\":null}"
+	req := ConfigItemFromCommonReq{}
+	util.StrToObject(str, &req)
+	fmt.Println(req)
+}
+
 // objectToJson
 type ValueObjectTest1 struct {
 	AppName string

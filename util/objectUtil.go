@@ -713,7 +713,7 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 		}
 	} else if IsBaseType(dstType) {
 		sourceValue := reflect.ValueOf(srcValue.Interface())
-		if IsBaseType(sourceValue.Type()) {
+		if sourceValue.IsValid() && IsBaseType(sourceValue.Type()) {
 			v, err := Cast(dstType.Kind(), fmt.Sprintf("%v", srcValue.Interface()))
 			if err == nil {
 				return reflect.ValueOf(v)
