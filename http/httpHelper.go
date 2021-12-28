@@ -279,11 +279,11 @@ func PatchOfStandard(url string, header http.Header, parameterMap map[string]str
 func call(httpRequest *http.Request, url string) ([]byte, error) {
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil && httpResponse == nil {
-		log.Fatalf("Error sending request to API endpoint. %+v", err)
+		log.Printf("Error sending request to API endpoint. %+v", err)
 		return nil, &NetError{ErrMsg: "Error sending request, url: " + url + ", err" + err.Error()}
 	} else {
 		if httpResponse == nil {
-			log.Fatalf("httpResponse is nil")
+			log.Printf("httpResponse is nil")
 			return nil, nil
 		}
 
@@ -303,7 +303,7 @@ func call(httpRequest *http.Request, url string) ([]byte, error) {
 		// We have seen inconsistencies even when we get 200 OK response
 		body, err := ioutil.ReadAll(httpResponse.Body)
 		if err != nil {
-			log.Fatalf("Couldn't parse response body %+v", err)
+			log.Printf("Couldn't parse response body %+v", err)
 			return nil, &NetError{ErrMsg: "Couldn't parse response body, err: " + err.Error()}
 		}
 
@@ -318,11 +318,11 @@ func call(httpRequest *http.Request, url string) ([]byte, error) {
 func callIgnoreReturn(httpRequest *http.Request, url string) error {
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil && httpResponse == nil {
-		log.Fatalf("Error sending request to API endpoint. %+v", err)
+		log.Printf("Error sending request to API endpoint. %+v", err)
 		return &NetError{ErrMsg: "Error sending request, url: " + url + ", err" + err.Error()}
 	} else {
 		if httpResponse == nil {
-			log.Fatalf("httpResponse is nil")
+			log.Printf("httpResponse is nil")
 			return nil
 		}
 
