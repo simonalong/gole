@@ -551,6 +551,7 @@ func TestArrayToObject1(t *testing.T) {
 	Equal(t, util.ObjectToJson(dstValues), "[{\"age\":1,\"name\":\"zhou\"}]")
 }
 
+//todo 这个暂时还有点问题
 func TestArrayToObject2(t *testing.T) {
 	var dstArray []map[string]interface{}
 	var srcArray []ValueInnerEntity1
