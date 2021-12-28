@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/simonalong/tools/log"
@@ -992,4 +993,12 @@ func ToLowerFirstPrefix(dataStr string) string {
 // ToUpperFirstPrefix 首字母大写
 func ToUpperFirstPrefix(dataStr string) string {
 	return strings.ToLower(dataStr[:1]) + dataStr[1:]
+}
+
+func Base64Encode(src []byte) string {
+	return base64.StdEncoding.EncodeToString(src)
+}
+
+func Base64Decode(dst string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(dst)
 }
