@@ -281,7 +281,7 @@ func TestMapToObject11(t *testing.T) {
 	inner2 := map[string]interface{}{}
 
 	_ = util.MapToObject(inner1, &inner2)
-	Equal(t, "{\"age\":\"12\",\"name\":\"inner_1\"}", util.ToJsonString(inner2))
+	Equal(t, util.ToJsonString(inner2), "{\"age\":12,\"name\":\"inner_1\"}")
 }
 
 func TestMapToObject12(t *testing.T) {
@@ -518,7 +518,7 @@ func TestStrToObject5(t *testing.T) {
 func TestStrToObject6(t *testing.T) {
 	targetObj := map[string]interface{}{}
 	_ = util.StrToObject("{\"age\": 12}", &targetObj)
-	Equal(t, util.ToJsonString(targetObj), "{\"age\":\"12\"}")
+	Equal(t, util.ToJsonString(targetObj), "{\"age\":12}")
 }
 
 func TestStrToObject7(t *testing.T) {
@@ -834,4 +834,40 @@ func TestObjectToData13(t *testing.T) {
 	src = append(src, map1)
 
 	Equal(t, util.ObjectToJson(util.ObjectToData(src)), util.ObjectToJson(dst))
+}
+
+type ValueInnerEntityPtr struct {
+	Ptr *ValueInnerEntity1
+}
+
+func TestObjectToData14(t *testing.T) {
+	entity := ValueInnerEntity1{
+		Name: "zhou",
+		Age:  12,
+	}
+
+	act := ValueInnerEntityPtr{}
+
+	map1 := map[string]interface{}{}
+	map1["ptr"] = &entity
+
+	util.MapToObject(map1, &act)
+	fmt.Println(act.Ptr.Name)
+	fmt.Println(act.Ptr.Age)
+
+	//Equal(t, util.ObjectToJson(util.ObjectToData(src)), util.ObjectToJson(dst))
+}
+
+// test
+func TestObjectToData15(t *testing.T) {
+	inner := ValueInnerEntity1{
+		Name: "zhou",
+		Age:  12,
+	}
+
+	orginal := ValueInnerEntityPtr{Ptr: &inner}
+	newData := ValueInnerEntityPtr{}
+
+	util.DataToObject(orginal, &newData)
+	fmt.Println(newData.Ptr.Name)
 }

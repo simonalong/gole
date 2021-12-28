@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/simonalong/tools/log"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"reflect"
@@ -36,6 +37,18 @@ func ToMap(data interface{}) map[string]interface{} {
 			mapValue := mapR.Value()
 
 			resultMap[mapKey.String()] = mapValue
+		}
+		return resultMap
+	} else if reflect.TypeOf(data).Kind() == reflect.Struct {
+		resultMap := map[string]interface{}{}
+		jsonStr, err := json.Marshal(data)
+		if err != nil {
+			return resultMap
+		}
+
+		err = yaml.Unmarshal(jsonStr, &resultMap)
+		if err != nil {
+			return resultMap
 		}
 		return resultMap
 	}
@@ -425,6 +438,8 @@ func DataToObject(data interface{}, targetPtrObj interface{}) error {
 		return MapToObject(data.(map[string]interface{}), targetPtrObj)
 	case []interface{}:
 		return ArrayToObject(data.([]interface{}), targetPtrObj)
+	case interface{}:
+		return MapToObject(ToMap(data), targetPtrObj)
 	}
 
 	targetPtrValue := reflect.ValueOf(targetPtrObj)
@@ -447,9 +462,6 @@ func ReaderToObject(reader io.Reader, targetPtrObj interface{}) error {
 	}
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
-		if err != io.EOF {
-			fmt.Println("read error:", err)
-		}
 		return err
 	}
 	return StrToObject(string(data), targetPtrObj)
@@ -529,9 +541,7 @@ func ArrayToObject(dataArray interface{}, targetPtrObj interface{}) error {
 
 	dstValue := reflect.MakeSlice(dstType, 0, 0)
 
-	fmt.Println(dstItemType.String())
 	for arrayIndex := 0; arrayIndex < srcValue.Len(); arrayIndex++ {
-		fmt.Println(srcValue.Index(arrayIndex))
 		dataV := valueToTarget(srcValue.Index(arrayIndex), dstItemType)
 		if dataV.IsValid() {
 			if dataV.Kind() == reflect.Ptr {
@@ -711,6 +721,8 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 		}
 	} else if dstType.Kind() == reflect.Interface {
 		return reflect.ValueOf(ObjectToData(srcValue.Interface()))
+	} else if dstType.Kind() == reflect.Ptr {
+		return srcValue
 	} else {
 		v, err := Cast(dstType.Kind(), fmt.Sprintf("%v", srcValue.Interface()))
 		if err == nil {
