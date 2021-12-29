@@ -177,7 +177,7 @@ type AppManagerUpdateReq struct {
     ActiveStatus int8   `json:"activeStatus"`
 }
 ```
-为了去掉后面的json，这里做了反解析化工具。提供三个api进行转换
+为了去掉后面的json，这里做了反解析化工具。提供如下api进行转换
 ```go
 // MapToObject              map         ——> 对象
 // ArrayToObject            array       ——> 对象
