@@ -35,6 +35,8 @@ gole是go代码写的的个人工具包。
 ### 1. 支持profile
 `--gole.profile xxx`
 即可读取./resource/application-xxx.mmm文件内容。获取配置内容可以使用config包的api获取即可
+
+#### 基本类型
 ```go
 config.GetValueString(key string) string
 config.GetValueInt(key string) int
@@ -44,8 +46,32 @@ config.GetValueInt32(key string) int32
 config.GetValueInt64(key string) int64
 config.GetValueBool(key string) bool
 // ... 等等基本类型 ...
+```
+
+#### 复杂类型
+```go
 // 也支持复杂类型，直接根据key也可以读取获得对应对象，使用如下方法，然后在使用util.DataToObject(data, obj)即可得到想要的结构
 config.GetValueObject(key string) interface{}
+```
+示例：
+```go
+// 结构
+type Entity struct {
+    Name string
+    Age int
+}
+```
+
+```yaml
+# ./resource/application.yml 配置文件
+entity:
+  name: "chen"
+  age: 12
+```
+```go
+// 获取
+entity := Entity{}
+config.GetValueObject("entity", &entity)
 ```
 
 

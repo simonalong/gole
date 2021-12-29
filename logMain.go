@@ -37,7 +37,7 @@ func main() {
 	////fmt.Println(config.GetValueString("a.b"))
 	////fmt.Println(config.GetValueBool("a.e"))
 	////fmt.Println(config.GetValueIntDefault("a.f", 33))
-	fmt.Println(config.GetValueObject("a.b"))
+	fmt.Println(config.GetValue("a.b"))
 
 	////返回命令行参数后的其他参数
 	//fmt.Println(flag.Args())

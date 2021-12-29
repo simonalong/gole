@@ -386,7 +386,16 @@ func GetValueBoolDefault(key string, defaultValue bool) bool {
 	return false
 }
 
-func GetValueObject(key string) interface{} {
+func GetValueObject(key string, targetPtrObj interface{}) error {
+	data := doGetValue(appProperty.ValueDeepMap, key)
+	err := util.DataToObject(data, targetPtrObj)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetValue(key string) interface{} {
 	return doGetValue(appProperty.ValueDeepMap, key)
 }
 
