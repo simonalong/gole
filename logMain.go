@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/simonalong/tools/config"
-	"github.com/simonalong/tools/log"
+	"github.com/simonalong/gole/config"
+	"github.com/simonalong/gole/log"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -13,7 +13,7 @@ var serviceLogger *logrus.Logger
 var testLogger *logrus.Logger
 
 func init() {
-	log.LogConfig("/Users/zhouzhenyong/tem/tools/logs/tools", "/api/tools/", true)
+	log.LogConfig("/Users/zhouzhenyong/tem/gole/logs/gole", "/api/gole/", true)
 }
 
 func main() {

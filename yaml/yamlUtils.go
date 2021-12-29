@@ -3,7 +3,7 @@ package yaml
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/simonalong/tools/util"
+	"github.com/simonalong/gole/util"
 	"gopkg.in/yaml.v2"
 	"log"
 	"reflect"

@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
-	"github.com/simonalong/tools/config"
-	"github.com/simonalong/tools/util"
+	"github.com/simonalong/gole/config"
+	"github.com/simonalong/gole/util"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"path/filepath"
@@ -34,7 +34,7 @@ var unInit = false
 var (
 	gHost    = "localhost"
 	gPort    = "port"
-	gApiPath = "/api/tools/"
+	gApiPath = "/api/gole/"
 	gColor   = false
 )
 
@@ -44,7 +44,7 @@ var (
 func LogConfig(fileName, apiPath string, haveColor bool) {
 	gFilePath = fileName
 	if apiPath == "" {
-		apiPath = "/api/tools/"
+		apiPath = "/api/gole/"
 	}
 
 	if !strings.HasSuffix(apiPath, "/") {
@@ -96,7 +96,7 @@ func LogRouters(r *gin.Engine) {
 	appRouter := r.Group(gApiPath)
 	{
 		// 获取帮助列表
-		appRouter.GET("help", getLogToolsHelp)
+		appRouter.GET("help", getLoggoleHelp)
 		// 获取Logger集合curl
 		appRouter.GET("logger/list", getLoggerList)
 		// 修改host和port
@@ -110,7 +110,7 @@ func LogRouters(r *gin.Engine) {
 	}
 }
 
-func getLogToolsHelp(c *gin.Context) {
+func getLoggoleHelp(c *gin.Context) {
 	helpStr := map[string]string{}
 	helpStr["查询：帮助-----------"] = fmt.Sprintf("curl %v%vhelp", getHostAndPort(), gApiPath)
 	helpStr["查询：Logger集合-----"] = fmt.Sprintf("curl %v%vlogger/list", getHostAndPort(), gApiPath)

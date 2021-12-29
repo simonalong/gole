@@ -2,7 +2,7 @@ package test
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/simonalong/tools/log"
+	"github.com/simonalong/gole/log"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"testing"

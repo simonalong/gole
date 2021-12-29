@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/magiconair/properties"
-	"github.com/simonalong/tools/yaml"
+	"github.com/simonalong/gole/yaml"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -38,7 +38,7 @@ func TestMapToProperties2(t *testing.T) {
 	dataMap["d"] = innerMap1
 
 	// 顺序不固定，无法测试
-	//act, err := tools.MapToProperties(dataMap)
+	//act, err := gole.MapToProperties(dataMap)
 	//if err != nil {
 	//	log.Printf("转换：%v", err)
 	//	return
@@ -65,7 +65,7 @@ func TestMapToProperties3(t *testing.T) {
 	dataMap["e"] = array
 
 	// 顺序不固定，无法测试
-	//act, err := tools.MapToProperties(dataMap)
+	//act, err := gole.MapToProperties(dataMap)
 	//if err != nil {
 	//	log.Printf("转换：%v", err)
 	//	return
@@ -91,7 +91,7 @@ func TestMapToProperties4(t *testing.T) {
 	dataMap["d"] = innerMap1
 
 	// 顺序不固定，无法测试
-	//act, err := tools.MapToProperties(dataMap)
+	//act, err := gole.MapToProperties(dataMap)
 	//if err != nil {
 	//	log.Printf("转换：%v", err)
 	//	return

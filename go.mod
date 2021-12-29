@@ -1,4 +1,4 @@
-module github.com/simonalong/tools
+module github.com/simonalong/gole
 
 go 1.17
 

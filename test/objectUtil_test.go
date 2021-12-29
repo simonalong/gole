@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"github.com/simonalong/tools/util"
+	"github.com/simonalong/gole/util"
 	"testing"
 )
 

@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"github.com/simonalong/tools/config"
+	"github.com/simonalong/gole/config"
 	"io/ioutil"
 	"testing"
 )

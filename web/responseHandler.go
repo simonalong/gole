@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/simonalong/tools/config"
-	http2 "github.com/simonalong/tools/http"
-	"github.com/simonalong/tools/log"
-	"github.com/simonalong/tools/util"
+	"github.com/simonalong/gole/config"
+	http2 "github.com/simonalong/gole/http"
+	"github.com/simonalong/gole/log"
+	"github.com/simonalong/gole/util"
 	"net/http"
 	"time"
 )
@@ -51,7 +51,7 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 			Body:       bodyMap,
 		}
 
-		if config.GetValueBool("tools.show.head") {
+		if config.GetValueBool("gole.show.head") {
 			request.Headers = c.Request.Header
 		}
 
