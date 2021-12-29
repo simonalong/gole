@@ -36,7 +36,7 @@ gole是go代码写的的个人工具包。
 `--gole.profile xxx`
 即可读取./resource/application-xxx.mmm文件内容。获取配置内容可以使用config包的api获取即可
 
-#### 基本类型
+### a. 基本类型
 ```go
 config.GetValueString(key string) string
 config.GetValueInt(key string) int
@@ -48,7 +48,7 @@ config.GetValueBool(key string) bool
 // ... 等等基本类型 ...
 ```
 
-#### 复杂类型
+### b. 复杂类型
 ```go
 // 也支持复杂类型，直接根据key也可以读取获得对应对象，使用如下方法，然后在使用util.DataToObject(data, obj)即可得到想要的结构
 config.GetValueObject(key string) interface{}
@@ -74,12 +74,19 @@ entity := Entity{}
 config.GetValueObject("entity", &entity)
 ```
 
+### c. 动态修改配置
+这个功能是基于提供的在线修改功能直接修改，该功能会直接覆盖项目中的配置
+```shell
+curl -X POST http://localhost:port/api/gole/env -d '{"key":xxx, "value":xxx}'
+```
+
 
 ## 3. log 功能
 1. 支持日志文件切分
 2. 支持日志颜色
 3. 增加logger维度
 4. 增加对logger的日志级别管控
+5. 动态修改日志级别
 
 ### 日志路径配置用法
 
