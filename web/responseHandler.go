@@ -7,7 +7,6 @@ import (
 	http2 "github.com/simonalong/tools/http"
 	"github.com/simonalong/tools/log"
 	"github.com/simonalong/tools/util"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
@@ -37,12 +36,6 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 		// 处理请求
 		c.Next()
 
-		// 结束时间
-		endTime := time.Now()
-
-		// 执行时间
-		costTime := endTime.Sub(startTime)
-
 		// 状态码
 		statusCode := c.Writer.Status()
 
@@ -58,13 +51,18 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 			Body:       bodyMap,
 		}
 
+		message := ErrorMessage{
+			Request: request,
+			Cost:    time.Now().Sub(startTime).String(),
+		}
+
 		if statusCode != 200 {
 			for _, code := range exceptCode {
 				if code == statusCode {
 					return
 				}
 			}
-			logger.WithFields(logrus.Fields{"request": util.ObjectToJson(request), "costTime": costTime}).Error("请求异常")
+			logger.WithField("result", util.ObjectToJson(message)).Error("请求异常")
 		} else {
 			var response http2.StandardResponse
 			err := json.Unmarshal([]byte(blw.body.String()), &response)
@@ -75,7 +73,8 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 					return
 				}
 				if response.Code != 0 && response.Code != "0" && response.Code != 200 && response.Code != "200" && response.Code != "success" {
-					logger.WithFields(logrus.Fields{"request": util.ObjectToJson(request), "response": util.ObjectToJson(response), "costTime": costTime}).Error("请求异常")
+					message.Response = response
+					logger.WithField("result", util.ObjectToJson(message)).Error("请求异常")
 				}
 			}
 		}
@@ -89,6 +88,12 @@ type Request struct {
 	Headers    http.Header
 	Parameters gin.Params
 	Body       map[string]interface{}
+}
+
+type ErrorMessage struct {
+	Request  Request
+	Response http2.StandardResponse
+	Cost     string
 }
 
 func Success(ctx *gin.Context, object interface{}) {
