@@ -183,6 +183,10 @@ func LoadJsonFile(filePath string) {
 }
 
 func SetValue(key string, value interface{}) {
+	if appProperty == nil {
+		appProperty = &ApplicationProperty{}
+		appProperty.ValueMap = map[string]interface{}{}
+	}
 	appProperty.ValueMap[key] = value
 }
 
