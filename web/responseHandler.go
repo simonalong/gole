@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/simonalong/tools/config"
 	http2 "github.com/simonalong/tools/http"
 	"github.com/simonalong/tools/log"
 	"github.com/simonalong/tools/util"
@@ -46,9 +47,12 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 			Method:     c.Request.Method,
 			Uri:        c.Request.RequestURI,
 			Ip:         c.ClientIP(),
-			Headers:    c.Request.Header,
 			Parameters: c.Params,
 			Body:       bodyMap,
+		}
+
+		if config.GetValueBool("tools.show.head") {
+			request.Headers = c.Request.Header
 		}
 
 		message := ErrorMessage{
