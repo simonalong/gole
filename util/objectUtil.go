@@ -878,6 +878,9 @@ func ObjectToJson(object interface{}) string {
 // 结构体 			-> 转换为map
 // map 				-> 转换为map
 func doObjectChange(objType reflect.Type, object interface{}) interface{} {
+	if objType == nil || object == nil {
+		return nil
+	}
 	objKind := objType.Kind()
 	if objKind == reflect.Ptr {
 		return nil
