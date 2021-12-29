@@ -3,10 +3,8 @@ package config
 import (
 	"flag"
 	"fmt"
-	"github.com/simonalong/tools/log"
 	"github.com/simonalong/tools/util"
 	"github.com/simonalong/tools/yaml"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"path"
@@ -14,12 +12,7 @@ import (
 	"strings"
 )
 
-var configLog *logrus.Logger
 var appProperty *ApplicationProperty
-
-func init() {
-	configLog = log.GetLogger("configLog")
-}
 
 // LoadConfig 默认读取./resources/下面的配置文件
 // 支持yml、yaml、json、properties格式
@@ -45,7 +38,7 @@ func LoadConfigWithAbsPath(resourceAbsPath string) {
 	}
 	files, err := ioutil.ReadDir(resourceAbsPath)
 	if err != nil {
-		configLog.WithField("resourceAbsPath", resourceAbsPath).Errorf("read fail, %v", err.Error())
+		fmt.Printf("read fail, resource: %v, err %v", resourceAbsPath, err.Error())
 		return
 	}
 
@@ -137,7 +130,7 @@ func getFileExtension(fileName string) string {
 func LoadYamlFile(filePath string) {
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		configLog.Fatal("fail to read file:", err)
+		fmt.Println("fail to read file:", err)
 	}
 
 	if appProperty == nil {
@@ -155,7 +148,7 @@ func LoadYamlFile(filePath string) {
 func LoadPropertyFile(filePath string) {
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		configLog.Fatal("fail to read file:", err)
+		fmt.Println("fail to read file:", err)
 	}
 
 	if appProperty == nil {
@@ -173,7 +166,7 @@ func LoadPropertyFile(filePath string) {
 func LoadJsonFile(filePath string) {
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		configLog.Fatal("fail to read file:", err)
+		fmt.Println("fail to read file:", err)
 	}
 
 	if appProperty == nil {
