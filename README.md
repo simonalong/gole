@@ -183,10 +183,10 @@ type AppManagerUpdateReq struct {
 // ArrayToObject            array       ——> 对象
 // StrToObject              字符         ——> 对象
 // ReaderJsonToObject       io.Reader   ——> 对象
-// DataToObject：这个是总况   总数据       ——> 对象
+// DataToObject：通用转换     以上类型     ——> 对象
 //
 // ObjectToJson             对象         ——>json字符
-// ObjectToData：这个是总的   对象         ——>转换后的对象
+// ObjectToData：通用转换     对象         ——>转换后的对象
 ```
 #### 提示：
 这里的转换支持如下三种特性
