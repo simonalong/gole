@@ -106,7 +106,7 @@ func LogRouters(r *gin.Engine) {
 		// 修改所有logger的级别
 		appRouter.POST("logger/root/level/:level", setLoggerRootLevel)
 		// 修改环境变量
-		appRouter.POST("env/:key/:value", setKeyValue)
+		appRouter.POST("env", setKeyValue)
 	}
 }
 
