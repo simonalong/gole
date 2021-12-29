@@ -7,6 +7,7 @@ import (
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
 	"github.com/simonalong/tools/config"
+	"github.com/simonalong/tools/util"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"path/filepath"
@@ -116,7 +117,7 @@ func getLogToolsHelp(c *gin.Context) {
 	helpStr["修改：host和port-----"] = fmt.Sprintf("curl -X POST %v%vhost/change/{host}/{port}", getHostAndPort(), gApiPath)
 	helpStr["修改：logger的级别----"] = fmt.Sprintf("curl -X POST %v%vlogger/level/{loggerName}/{level}", getHostAndPort(), gApiPath)
 	helpStr["修改：所有logger的级别"] = fmt.Sprintf("curl -X POST %v%vlogger/root/level/{level}", getHostAndPort(), gApiPath)
-	helpStr["修改：环境变量--------"] = fmt.Sprintf("curl -X POST %v%venv/{key}/{valkue}", getHostAndPort(), gApiPath)
+	helpStr["修改：环境变量--------"] = fmt.Sprintf("curl -X POST %v%venv", getHostAndPort(), gApiPath)
 	Success(c, helpStr)
 }
 
@@ -160,11 +161,19 @@ func setLoggerRootLevel(c *gin.Context) {
 	Success(c, len(loggerMap))
 }
 
-func setKeyValue(c *gin.Context) {
-	key := c.Param("key")
-	value := c.Param("value")
+type EnvProperty struct {
+	Key   string
+	Value string
+}
 
-	config.SetValue(key, value)
+func setKeyValue(c *gin.Context) {
+	envProperty := EnvProperty{}
+	err := util.DataToObject(c.Request.Body, &envProperty)
+	if err != nil {
+		return
+	}
+
+	config.SetValue(envProperty.Key, envProperty.Value)
 }
 
 func getHostAndPort() string {
