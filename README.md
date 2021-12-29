@@ -65,11 +65,12 @@ func main() {
 
 ```json
 {
-  "修改：host和port-----":"curl -X POST http://localhost:port/api/xxx/host/change/{host}/{port}",
-  "修改：logger的级别----":"curl -X POST http://localhost:port/api/xxx/logger/level/{loggerName}/{level}",
-  "修改：所有logger的级别":"curl -X POST http://localhost:port/api/xxx/logger/root/level/{level}",
-  "查询：Logger集合-----":"curl http://localhost:port/api/xxx/logger/list",
-  "查询：帮助-----------":"curl http://localhost:port/api/xxx/help"
+  "修改：host和port-----":"curl -X POST http://localhost:port/api/log/host/change/{host}/{port}",
+  "修改：logger的级别----":"curl -X POST http://localhost:port/api/log/logger/level/{loggerName}/{level}",
+  "修改：所有logger的级别":"curl -X POST http://localhost:port/api/log/logger/root/level/{level}",
+  "修改：环境变量--------":"curl -X POST http://localhost:port/api/log/env",
+  "查询：Logger集合-----":"curl http://localhost:port/api/log/logger/list",
+  "查询：帮助-----------":"curl http://localhost:port/api/log/help"
 }
 ```
 

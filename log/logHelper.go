@@ -117,7 +117,7 @@ func getLogToolsHelp(c *gin.Context) {
 	helpStr["修改：host和port-----"] = fmt.Sprintf("curl -X POST %v%vhost/change/{host}/{port}", getHostAndPort(), gApiPath)
 	helpStr["修改：logger的级别----"] = fmt.Sprintf("curl -X POST %v%vlogger/level/{loggerName}/{level}", getHostAndPort(), gApiPath)
 	helpStr["修改：所有logger的级别"] = fmt.Sprintf("curl -X POST %v%vlogger/root/level/{level}", getHostAndPort(), gApiPath)
-	helpStr["修改：环境变量--------"] = fmt.Sprintf("curl -X POST %v%venv", getHostAndPort(), gApiPath)
+	helpStr["修改：环境变量--------"] = fmt.Sprintf("curl -X POST %v%venv -d '{\"key\": \"tools.show.head\",\"value\": \"true\"}'", getHostAndPort(), gApiPath)
 	Success(c, helpStr)
 }
 
