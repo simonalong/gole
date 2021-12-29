@@ -427,7 +427,7 @@ func DataToObject(data interface{}, targetPtrObj interface{}) error {
 		return ReaderToObject(data.(io.Reader), targetPtrObj)
 	case string:
 		return StrToObject(data.(string), targetPtrObj)
-	case map[string]interface{}:
+	case map[interface{}]interface{}:
 		return MapToObject(data.(map[string]interface{}), targetPtrObj)
 	case []interface{}:
 		return ArrayToObject(data.([]interface{}), targetPtrObj)

@@ -4,6 +4,7 @@ gole是go代码写的的个人工具包。
 目前有以下功能
 - yaml、properties、json、map互转的工具
 - http的简单封装工具
+- config配置文件处理工具  
 - 日志的工具封装
 - web返回值的异常打印
 - interface转换具体类型工具
@@ -28,6 +29,25 @@ gole是go代码写的的个人工具包。
   "data": "xxx"
 }
 ```
+
+## 3. 配置文件 功能
+给go项目提供配置文件加载规范，所有文件都放在 ./resource目录下，借鉴spring的规范，使用application-{profile}.mmm进行解析，支持yaml、yml、property、json等格式
+### 1. 支持profile
+`--gole.profile xxx`
+即可读取./resource/application-xxx.mmm文件内容。获取配置内容可以使用config包的api获取即可
+```go
+config.GetValueString(key string) string
+config.GetValueInt(key string) int
+config.GetValueInt8(key string) int8
+config.GetValueInt16(key string) int16
+config.GetValueInt32(key string) int32
+config.GetValueInt64(key string) int64
+config.GetValueBool(key string) bool
+// ... 等等基本类型 ...
+// 也支持复杂类型，直接根据key也可以读取获得对应对象，使用如下方法，然后在使用util.DataToObject(data, obj)即可得到想要的结构
+config.GetValueObject(key string) interface{}
+```
+
 
 ## 3. log 功能
 1. 支持日志文件切分
