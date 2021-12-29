@@ -22,7 +22,7 @@ func (w bodyLogWriter) Write(b []byte) (int, error) {
 }
 
 // 日志记录到文件
-func ResponseHandler() gin.HandlerFunc {
+func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 	//实例化
 	logger := log.GetLogger("isc-config-service")
 
@@ -55,6 +55,11 @@ func ResponseHandler() gin.HandlerFunc {
 		clientIP := c.ClientIP()
 
 		if statusCode != 200 {
+			for _, code := range exceptCode {
+				if code == statusCode {
+					return
+				}
+			}
 			logger.WithFields(logrus.Fields{"code": statusCode, "method": reqMethod, "uri": reqUri, "costTime": costTime, "ip": clientIP}).Error("请求异常")
 		} else {
 			var response http2.StandardResponse
