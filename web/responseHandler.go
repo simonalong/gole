@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	http2 "github.com/simonalong/tools/http"
 	"github.com/simonalong/tools/log"
+	"github.com/simonalong/tools/util"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
@@ -42,17 +43,20 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 		// 执行时间
 		costTime := endTime.Sub(startTime)
 
-		// 请求方式
-		reqMethod := c.Request.Method
-
-		// 请求路由
-		reqUri := c.Request.RequestURI
-
 		// 状态码
 		statusCode := c.Writer.Status()
 
-		// 请求IP
-		clientIP := c.ClientIP()
+		bodyMap := map[string]interface{}{}
+		_ = util.DataToObject(c.Request.Body, &bodyMap)
+
+		request := Request{
+			Method:     c.Request.Method,
+			Uri:        c.Request.RequestURI,
+			Ip:         c.ClientIP(),
+			Headers:    c.Request.Header,
+			Parameters: c.Params,
+			Body:       bodyMap,
+		}
 
 		if statusCode != 200 {
 			for _, code := range exceptCode {
@@ -60,7 +64,7 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 					return
 				}
 			}
-			logger.WithFields(logrus.Fields{"code": statusCode, "method": reqMethod, "uri": reqUri, "costTime": costTime, "ip": clientIP}).Error("请求异常")
+			logger.WithFields(logrus.Fields{"request": util.ObjectToJson(request), "costTime": costTime}).Error("请求异常")
 		} else {
 			var response http2.StandardResponse
 			err := json.Unmarshal([]byte(blw.body.String()), &response)
@@ -71,11 +75,20 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 					return
 				}
 				if response.Code != 0 && response.Code != "0" && response.Code != 200 && response.Code != "200" && response.Code != "success" {
-					logger.WithFields(logrus.Fields{"code": response.Code, "method": reqMethod, "uri": reqUri, "costTime": costTime, "ip": clientIP, "errMsg": response.Message}).Error("请求异常")
+					logger.WithFields(logrus.Fields{"request": util.ObjectToJson(request), "response": util.ObjectToJson(response), "costTime": costTime}).Error("请求异常")
 				}
 			}
 		}
 	}
+}
+
+type Request struct {
+	Method     string
+	Uri        string
+	Ip         string
+	Headers    http.Header
+	Parameters gin.Params
+	Body       map[string]interface{}
 }
 
 func Success(ctx *gin.Context, object interface{}) {
