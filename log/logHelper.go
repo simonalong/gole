@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
+	"github.com/simonalong/tools/config"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"path/filepath"
@@ -103,6 +104,8 @@ func LogRouters(r *gin.Engine) {
 		appRouter.POST("logger/level/:loggerName/:level", setLoggerLevel)
 		// 修改所有logger的级别
 		appRouter.POST("logger/root/level/:level", setLoggerRootLevel)
+		// 修改环境变量
+		appRouter.POST("env/:key/:value", setKeyValue)
 	}
 }
 
@@ -113,6 +116,7 @@ func getLogToolsHelp(c *gin.Context) {
 	helpStr["修改：host和port-----"] = fmt.Sprintf("curl -X POST %v%vhost/change/{host}/{port}", getHostAndPort(), gApiPath)
 	helpStr["修改：logger的级别----"] = fmt.Sprintf("curl -X POST %v%vlogger/level/{loggerName}/{level}", getHostAndPort(), gApiPath)
 	helpStr["修改：所有logger的级别"] = fmt.Sprintf("curl -X POST %v%vlogger/root/level/{level}", getHostAndPort(), gApiPath)
+	helpStr["修改：环境变量--------"] = fmt.Sprintf("curl -X POST %v%venv/{key}/{valkue}", getHostAndPort(), gApiPath)
 	Success(c, helpStr)
 }
 
@@ -154,6 +158,13 @@ func setLoggerRootLevel(c *gin.Context) {
 		logger.SetLevel(levelValue)
 	}
 	Success(c, len(loggerMap))
+}
+
+func setKeyValue(c *gin.Context) {
+	key := c.Param("key")
+	value := c.Param("value")
+
+	config.SetValue(key, value)
 }
 
 func getHostAndPort() string {

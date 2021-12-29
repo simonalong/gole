@@ -189,6 +189,10 @@ func LoadJsonFile(filePath string) {
 	appProperty.ValueDeepMap = yamlMap
 }
 
+func SetValue(key string, value interface{}) {
+	appProperty.ValueMap[key] = value
+}
+
 func GetValueString(key string) string {
 	if value, exist := appProperty.ValueMap[key]; exist {
 		return util.ToString(value)
