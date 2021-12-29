@@ -54,6 +54,10 @@ func createHTTPClient() *http.Client {
 	return client
 }
 
+func SetHttpClient(httpClientOuter *http.Client) {
+	httpClient = httpClientOuter
+}
+
 // ------------------ get ------------------
 
 func GetSimple(url string) ([]byte, error) {
