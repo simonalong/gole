@@ -9,6 +9,7 @@ gole是go代码写的的个人工具包。
 - web返回值的异常打印
 - interface转换具体类型工具
 - json转object工具：省去`json:"xxx"`
+- message、cache  
 - 其他的一些简单工具
 
 ## 1. yaml功能
