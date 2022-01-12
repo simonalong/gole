@@ -875,7 +875,9 @@ func doObjectChange(objType reflect.Type, object interface{}) interface{} {
 	}
 	objKind := objType.Kind()
 	if objKind == reflect.Ptr {
-		return nil
+		objKind = objType.Elem().Kind()
+		objValue := reflect.ValueOf(object)
+		return doObjectChange(objType.Elem(), objValue.Elem().Interface())
 	}
 	if objKind == reflect.Int || objKind == reflect.Int8 || objKind == reflect.Int16 || objKind == reflect.Int32 || objKind == reflect.Int64 {
 		return ToInt64(object)

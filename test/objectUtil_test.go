@@ -742,6 +742,36 @@ func TestObjectToJson9(t *testing.T) {
 	//Equal(t, util.ObjectToJson(act), "[{\"age\":1,\"name\":\"zhou1\"},{\"age\":2,\"name\":\"zhou2\"}]")
 }
 
+type JsonEntity10Inner struct {
+	Name string
+}
+
+type JsonEntity10 struct {
+	Data *JsonEntity10Inner
+}
+
+func TestObjectToJson10(t *testing.T) {
+	inner := JsonEntity10Inner{
+		Name: "ok",
+	}
+	entity := JsonEntity10{
+		Data: &inner,
+	}
+
+	Equal(t, util.ObjectToJson(entity), "{\"data\":{\"name\":\"ok\"}}")
+}
+
+func TestObjectToJson11(t *testing.T) {
+	inner := JsonEntity10Inner{
+		Name: "ok",
+	}
+
+	map1 := map[string]interface{}{}
+	map1["data"] = &inner
+
+	Equal(t, util.ObjectToJson(map1), "{\"data\":{\"name\":\"ok\"}}")
+}
+
 // objectToMap
 
 // objectToArray
