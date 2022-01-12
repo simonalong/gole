@@ -191,7 +191,7 @@ type AppManagerUpdateReq struct {
 // ReaderJsonToObject       io.Reader   ——> 对象
 // DataToObject：通用转换     以上类型     ——> 对象
 //
-// ObjectToJson             对象         ——>json字符
+// ObjectToJson             对象         ——>json字符：对应的json中的字段为小写
 // ObjectToData：通用转换     对象         ——>转换后的对象
 ```
 #### 提示：
