@@ -196,7 +196,7 @@ type AppManagerUpdateReq struct {
 ```
 #### 提示：
 这里的转换支持如下三种特性
-- 无json标示：反解析不需要添加'json:"xxx"'，而且反解析时候对应的map中的key为消息
+- 无json标示：反解析不需要添加'json:"xxx"'，而且反解析时候对应的map中的key大小写均可
 - 类型无限制：map中对应的类型只要能转换进去即可，比如：map中的value值为string类型，但是存储的是数字，实体为int，也是可以的
 - 自定义类型：比如自定义类型`type myType int8` 这种类型修饰的也可以转换
 - 不支持：暂时不支持属性为指针的类型转换
