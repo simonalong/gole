@@ -791,7 +791,7 @@ func ObjectToData(object interface{}) interface{} {
 	return nil
 }
 
-// ObjectToJson 对象转化为json，其中map对应的key为小写
+// ObjectToJson 对象转化为json，其中map对应的key大小姐均可
 func ObjectToJson(object interface{}) string {
 	if object == nil || reflect.ValueOf(object).Kind() == reflect.Ptr {
 		return "{}"
