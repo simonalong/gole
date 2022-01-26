@@ -726,6 +726,10 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 }
 
 // ObjectToData 字段转化，其中对应字段为小写，map的话为小写
+// 转换类型：
+// - struct -> map
+// - map    -> map
+// - array  -> array
 func ObjectToData(object interface{}) interface{} {
 	if object == nil || reflect.ValueOf(object).Kind() == reflect.Ptr {
 		return "{}"
