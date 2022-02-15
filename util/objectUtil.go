@@ -422,17 +422,20 @@ func DataToObject(data interface{}, targetPtrObj interface{}) error {
 		return &ChangeError{ErrMsg: "targetPtrObj type is not ptr"}
 	}
 
-	switch data.(type) {
-	case io.Reader:
-		return ReaderToObject(data.(io.Reader), targetPtrObj)
-	case string:
-		return StrToObject(data.(string), targetPtrObj)
-	case map[interface{}]interface{}:
-		return MapToObject(data.(map[interface{}]interface{}), targetPtrObj)
-	case []interface{}:
+	srcType := reflect.TypeOf(data)
+	if srcType.Kind() == reflect.Map {
+		return MapToObject(data, targetPtrObj)
+	} else if srcType.Kind() == reflect.Array || srcType.Kind() == reflect.Slice {
 		return ArrayToObject(data.([]interface{}), targetPtrObj)
-	case interface{}:
-		return MapToObject(ToMap(data), targetPtrObj)
+	} else {
+		switch data.(type) {
+		case io.Reader:
+			return ReaderToObject(data.(io.Reader), targetPtrObj)
+		case string:
+			return StrToObject(data.(string), targetPtrObj)
+		case interface{}:
+			return MapToObject(ToMap(data), targetPtrObj)
+		}
 	}
 
 	targetPtrValue := reflect.ValueOf(targetPtrObj)
