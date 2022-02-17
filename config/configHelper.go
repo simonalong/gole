@@ -18,7 +18,7 @@ var appProperty *ApplicationProperty
 // 支持yml、yaml、json、properties格式
 // 优先级yaml > yml > properties > json
 func LoadConfig() {
-	LoadConfigWithRelativePath("./resources/")
+	LoadConfigWithRelativePath("")
 }
 
 // LoadConfigWithRelativePath 加载相对文件路径，相对路径是相对系统启动的位置部分
