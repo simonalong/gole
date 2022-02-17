@@ -43,7 +43,7 @@ func LoadConfigWithAbsPath(resourceAbsPath string) {
 	}
 
 	var profile string
-	flag.StringVar(&profile, "gole.profile", "local", "环境变量")
+	flag.StringVar(&profile, "gole.profile", "", "环境变量")
 	flag.Parse()
 	for _, file := range files {
 		if file.IsDir() {

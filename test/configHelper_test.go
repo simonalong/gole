@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestLoad(t *testing.T) {
+func TestLoad1(t *testing.T) {
 	config.LoadConfig()
 
 	fmt.Println(config.GetValueString("a.b"))
@@ -24,4 +24,21 @@ func TestLoad(t *testing.T) {
 	for _, file := range files {
 		fmt.Println(file.Name())
 	}
+}
+
+type Sample struct {
+	One InnerOne
+}
+
+type InnerOne struct {
+	Name string
+}
+
+func TestLoad2(t *testing.T) {
+	config.LoadConfig()
+
+	var sample InnerOne
+	config.GetValueObject("base", &sample)
+
+	fmt.Println(sample)
 }
