@@ -807,8 +807,7 @@ func ObjectToJson(object interface{}) string {
 	// 只接收 map、struct、array、slice进行解析
 	objKind := reflect.ValueOf(object).Kind()
 	if objKind != reflect.Map && objKind != reflect.Struct && objKind != reflect.Array && objKind != reflect.Slice {
-		fmt.Printf("not support the type %v change to json", objKind.String())
-		return "{}"
+		return ToString(object)
 	}
 
 	if objKind == reflect.Map {
