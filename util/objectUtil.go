@@ -862,7 +862,7 @@ func ObjectToJson(object interface{}) string {
 		}
 		return ToJsonString(resultSlice)
 	}
-	return "{}"
+	return ToString(object)
 }
 
 // 转换为对应类型
