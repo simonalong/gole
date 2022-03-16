@@ -416,6 +416,11 @@ func DataToObject(data interface{}, targetPtrObj interface{}) error {
 		fmt.Printf("data is nil")
 		return nil
 	}
+
+	if data == "" {
+		fmt.Printf("data is empty ")
+		return nil
+	}
 	targetType := reflect.TypeOf(targetPtrObj)
 	if targetType.Kind() != reflect.Ptr {
 		fmt.Printf("targetPtrObj type is not ptr")
@@ -729,10 +734,6 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 }
 
 // ObjectToData 字段转化，其中对应字段为小写，map的话为小写
-// 转换类型：
-// - struct -> map
-// - map    -> map
-// - array  -> array
 func ObjectToData(object interface{}) interface{} {
 	if object == nil || reflect.ValueOf(object).Kind() == reflect.Ptr {
 		return "{}"
@@ -798,7 +799,7 @@ func ObjectToData(object interface{}) interface{} {
 	return nil
 }
 
-// ObjectToJson 对象转化为json，其中map对应的key大小姐均可
+// ObjectToJson 对象转化为json，其中map对应的key为小写
 func ObjectToJson(object interface{}) string {
 	if object == nil || reflect.ValueOf(object).Kind() == reflect.Ptr {
 		return "{}"
@@ -807,7 +808,8 @@ func ObjectToJson(object interface{}) string {
 	// 只接收 map、struct、array、slice进行解析
 	objKind := reflect.ValueOf(object).Kind()
 	if objKind != reflect.Map && objKind != reflect.Struct && objKind != reflect.Array && objKind != reflect.Slice {
-		return ToString(object)
+		fmt.Printf("not support the type %v change to json", objKind.String())
+		return "{}"
 	}
 
 	if objKind == reflect.Map {
@@ -861,7 +863,7 @@ func ObjectToJson(object interface{}) string {
 		}
 		return ToJsonString(resultSlice)
 	}
-	return ToString(object)
+	return "{}"
 }
 
 // 转换为对应类型
@@ -881,9 +883,7 @@ func doObjectChange(objType reflect.Type, object interface{}) interface{} {
 	}
 	objKind := objType.Kind()
 	if objKind == reflect.Ptr {
-		objKind = objType.Elem().Kind()
-		objValue := reflect.ValueOf(object)
-		return doObjectChange(objType.Elem(), objValue.Elem().Interface())
+		return nil
 	}
 	if objKind == reflect.Int || objKind == reflect.Int8 || objKind == reflect.Int16 || objKind == reflect.Int32 || objKind == reflect.Int64 {
 		return ToInt64(object)
