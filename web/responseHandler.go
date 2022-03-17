@@ -8,7 +8,9 @@ import (
 	http2 "github.com/simonalong/gole/http"
 	"github.com/simonalong/gole/log"
 	"github.com/simonalong/gole/util"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -31,6 +33,13 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 		// 开始时间
 		startTime := time.Now()
 
+		data, err := ioutil.ReadAll(c.Request.Body)
+		if err != nil {
+			logger.Errorf("read request body failed,err = %s.", err)
+			return
+		}
+		c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+
 		blw := &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
 		c.Writer = blw
 
@@ -40,15 +49,24 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 		// 状态码
 		statusCode := c.Writer.Status()
 
-		bodyMap := map[string]interface{}{}
-		_ = util.DataToObject(c.Request.Body, &bodyMap)
+		var body interface{}
+		bodyStr := string(data)
+		if "" != bodyStr {
+			if strings.HasPrefix(bodyStr, "{") && strings.HasSuffix(bodyStr, "}") {
+				var bodys []interface{}
+				_ = util.StrToObject(bodyStr, &bodys)
+				body = bodys
+			} else if strings.HasPrefix(bodyStr, "[") && strings.HasSuffix(bodyStr, "]") {
+				_ = util.StrToObject(bodyStr, &body)
+			}
+		}
 
 		request := Request{
 			Method:     c.Request.Method,
 			Uri:        c.Request.RequestURI,
 			Ip:         c.ClientIP(),
 			Parameters: c.Params,
-			Body:       bodyMap,
+			Body:       body,
 		}
 
 		if config.GetValueBool("gole.show.head") {
@@ -56,8 +74,9 @@ func ResponseHandler(exceptCode ...int) gin.HandlerFunc {
 		}
 
 		message := ErrorMessage{
-			Request: request,
-			Cost:    time.Now().Sub(startTime).String(),
+			Request:    request,
+			StatusCode: statusCode,
+			Cost:       time.Now().Sub(startTime).String(),
 		}
 
 		if statusCode != 200 {
@@ -91,13 +110,14 @@ type Request struct {
 	Ip         string
 	Headers    http.Header
 	Parameters gin.Params
-	Body       map[string]interface{}
+	Body       interface{}
 }
 
 type ErrorMessage struct {
-	Request  Request
-	Response http2.StandardResponse
-	Cost     string
+	Request    Request
+	Response   http2.StandardResponse
+	Cost       string
+	StatusCode int
 }
 
 func Success(ctx *gin.Context, object interface{}) {
