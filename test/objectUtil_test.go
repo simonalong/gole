@@ -23,6 +23,11 @@ type ValueInnerEntity1 struct {
 	Age  int
 }
 
+type ValueInnerEntity12 struct {
+	Name string
+	Age  []int
+}
+
 func TestMapToObject1(t *testing.T) {
 	inner1 := map[string]interface{}{}
 	inner1["name"] = "inner_1"
@@ -879,6 +884,22 @@ func TestObjectToData13(t *testing.T) {
 	src = append(src, map1)
 
 	Equal(t, util.ObjectToJson(util.ObjectToData(src)), util.ObjectToJson(dst))
+}
+
+func TestObjectToData14(t *testing.T) {
+	var dst = ValueInnerEntity12{}
+	ages := []int{}
+	//ages = append(ages, 1)
+	//ages = append(ages, 2)
+	dst.Age = ages
+
+	//map1 := map[string]interface{}{}
+	//map1["name"] = "zhou"
+	//map1["age"] = 12
+	//src = append(src, map1)
+
+	//Equal(t, util.ObjectToJson(util.ObjectToData(src)), util.ObjectToData(dst))
+	fmt.Println(util.ObjectToJson(util.ObjectToData(dst)))
 }
 
 func BenchmarkSprintfPress(b *testing.B) {

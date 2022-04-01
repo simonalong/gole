@@ -784,7 +784,7 @@ func ObjectToData(object interface{}) interface{} {
 		return resultMap
 	} else if objKind == reflect.Array || objKind == reflect.Slice {
 		// Array 结构
-		var resultSlice []interface{}
+		resultSlice := []interface{}{}
 		objValue := reflect.ValueOf(object)
 		for index := 0; index < objValue.Len(); index++ {
 			arrayItemValue := objValue.Index(index)
@@ -900,7 +900,7 @@ func doObjectChange(objType reflect.Type, object interface{}) interface{} {
 	} else if objKind == reflect.String {
 		return ToString(object)
 	} else if objKind == reflect.Array || objKind == reflect.Slice {
-		var resultSlice []interface{}
+		resultSlice := []interface{}{}
 		objValue := reflect.ValueOf(object)
 		for index := 0; index < objValue.Len(); index++ {
 			arrayItemValue := objValue.Index(index)
