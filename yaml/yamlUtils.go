@@ -590,6 +590,10 @@ func wordToNode(lineWordList []string, nodeList []YamlNode, parentNode *YamlNode
 }
 
 func doMapToProperties(propertyStrList []string, value interface{}, prefix string) []string {
+	if nil == value {
+		value = ""
+	}
+	
 	valueKind := reflect.TypeOf(value).Kind()
 	switch valueKind {
 	case reflect.Map:
