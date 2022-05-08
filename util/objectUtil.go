@@ -851,7 +851,7 @@ func ObjectToJson(object interface{}) string {
 		return ToJsonString(resultMap)
 	} else if objKind == reflect.Array || objKind == reflect.Slice {
 		// Array 结构
-		var resultSlice []interface{}
+		resultSlice := []interface{}{}
 		objValue := reflect.ValueOf(object)
 		for index := 0; index < objValue.Len(); index++ {
 			arrayItemValue := objValue.Index(index)
