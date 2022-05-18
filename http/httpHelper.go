@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"github.com/lunny/log"
+	"github.com/simonalong/gole/util"
 	"io"
 	"io/ioutil"
 	"net"
@@ -371,8 +372,9 @@ func parseStandard(responseResult []byte, errs error) ([]byte, error) {
 		if standRsp.Code != "success" {
 			return nil, &NetError{ErrMsg: "remote err, bizCode=" + standRsp.Code.(string) + ", message=" + standRsp.Message}
 		}
-	} else if codeKind == reflect.Int || codeKind == reflect.Int8 || codeKind == reflect.Int16 || codeKind == reflect.Int32 || codeKind == reflect.Int64 {
-		if standRsp.Code != 0 && standRsp.Code != 200 {
+	} else if codeKind == reflect.Int || codeKind == reflect.Int8 || codeKind == reflect.Int16 || codeKind == reflect.Int32 || codeKind == reflect.Int64 || codeKind == reflect.Float32 || codeKind == reflect.Float64 {
+		code := util.ToInt(standRsp.Code)
+		if code != 0 && code != 200 {
 			return nil, &NetError{ErrMsg: "remote err, bizCode=" + standRsp.Code.(string) + ", message=" + standRsp.Message}
 		}
 	}
