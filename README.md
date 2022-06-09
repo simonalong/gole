@@ -1,6 +1,13 @@
 # gole
 gole是go代码写的的个人工具包。
 
+### ！！！！！当前项目后续将不再维护 ！！！！！
+该项目已经合入到公司级别的全量工具包项目go-base中，后续可以关注go-base项目，如下，
+https://github.com/isyscore/isc-gobase
+
+---
+
+
 ### 安装使用
 ```shell
 go get github.com/simonalong/gole
