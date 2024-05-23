@@ -56,7 +56,7 @@ type NetError struct {
 	Error string
 }
 
-func (error *NetError) Error() string {
+func (error *NetError) ErrorMsg() string {
 	return error.Error
 }
 
