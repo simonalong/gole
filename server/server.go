@@ -169,7 +169,7 @@ func ErrHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				rsp.FailedOfStandard(c, 500, fmt.Sprintf("业务异常：%v", err))
+				rsp.FailOfStandard(c, 500, fmt.Sprintf("业务异常：%v", err))
 				return
 			}
 		}()

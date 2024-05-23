@@ -38,6 +38,10 @@ func Success(ctx *gin.Context, object any) {
 	ctx.JSON(http.StatusOK, object)
 }
 
+func Fail(ctx *gin.Context, code int, object any) {
+	ctx.JSON(code, object)
+}
+
 func SuccessOfStandard(ctx *gin.Context, v any) {
 	ctx.JSON(http.StatusOK, map[string]any{
 		"code":    0,
@@ -46,7 +50,7 @@ func SuccessOfStandard(ctx *gin.Context, v any) {
 	})
 }
 
-func FailedOfStandard(ctx *gin.Context, code int, message string) {
+func FailOfStandard(ctx *gin.Context, code int, message string) {
 	ctx.JSON(http.StatusOK, map[string]any{
 		"code":    code,
 		"message": message,
@@ -54,7 +58,7 @@ func FailedOfStandard(ctx *gin.Context, code int, message string) {
 	})
 }
 
-func FailedWithDataOfStandard(ctx *gin.Context, code string, message string, v any) {
+func FailWithDataOfStandard(ctx *gin.Context, code string, message string, v any) {
 	ctx.JSON(http.StatusOK, map[string]any{
 		"code":    code,
 		"message": message,

@@ -73,7 +73,7 @@ func TestServer2(t *testing.T) {
 	})
 
 	server.Get("/test/err", func(c *gin.Context) {
-		rsp.FailedOfStandard(c, 500, "异常")
+		rsp.FailOfStandard(c, 500, "异常")
 	})
 
 	server.Run()
