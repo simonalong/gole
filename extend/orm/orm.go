@@ -69,7 +69,7 @@ func getDbDsn(dbType string, datasourceConfig config.DatasourceConfig) string {
 func ConfigChangeListenerOfOrm(event listener.BaseEvent) {
 	ev := event.(listener.ConfigChangeEvent)
 	if ev.Key == "base.orm.show-sql" {
-		if isc.ToBool(ev.Value) {
+		if util.ToBool(ev.Value) {
 			logger.Group("orm").SetLevel(logrus.DebugLevel)
 		} else {
 			logger.Group("orm").SetLevel(logrus.InfoLevel)

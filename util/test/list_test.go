@@ -6,7 +6,7 @@ import (
 )
 
 func TestList(t *testing.T) {
-	list := isc.NewList[string]()
+	list := util.NewList[string]()
 	list.Add("aaaa")
 	list.AddAll("bbbb", "ccc")
 	t.Logf("list: %v\n", list)
@@ -17,7 +17,7 @@ func TestList(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-	m := isc.NewMap[string, string]()
+	m := util.NewMap[string, string]()
 	m["aa"] = "bb"
 	m.Put("cc", "dd")
 	t.Logf("m: %v\n", m)

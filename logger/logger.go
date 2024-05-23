@@ -292,7 +292,7 @@ func rotateLog(path, level string) *rotatelogs.RotateLogs {
 
 	rotateOptions := []rotatelogs.Option{rotatelogs.WithLinkName(path + "app-" + level + ".log")}
 	if maxSizeStr != "" {
-		rotateOptions = append(rotateOptions, rotatelogs.WithRotationSize(isc.ParseByteSize(maxSizeStr)))
+		rotateOptions = append(rotateOptions, rotatelogs.WithRotationSize(util.ParseByteSize(maxSizeStr)))
 	}
 
 	_maxHistory, err := time.ParseDuration(maxHistoryStr)

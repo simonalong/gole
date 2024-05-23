@@ -1,4 +1,4 @@
-package isc
+package util
 
 type LinkedHashMap[K comparable, V comparable] OrderMap[K, V]
 

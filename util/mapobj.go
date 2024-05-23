@@ -1,4 +1,4 @@
-package isc
+package util
 
 type ISCMap[K comparable, V any] map[K]V
 

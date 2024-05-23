@@ -48,9 +48,9 @@ func TestZip(t *testing.T) {
 	f3 := "./zip/test3.txt"
 	var files = []string{f1, f2, f3}
 	dest := "./zip/test.zip"
-	srcSize := isc.FormatSize(file.SizeList(files))
+	srcSize := util.FormatSize(file.SizeList(files))
 	if err := compress.Zip(dest, files); err == nil {
-		dstSize := isc.FormatSize(file.Size("./zip/test.zip"))
+		dstSize := util.FormatSize(file.Size("./zip/test.zip"))
 		// Compress success, size: 714.55KB -> 5.88KB
 		t.Logf("Compress success, zip size: %s -> %s", srcSize, dstSize)
 	} else {
@@ -73,8 +73,8 @@ func TestUnzip(t *testing.T) {
 	dest := "./zip/uncomp"
 	err := compress.Unzip(zipFile, dest)
 	if err == nil {
-		srcSize := isc.FormatSize(file.Size("./zip/test.zip"))
-		dstSize := isc.FormatSize(file.SizeList(files))
+		srcSize := util.FormatSize(file.Size("./zip/test.zip"))
+		dstSize := util.FormatSize(file.SizeList(files))
 
 		// Decompress success, unzip size: 5.88KB -> 714.55KB
 		t.Logf("Decompress success, unzip size: %s -> %s", srcSize, dstSize)

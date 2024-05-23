@@ -39,7 +39,7 @@ func Help(c *gin.Context) {
 }
 
 func pre(port int) string {
-	return isc.ToString(port) + apiPreAndModule()
+	return util.ToString(port) + apiPreAndModule()
 }
 
 func apiPreAndModule() string {

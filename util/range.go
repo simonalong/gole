@@ -1,4 +1,4 @@
-package isc
+package util
 
 func Int(AStart, AEnd int) []int {
 	var ret []int

@@ -1,4 +1,4 @@
-package isc
+package util
 
 type Pair[A any, B any] struct {
 	First  A

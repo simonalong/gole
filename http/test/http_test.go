@@ -30,7 +30,7 @@ func TestGetSimple(t *testing.T) {
 	}
 	fmt.Println("结果： " + string(data.([]byte)))
 
-	datas := isc.ToInt(unsafe.Sizeof(data))
+	datas := util.ToInt(unsafe.Sizeof(data))
 
-	fmt.Println("====" + isc.ToString(datas))
+	fmt.Println("====" + util.ToString(datas))
 }

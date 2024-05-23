@@ -6,12 +6,12 @@ import (
 )
 
 func TestSet(t *testing.T) {
-	l := isc.NewListWithItems(1, 2, 3, 4, 1, 2, 3, 4, 5, 6)
+	l := util.NewListWithItems(1, 2, 3, 4, 1, 2, 3, 4, 5, 6)
 	t.Logf("%v", l)
-	ls := isc.ListToSet(l)
+	ls := util.ListToSet(l)
 	t.Logf("%v", ls)
 
-	s := isc.NewSetWithItems(1, 2, 3, 4, 1, 2, 3, 4, 5, 6)
+	s := util.NewSetWithItems(1, 2, 3, 4, 1, 2, 3, 4, 5, 6)
 	t.Logf("%v", s)
 
 	_ = s.Add(7)

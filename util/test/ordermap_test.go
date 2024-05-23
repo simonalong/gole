@@ -7,7 +7,7 @@ import (
 )
 
 func TestOrderMap(t *testing.T) {
-	om := isc.NewOrderMap[string, string]()
+	om := util.NewOrderMap[string, string]()
 	om.Put("a", "1")
 	om.Put("b", "2")
 	om.Put("c", "3")

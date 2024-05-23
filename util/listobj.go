@@ -1,4 +1,4 @@
-package isc
+package util
 
 type ISCList[T any] []T
 

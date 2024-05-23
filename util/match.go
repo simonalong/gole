@@ -1,4 +1,4 @@
-package isc
+package util
 
 func ListAll[T any](list []T, f func(T) bool) bool {
 	for _, e := range list {

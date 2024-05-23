@@ -1,4 +1,4 @@
-package isc
+package util
 
 func ListFlatMap[T any, R any](list []T, f func(T) []R) []R {
 	var r []R

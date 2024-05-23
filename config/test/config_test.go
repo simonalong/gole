@@ -34,8 +34,8 @@ func TestLoadConfig(t *testing.T) {
 	assert.Equal(t, config.GetValueInt("key1.key2.intdata"), 12)
 	assert.Equal(t, config.GetValueString("key1.key2.strdata"), "data")
 	assert.Equal(t, config.GetValueBool("key1.key2.booldata"), true)
-	assert.Equal(t, config.GetValueInt64("key1.key2.int64data"), isc.ToInt64(12))
-	assert.Equal(t, config.GetValueFloat32("key1.key2.floatdata"), isc.ToFloat32(12.3))
+	assert.Equal(t, config.GetValueInt64("key1.key2.int64data"), util.ToInt64(12))
+	assert.Equal(t, config.GetValueFloat32("key1.key2.floatdata"), util.ToFloat32(12.3))
 
 	expectData := map[string]any{
 		"field1": 1,

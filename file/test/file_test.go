@@ -48,7 +48,7 @@ func TestChild(t *testing.T) {
 }
 
 func TestFileSize(t *testing.T) {
-	assert.Equal(t, isc.ToInt64(40), file.Size("./assert_file_size.txt"))
+	assert.Equal(t, util.ToInt64(40), file.Size("./assert_file_size.txt"))
 }
 
 func TestFileFormatSize(t *testing.T) {

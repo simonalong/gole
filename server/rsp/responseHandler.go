@@ -59,11 +59,11 @@ func ResponseHandler() gin.HandlerFunc {
 		if "" != bodyStr && unsafe.Sizeof(bodyStr) < 10240 {
 			if strings.HasPrefix(bodyStr, "{") && strings.HasSuffix(bodyStr, "}") {
 				bodys := map[string]any{}
-				_ = isc.StrToObject(bodyStr, &bodys)
+				_ = util.StrToObject(bodyStr, &bodys)
 				body = bodys
 			} else if strings.HasPrefix(bodyStr, "[") && strings.HasSuffix(bodyStr, "]") {
 				var bodys []any
-				_ = isc.StrToObject(bodyStr, &bodys)
+				_ = util.StrToObject(bodyStr, &bodys)
 				body = bodys
 			}
 		}
@@ -102,7 +102,7 @@ func ResponseHandler() gin.HandlerFunc {
 				}
 			}
 			if expPrint {
-				logger.Error("返回异常, result：%v", isc.ObjectToJson(errMessage))
+				logger.Error("返回异常, result：%v", util.ObjectToJson(errMessage))
 			}
 		} else {
 			var response DataResponse[any]
@@ -112,7 +112,7 @@ func ResponseHandler() gin.HandlerFunc {
 				if response.Code != 0 && response.Code != 200 {
 					errMessage.Response = response
 					if expPrint {
-						logger.Error("返回异常, result：%v", isc.ObjectToJson(errMessage))
+						logger.Error("返回异常, result：%v", util.ObjectToJson(errMessage))
 					}
 				} else {
 					responseMessage.Response = response
@@ -130,7 +130,7 @@ func printReq(requestUri string, requestData Request) {
 	printFlag := false
 	if len(includeUri) != 0 {
 		for _, uri := range includeUri {
-			if strings.HasPrefix(requestUri, isc.ToString(uri)) {
+			if strings.HasPrefix(requestUri, util.ToString(uri)) {
 				printFlag = true
 				break
 			}
@@ -140,7 +140,7 @@ func printReq(requestUri string, requestData Request) {
 	excludeUri := config.GetValueArray("base.server.request.print.exclude-uri")
 	if len(excludeUri) != 0 {
 		for _, uri := range excludeUri {
-			if strings.HasPrefix(requestUri, isc.ToString(uri)) {
+			if strings.HasPrefix(requestUri, util.ToString(uri)) {
 				printFlag = false
 				break
 			}
@@ -149,7 +149,7 @@ func printReq(requestUri string, requestData Request) {
 
 	reqLogLevel := config.GetValueString("base.server.request.print.level")
 	if printFlag {
-		logger.Record(reqLogLevel, "请求：%v", isc.ToJsonString(requestData))
+		logger.Record(reqLogLevel, "请求：%v", util.ToJsonString(requestData))
 	}
 	return
 }
@@ -159,7 +159,7 @@ func printRsq(requestUri string, responseMessage Response) {
 	printFlag := false
 	if len(includeUri) != 0 {
 		for _, uri := range includeUri {
-			if strings.HasPrefix(requestUri, isc.ToString(uri)) {
+			if strings.HasPrefix(requestUri, util.ToString(uri)) {
 				printFlag = true
 				break
 			}
@@ -169,7 +169,7 @@ func printRsq(requestUri string, responseMessage Response) {
 	excludeUri := config.GetValueArray("base.server.response.print.exclude-uri")
 	if len(excludeUri) != 0 {
 		for _, uri := range excludeUri {
-			if strings.HasPrefix(requestUri, isc.ToString(uri)) {
+			if strings.HasPrefix(requestUri, util.ToString(uri)) {
 				printFlag = false
 				break
 			}
@@ -178,7 +178,7 @@ func printRsq(requestUri string, responseMessage Response) {
 
 	rspLogLevel := config.GetValueString("base.server.response.print.level")
 	if printFlag {
-		logger.Record(rspLogLevel, "响应：%v", isc.ToJsonString(responseMessage))
+		logger.Record(rspLogLevel, "响应：%v", util.ToJsonString(responseMessage))
 	}
 }
 

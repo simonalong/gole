@@ -10,9 +10,9 @@ import (
 func TestField(t *testing.T) {
 	privateField := PrivateFieldStruct{}
 	data := "data"
-	isc.SetFieldPrivateValue(reflect.ValueOf(privateField), "name", reflect.ValueOf(&data))
+	util.SetFieldPrivateValue(reflect.ValueOf(privateField), "name", reflect.ValueOf(&data))
 
-	dataRel := isc.GetPrivateFieldValue(reflect.ValueOf(&privateField), "name")
+	dataRel := util.GetPrivateFieldValue(reflect.ValueOf(&privateField), "name")
 	fmt.Println(dataRel)
 }
 

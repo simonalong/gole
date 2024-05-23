@@ -1,4 +1,4 @@
-package isc
+package util
 
 type ISCListToMap[T any, R any] struct {
 	ISCList[T]

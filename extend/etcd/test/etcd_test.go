@@ -27,7 +27,7 @@ func Test1(t *testing.T) {
 	rsp, _ := etcdClient.Get(ctx, "test")
 	etcdClient.Get(ctx, "test", func(pOp *clientv3.Op) {
 		fmt.Println("信息")
-		fmt.Println(isc.ToJsonString(&pOp))
+		fmt.Println(util.ToJsonString(&pOp))
 	})
 	fmt.Println(rsp)
 }

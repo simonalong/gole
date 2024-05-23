@@ -35,7 +35,7 @@ func InsertData(c *gin.Context) {
   insertReq := InsertReq{}
 
   // 读取body数据，可以采用isc提供的工具
-  err := isc.DataToObject(c.Request.Body, &insertReq)
+  err := util.DataToObject(c.Request.Body, &insertReq)
   if err != nil {
     // ... 省略
     return

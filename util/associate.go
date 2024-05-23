@@ -1,4 +1,4 @@
-package isc
+package util
 
 //Associate Returns a Map containing key-value map provided by transform function applied to elements of the given collection.
 //If any of two map would have the same key the last one gets added to the map.

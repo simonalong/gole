@@ -1,4 +1,4 @@
-package isc
+package util
 
 //SubList 分片截取
 func SubList[T any](list []T, fromIndex int, toIndex int) []T {

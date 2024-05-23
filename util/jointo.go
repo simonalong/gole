@@ -1,4 +1,4 @@
-package isc
+package util
 
 func ListJoinToStringFull[T any](list []T, sep string, prefix string, postfix string, f func(T) string) string {
 	buffer := prefix

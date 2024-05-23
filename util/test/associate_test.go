@@ -26,8 +26,8 @@ func initList() []AssociateStruct {
 	}
 }
 
-var transformFun = func(a AssociateStruct) isc.Pair[string, AssociateStruct] {
-	return isc.NewPair(a.Key, a)
+var transformFun = func(a AssociateStruct) util.Pair[string, AssociateStruct] {
+	return util.NewPair(a.Key, a)
 }
 
 var transformFun1 = func(a AssociateStruct) int {
@@ -40,33 +40,33 @@ var keySelector = func(a AssociateStruct) string {
 
 func TestAssociate(t *testing.T) {
 	list := initList()
-	l := isc.Associate(list, transformFun)
+	l := util.Associate(list, transformFun)
 	t.Logf("%v", l)
 }
 
 func TestAssociateTo(t *testing.T) {
 	list := initList()
 	m := map[string]AssociateStruct{}
-	r := isc.AssociateTo(list, &m, transformFun)
+	r := util.AssociateTo(list, &m, transformFun)
 	t.Logf("%v", r)
 }
 
 func TestAssociateBy(t *testing.T) {
 	list := initList()
-	r := isc.AssociateBy(list, keySelector)
+	r := util.AssociateBy(list, keySelector)
 	t.Logf("%v", r)
 }
 
 func TestAssociateByAndValue(t *testing.T) {
 	list := initList()
-	r := isc.AssociateByAndValue(list, keySelector, transformFun)
+	r := util.AssociateByAndValue(list, keySelector, transformFun)
 	t.Logf("%v", r)
 }
 
 func TestAssociateByAndValueTo(t *testing.T) {
 	list := initList()
 	m := make(map[string]int)
-	isc.AssociateByAndValueTo(list, &m, keySelector, transformFun1)
+	util.AssociateByAndValueTo(list, &m, keySelector, transformFun1)
 	t.Logf("%v", m)
 }
 
@@ -74,7 +74,7 @@ func TestAssociateByAndValueTo(t *testing.T) {
 func TestAssociateByTo(t *testing.T) {
 	list := initList()
 	m := make(map[string]AssociateStruct)
-	isc.AssociateByTo(list, &m, keySelector)
+	util.AssociateByTo(list, &m, keySelector)
 	t.Logf("%v", m)
 }
 
@@ -83,7 +83,7 @@ func TestAssociateByTo(t *testing.T) {
 //
 func TestAssociateWith(t *testing.T) {
 	list := initList()
-	m := isc.AssociateWith(list, transformFun1)
+	m := util.AssociateWith(list, transformFun1)
 	t.Logf("%v", m)
 }
 
@@ -91,6 +91,6 @@ func TestAssociateWith(t *testing.T) {
 func TestAssociateWithTo(t *testing.T) {
 	list := initList()
 	m := make(map[AssociateStruct]int)
-	isc.AssociateWithTo(list, &m, transformFun1)
+	util.AssociateWithTo(list, &m, transformFun1)
 	t.Logf("%v", m)
 }

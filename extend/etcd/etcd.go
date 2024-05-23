@@ -106,7 +106,7 @@ func NewEtcdClient() (*EtcdClientWrap, error) {
 			break
 		}
 	} else {
-		retryTimes := isc.ToInt(config.EtcdCfg.DialRetry)
+		retryTimes := util.ToInt(config.EtcdCfg.DialRetry)
 		for i := 0; i < retryTimes; i++ {
 			_etcdClient, err := etcdClientV3.New(etcdCfg)
 			if err != nil {

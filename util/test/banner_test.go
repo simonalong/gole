@@ -8,5 +8,5 @@ import (
 
 func TestBanner(t *testing.T) {
 	// str := `abc` + "`" + `defg`
-	t.Logf(isc.DefaultBanner)
+	t.Logf(util.DefaultBanner)
 }

@@ -82,7 +82,7 @@ func CallFun(beanName, methodName string, parameterValueMap map[string]any) []an
 			method := fType.Method(index)
 
 			// 私有字段不处理
-			if !isc.IsPublic(method.Name) {
+			if !util.IsPublic(method.Name) {
 				continue
 			}
 
@@ -94,8 +94,8 @@ func CallFun(beanName, methodName string, parameterValueMap map[string]any) []an
 			var in []reflect.Value
 			in = append(in, reflect.ValueOf(beanValue))
 			for i := 1; i < parameterNum; i++ {
-				if v, exit := parameterValueMap["p"+isc.ToString(i)]; exit {
-					pV, err := isc.ToValue(v, method.Type.In(i).Kind())
+				if v, exit := parameterValueMap["p"+util.ToString(i)]; exit {
+					pV, err := util.ToValue(v, method.Type.In(i).Kind())
 					if err != nil {
 						continue
 					}
@@ -130,7 +130,7 @@ func GetField(beanName, fieldName string) any {
 			field := fType.Field(index)
 
 			// 私有字段不处理
-			if !isc.IsPublic(field.Name) {
+			if !util.IsPublic(field.Name) {
 				continue
 			}
 
@@ -146,7 +146,7 @@ func GetField(beanName, fieldName string) any {
 func SetField(beanName string, fieldName string, fieldValue any) {
 	if beanValue, exist := BeanMap[beanName]; exist {
 		// 私有字段不处理
-		if !isc.IsPublic(fieldName) {
+		if !util.IsPublic(fieldName) {
 			return
 		}
 
@@ -162,7 +162,7 @@ func SetField(beanName string, fieldName string, fieldValue any) {
 		}
 
 		if _, exist := fType.FieldByName(fieldName); exist {
-			v, err := isc.ToValue(fieldValue, fValue.FieldByName(fieldName).Kind())
+			v, err := util.ToValue(fieldValue, fValue.FieldByName(fieldName).Kind())
 			if err != nil {
 				return
 			}
@@ -181,7 +181,7 @@ func DebugBeanList(c *gin.Context) {
 
 func DebugBeanGetField(c *gin.Context) {
 	fieldGetReq := FieldGetReq{}
-	err := isc.DataToObject(c.Request.Body, &fieldGetReq)
+	err := util.DataToObject(c.Request.Body, &fieldGetReq)
 	if err != nil {
 		return
 	}
@@ -190,7 +190,7 @@ func DebugBeanGetField(c *gin.Context) {
 
 func DebugBeanSetField(c *gin.Context) {
 	fieldSetReq := FieldSetReq{}
-	err := isc.DataToObject(c.Request.Body, &fieldSetReq)
+	err := util.DataToObject(c.Request.Body, &fieldSetReq)
 	if err != nil {
 		return
 	}
@@ -200,7 +200,7 @@ func DebugBeanSetField(c *gin.Context) {
 
 func DebugBeanFunCall(c *gin.Context) {
 	funCallReq := FunCallReq{}
-	err := isc.DataToObject(c.Request.Body, &funCallReq)
+	err := util.DataToObject(c.Request.Body, &funCallReq)
 	if err != nil {
 		return
 	}

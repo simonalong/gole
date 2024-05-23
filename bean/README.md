@@ -74,7 +74,7 @@ func TestCallFun1(t *testing.T) {
 
     // 函数调用
     fv := bean.CallFun("test", "Fun1", parameterMap)
-    assert.Equal(t, isc.ToString(fv[0]), "name")
+    assert.Equal(t, util.ToString(fv[0]), "name")
 }
 ```
 

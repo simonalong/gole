@@ -139,7 +139,7 @@ func TestUrlEncode(t *testing.T) {
 func TestCode(t *testing.T) {
 	str := ""
 	t.Logf("len = %d\n", len(str))
-	str1 := isc.NewListWithList([]rune(str))
+	str1 := util.NewListWithList([]rune(str))
 	t.Logf("len = %d\n", len(str1))
 
 	idx1 := strings.Index(str, "令")

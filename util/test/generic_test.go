@@ -6,7 +6,7 @@ import (
 )
 
 func TestGeneric(t *testing.T) {
-	list := isc.NewListWithItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+	list := util.NewListWithItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 	i := list.IndexOf(5)
 	t.Logf("indexOf(5) = %d\n", i)
 
@@ -16,7 +16,7 @@ func TestGeneric(t *testing.T) {
 
 	t.Logf("filter = %v\n", l2)
 
-	lg := isc.ListToTripleFrom[int, string, string](list)
+	lg := util.ListToTripleFrom[int, string, string](list)
 	mg := lg.GroupBy(func(item int) string {
 		if item%2 == 0 {
 			return "even"

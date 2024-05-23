@@ -8,7 +8,7 @@ import (
 )
 
 func TestString(t *testing.T) {
-	var s isc.ISCString = "abcdefg"
+	var s util.ISCString = "abcdefg"
 	ss := s.Insert(3, "xyz")
 	// ss := s.SubStringAfterLast(",")
 	t.Logf("%v\n", ss) // abcxyzdefg
@@ -20,170 +20,170 @@ func TestString(t *testing.T) {
 
 func TestStringConvert(t *testing.T) {
 	originalStr := "dataBaseUser"
-	newStr := isc.BigCamel(originalStr)
+	newStr := util.BigCamel(originalStr)
 	assert.Equal(t, "DataBaseUser", newStr)
 }
 
 func TestMiddleLine(t *testing.T) {
 	originalStr := "dataBaseUser"
-	newStr := isc.MiddleLine(originalStr)
+	newStr := util.MiddleLine(originalStr)
 	assert.Equal(t, "data-base-user", newStr)
 }
 
 func TestBigCamelToMiddleLine(t *testing.T) {
 	originalStr := "DataBaseUser"
-	newStr := isc.BigCamelToMiddleLine(originalStr)
+	newStr := util.BigCamelToMiddleLine(originalStr)
 	assert.Equal(t, "data-base-user", newStr)
 }
 
 func TestBigCamelToSmallCamel(t *testing.T) {
 	originalStr := "DataBaseUser"
-	newStr := isc.BigCamelToSmallCamel(originalStr)
+	newStr := util.BigCamelToSmallCamel(originalStr)
 	assert.Equal(t, "dataBaseUser", newStr)
 }
 
 func TestBigCamelToPostUnder(t *testing.T) {
 	originalStr := "DataBaseUser"
-	newStr := isc.BigCamelToPostUnder(originalStr)
+	newStr := util.BigCamelToPostUnder(originalStr)
 	assert.Equal(t, "data_base_user_", newStr)
 }
 
 func TestPostUnder(t *testing.T) {
 	originalStr := "dataBaseUser"
-	newStr := isc.PostUnder(originalStr)
+	newStr := util.PostUnder(originalStr)
 	assert.Equal(t, "data_base_user_", newStr)
 }
 
 func TestPrePostUnder(t *testing.T) {
 	originalStr := "dataBaseUser"
-	newStr := isc.PrePostUnder(originalStr)
+	newStr := util.PrePostUnder(originalStr)
 	assert.Equal(t, "_data_base_user_", newStr)
 }
 
 func TestBigCamelToPrePostUnder(t *testing.T) {
 	originalStr := "DataBaseUser"
-	newStr := isc.BigCamelToPrePostUnder(originalStr)
+	newStr := util.BigCamelToPrePostUnder(originalStr)
 	assert.Equal(t, "_data_base_user_", newStr)
 }
 
 func TestPreUnder(t *testing.T) {
 	originalStr := "dataBaseUser"
-	newStr := isc.PreUnder(originalStr)
+	newStr := util.PreUnder(originalStr)
 	assert.Equal(t, "_data_base_user", newStr)
 }
 
 func TestBigCamelToPreUnder(t *testing.T) {
 	originalStr := "DataBaseUser"
-	newStr := isc.BigCamelToPreUnder(originalStr)
+	newStr := util.BigCamelToPreUnder(originalStr)
 	assert.Equal(t, "_data_base_user", newStr)
 }
 
 func TestBigCamelToUnderLine(t *testing.T) {
 	originalStr := "DataBaseUser"
-	newStr := isc.BigCamelToUnderLine(originalStr)
+	newStr := util.BigCamelToUnderLine(originalStr)
 	assert.Equal(t, "data_base_user", newStr)
 }
 
 func TestBigCamelToUpperMiddle(t *testing.T) {
 	originalStr := "DataBaseUser"
-	newStr := isc.BigCamelToUpperMiddle(originalStr)
+	newStr := util.BigCamelToUpperMiddle(originalStr)
 	assert.Equal(t, "DATA-BASE-USER", newStr)
 }
 
 func TestUpperUnderMiddle(t *testing.T) {
 	originalStr := "dataBaseUser"
-	newStr := isc.UpperUnderMiddle(originalStr)
+	newStr := util.UpperUnderMiddle(originalStr)
 	assert.Equal(t, "DATA-BASE-USER", newStr)
 }
 
 func TestUpperUnder(t *testing.T) {
 	originalStr := "dataBaseUser"
-	newStr := isc.UpperUnder(originalStr)
+	newStr := util.UpperUnder(originalStr)
 	assert.Equal(t, "DATA_BASE_USER", newStr)
 }
 
 func TestBigCamelToUpperUnder(t *testing.T) {
 	originalStr := "DataBaseUser"
-	newStr := isc.BigCamelToUpperUnder(originalStr)
+	newStr := util.BigCamelToUpperUnder(originalStr)
 	assert.Equal(t, "DATA_BASE_USER", newStr)
 }
 
 func TestMiddleLineToSmallCamel(t *testing.T) {
 	originalStr := "data-base-user"
-	newStr := isc.MiddleLineToSmallCamel(originalStr)
+	newStr := util.MiddleLineToSmallCamel(originalStr)
 	assert.Equal(t, "dataBaseUser", newStr)
 }
 
 func TestMiddleLineToBigCamel(t *testing.T) {
 	originalStr := "data-base-user"
-	newStr := isc.MiddleLineToBigCamel(originalStr)
+	newStr := util.MiddleLineToBigCamel(originalStr)
 	assert.Equal(t, "DataBaseUser", newStr)
 }
 
 func TestPreFixUnderLine(t *testing.T) {
 	originalStr := "dataBaseUser"
-	newStr := isc.PreFixUnderLine(originalStr, "pre_")
+	newStr := util.PreFixUnderLine(originalStr, "pre_")
 	assert.Equal(t, "pre_data_base_user", newStr)
 }
 
 func TestUnderLineToSmallCamel(t *testing.T) {
 	originalStr1 := "data_base_user"
-	newStr1 := isc.UnderLineToSmallCamel(originalStr1)
+	newStr1 := util.UnderLineToSmallCamel(originalStr1)
 	assert.Equal(t, "dataBaseUser", newStr1)
 
 	originalStr2 := "_data_base_user"
-	newStr2 := isc.UnderLineToSmallCamel(originalStr2)
+	newStr2 := util.UnderLineToSmallCamel(originalStr2)
 	assert.Equal(t, "dataBaseUser", newStr2)
 
 	originalStr3 := "data_base_user_"
-	newStr3 := isc.UnderLineToSmallCamel(originalStr3)
+	newStr3 := util.UnderLineToSmallCamel(originalStr3)
 	assert.Equal(t, "dataBaseUser", newStr3)
 }
 
 func TestPreFixUnderToSmallCamel(t *testing.T) {
 	originalStr := "pre_data_base_user"
-	newStr := isc.PreFixUnderToSmallCamel(originalStr, "pre_")
+	newStr := util.PreFixUnderToSmallCamel(originalStr, "pre_")
 	assert.Equal(t, "dataBaseUser", newStr)
 }
 
 func TestUnderLineToBigCamel(t *testing.T) {
 	originalStr1 := "data_base_user"
-	newStr1 := isc.UnderLineToBigCamel(originalStr1)
+	newStr1 := util.UnderLineToBigCamel(originalStr1)
 	assert.Equal(t, "DataBaseUser", newStr1)
 
 	originalStr2 := "_data_base_user"
-	newStr2 := isc.UnderLineToBigCamel(originalStr2)
+	newStr2 := util.UnderLineToBigCamel(originalStr2)
 	assert.Equal(t, "DataBaseUser", newStr2)
 
 	originalStr3 := "_data_base_user_"
-	newStr3 := isc.UnderLineToBigCamel(originalStr3)
+	newStr3 := util.UnderLineToBigCamel(originalStr3)
 	assert.Equal(t, "DataBaseUser", newStr3)
 
 	originalStr4 := "data_base_user_"
-	newStr4 := isc.UnderLineToBigCamel(originalStr4)
+	newStr4 := util.UnderLineToBigCamel(originalStr4)
 	assert.Equal(t, "DataBaseUser", newStr4)
 }
 
 func TestUpperUnderMiddleToSmallCamel(t *testing.T) {
 	originalStr := "DATA-BASE-USER"
-	newStr := isc.UpperUnderMiddleToSmallCamel(originalStr)
+	newStr := util.UpperUnderMiddleToSmallCamel(originalStr)
 	assert.Equal(t, "dataBaseUser", newStr)
 }
 
 func TestUpperUnderToSmallCamel(t *testing.T) {
 	originalStr := "DATA_BASE_USER"
-	newStr := isc.UpperUnderToSmallCamel(originalStr)
+	newStr := util.UpperUnderToSmallCamel(originalStr)
 	assert.Equal(t, "dataBaseUser", newStr)
 }
 
 func TestUpperUnderToBigCamel(t *testing.T) {
 	originalStr := "DATA_BASE_USER"
-	newStr := isc.UpperUnderToBigCamel(originalStr)
+	newStr := util.UpperUnderToBigCamel(originalStr)
 	assert.Equal(t, "DataBaseUser", newStr)
 }
 
 func TestUpperMiddleToBigCamel(t *testing.T) {
 	originalStr := "DATA-BASE-USER"
-	newStr := isc.UpperMiddleToBigCamel(originalStr)
+	newStr := util.UpperMiddleToBigCamel(originalStr)
 	assert.Equal(t, "DataBaseUser", newStr)
 }

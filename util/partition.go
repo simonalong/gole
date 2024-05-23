@@ -1,4 +1,4 @@
-package isc
+package util
 
 func Partition[T any](list []T, partition int) [][]T {
 	return PartitionWithCal(list, func(int) int {

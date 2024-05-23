@@ -57,7 +57,7 @@ var serverLoaded = false
 var ginHandlers []gin.HandlerFunc
 
 func init() {
-	isc.PrintBanner()
+	util.PrintBanner()
 	config.LoadConfig()
 	printVersionAndProfile()
 }
@@ -158,7 +158,7 @@ func InitServer() {
 func ConfigChangeListener(event listener.BaseEvent) {
 	ev := event.(listener.ConfigChangeEvent)
 	if ev.Key == "base.server.gin.pprof.enable" {
-		if isc.ToBool(ev.Value) && !pprofHave {
+		if util.ToBool(ev.Value) && !pprofHave {
 			pprofHave = true
 			pprof.Register(engine)
 		}
@@ -494,13 +494,13 @@ func Use(middleware ...gin.HandlerFunc) gin.IRoutes {
 
 func getPathAppendApiModel(path string) string {
 	// 获取 api-module
-	apiModel := isc.ISCString(config.GetValueString("api-module")).Trim("/")
+	apiModel := util.ISCString(config.GetValueString("api-module")).Trim("/")
 	// 获取api前缀
-	ap := isc.ISCString(config.GetValueStringDefault("base.api.prefix", "")).Trim("/")
+	ap := util.ISCString(config.GetValueStringDefault("base.api.prefix", "")).Trim("/")
 	if ap != "" {
 		ApiPrefix = "/" + string(ap)
 	}
-	p2 := isc.ISCString(path).Trim("/")
+	p2 := util.ISCString(path).Trim("/")
 	if strings.HasPrefix(string(p2), "api") {
 		return fmt.Sprintf("/%s", p2)
 	} else {

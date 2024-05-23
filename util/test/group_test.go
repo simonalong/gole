@@ -21,7 +21,7 @@ func TestGroupBy(t *testing.T) {
 		{Key: "K1", Name: "库陈胜2", Age: 2},
 		{Key: "K2", Name: "库陈胜3", Age: 1},
 	}
-	m := isc.GroupBy(list, func(t GroupStruct) string {
+	m := util.GroupBy(list, func(t GroupStruct) string {
 		return t.Key
 	})
 	t.Logf("%v", m)
@@ -36,7 +36,7 @@ func TestGroupByTransform(t *testing.T) {
 		{Key: "K1", Name: "库陈胜2", Age: 2},
 		{Key: "K2", Name: "库陈胜3", Age: 1},
 	}
-	m := isc.GroupByTransform(list, func(t GroupStruct) string {
+	m := util.GroupByTransform(list, func(t GroupStruct) string {
 		return t.Key
 	}, func(t GroupStruct) int {
 		return t.Age

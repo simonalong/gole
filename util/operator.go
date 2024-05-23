@@ -1,4 +1,4 @@
-package isc
+package util
 
 func ListPlus[T any](list []T, n []T) []T {
 	var t []T

@@ -83,7 +83,7 @@ func CheckWithParameter(parameterMap map[string]interface{}, object interface{},
 		fieldValue := objValue.Field(index)
 
 		// 私有字段不处理
-		if !isc.IsPublic(field.Name) {
+		if !util.IsPublic(field.Name) {
 			continue
 		}
 
@@ -219,7 +219,7 @@ func doCollectCollector(objType reflect.Type) {
 		fieldKind := field.Type.Kind()
 
 		// 不可访问字段不处理
-		if !isc.IsPublic(field.Name) {
+		if !util.IsPublic(field.Name) {
 			continue
 		}
 

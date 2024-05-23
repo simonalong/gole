@@ -18,7 +18,7 @@ func TestMapToProperties1(t *testing.T) {
 	dataMap["c"] = 14
 	dataMap["c"] = ""
 
-	act, err := isc.MapToProperties(dataMap)
+	act, err := util.MapToProperties(dataMap)
 	if err != nil {
 		log.Printf("转换错误：%v", err)
 		return
@@ -172,7 +172,7 @@ func propertiesToMap(t *testing.T, filePath string) {
 	}
 
 	expect := strings.TrimSpace(string(bytes))
-	_, err = isc.PropertiesToMap(expect)
+	_, err = util.PropertiesToMap(expect)
 	if err != nil {
 		log.Printf("转换错误：%v", err)
 		return
@@ -187,7 +187,7 @@ func yamlToPropertiesWithKeyTest(t *testing.T, filePath string) {
 	}
 
 	expect := strings.TrimSpace(string(bytes))
-	property, err := isc.YamlToPropertiesWithKey("t", expect)
+	property, err := util.YamlToPropertiesWithKey("t", expect)
 	if err != nil {
 		log.Printf("转换错误：%v", err)
 		return
@@ -204,7 +204,7 @@ func yamlToKvListTest(t *testing.T, filePath string) {
 	}
 
 	expect := strings.TrimSpace(string(bytes))
-	kvPairs, err := isc.YamlToKvList(expect)
+	kvPairs, err := util.YamlToKvList(expect)
 	if err != nil {
 		log.Printf("转换错误：%v", err)
 		return
@@ -217,7 +217,7 @@ func yamlToKvListTest(t *testing.T, filePath string) {
 	}
 
 	// 获取标准的数据
-	property, err := isc.YamlToProperties(expect)
+	property, err := util.YamlToProperties(expect)
 	pro := properties.NewProperties()
 	err = pro.Load([]byte(property), properties.UTF8)
 	if err != nil {
@@ -242,13 +242,13 @@ func yamlToMapTest(t *testing.T, filePath string) {
 		return
 	}
 	expect := strings.TrimSpace(string(bytes))
-	dataMap, err := isc.YamlToMap(expect)
+	dataMap, err := util.YamlToMap(expect)
 	if err != nil {
 		log.Printf("转换错误：%v", err)
 		return
 	}
 
-	value, _ := isc.ObjectToYaml(dataMap)
+	value, _ := util.ObjectToYaml(dataMap)
 	act := strings.TrimSpace(value)
 	test.Equal(t, act, expect)
 }
@@ -260,14 +260,14 @@ func propertiesToYamlTest(t *testing.T, filePath string) {
 		return
 	}
 	expect := strings.TrimSpace(string(bytes))
-	yamlContent, err := isc.PropertiesToYaml(expect)
+	yamlContent, err := util.PropertiesToYaml(expect)
 	//fmt.Println(yamlContent)
 	if err != nil {
 		log.Printf("转换错误：%v", err)
 		return
 	}
 
-	act, err := isc.YamlToProperties(yamlContent)
+	act, err := util.YamlToProperties(yamlContent)
 	act = strings.TrimSpace(act)
 	test.Equal(t, act, expect)
 }

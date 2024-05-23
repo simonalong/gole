@@ -42,10 +42,10 @@ func NewApiPath(path string, method HttpMethod) *ApiPath {
 	v.Handler = func(c *gin.Context) {
 		v.Versions.ForEach(func(a *ApiVersion) {
 			// 取出所有已定义header所对应的值
-			t := isc.ListToMapFrom[string, string](a.Header).Map(func(item string) string {
+			t := util.ListToMapFrom[string, string](a.Header).Map(func(item string) string {
 				return c.GetHeader(item)
 			})
-			if isc.ListEquals(a.Version, t) {
+			if util.ListEquals(a.Version, t) {
 				// 找到符合条件的路由版本，并转发请求
 				a.Handler(c)
 			}
@@ -59,7 +59,7 @@ func NewApiPath(path string, method HttpMethod) *ApiPath {
 func (ap *ApiPath) AddVersion(header []string, version []string, handler gin.HandlerFunc) {
 	// 查找指定版本的路由是否已经存在
 	av := ap.Versions.Find(func(a *ApiVersion) bool {
-		return isc.ListEquals(a.Header, header) && isc.ListEquals(a.Version, version)
+		return util.ListEquals(a.Header, header) && util.ListEquals(a.Version, version)
 	})
 	if av == nil {
 		// 不存在，则添加一个

@@ -217,7 +217,7 @@ type DBValue struct {
 
 func (r *Rows) GetByName(fieldName string) *DBValue {
 	cs, _ := r.Columns()
-	index := isc.IndexOf(cs, fieldName)
+	index := util.IndexOf(cs, fieldName)
 	if index == -1 {
 		return nil
 	}

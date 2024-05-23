@@ -1,4 +1,4 @@
-package isc
+package util
 
 //Take Returns a list containing first n elements.
 func Take[T any](list []T, n int) []T {

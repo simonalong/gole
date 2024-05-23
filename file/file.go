@@ -212,5 +212,5 @@ func SizeList(filePaths []string) int64 {
 
 // SizeFormat 返回文件/目录的可读大小
 func SizeFormat(filePath string) string {
-	return isc.FormatSize(Size(filePath))
+	return util.FormatSize(Size(filePath))
 }

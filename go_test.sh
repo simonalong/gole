@@ -1,7 +1,7 @@
 #!/bin/bash
 
 go test ./config/test
-go test ./isc/test
+go test ./util/test
 go test ./validate/test
 go test ./compress/test
 go test ./encoding/test

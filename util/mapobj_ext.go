@@ -1,4 +1,4 @@
-package isc
+package util
 
 type ISCMapToMap[K comparable, V any, R any] struct {
 	ISCMap[K, V]

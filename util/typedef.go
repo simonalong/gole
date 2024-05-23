@@ -1,4 +1,4 @@
-package isc
+package util
 
 type IntRange struct {
 	Start int

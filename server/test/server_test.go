@@ -68,7 +68,7 @@ func TestServer2(t *testing.T) {
 
 	server.Post("/test/rsp1", func(c *gin.Context) {
 		testReq := pojo.TestReq{}
-		_ = isc.DataToObject(c.Request.Body, &testReq)
+		_ = util.DataToObject(c.Request.Body, &testReq)
 		rsp.SuccessOfStandard(c, testReq)
 	})
 

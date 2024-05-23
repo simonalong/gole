@@ -21,12 +21,12 @@ func (jsonObject *Object) Load(jsonContent string) error {
 		jsonObject.ValueDeepMap = make(map[string]any)
 	}
 
-	yamlStr, _ := isc.JsonToYaml(jsonContent)
-	property, _ := isc.YamlToProperties(yamlStr)
-	valueMap, _ := isc.PropertiesToMap(property)
+	yamlStr, _ := util.JsonToYaml(jsonContent)
+	property, _ := util.YamlToProperties(yamlStr)
+	valueMap, _ := util.PropertiesToMap(property)
 	jsonObject.ValueMap = valueMap
 
-	yamlMap, _ := isc.YamlToMap(yamlStr)
+	yamlMap, _ := util.YamlToMap(yamlStr)
 	jsonObject.ValueDeepMap = yamlMap
 	return nil
 }
@@ -74,7 +74,7 @@ func innerPutValue(valueMap map[string]any, key string, newValue any) {
 		if reflect.TypeOf(oldValue).Kind() != reflect.Map {
 			return
 		} else {
-			oldValueMap := isc.ToMap(oldValue)
+			oldValueMap := util.ToMap(oldValue)
 			innerPutValue(oldValueMap, endKey, newValue)
 			valueMap[startKey] = oldValueMap
 		}
@@ -127,7 +127,7 @@ func (jsonObject *Object) doGet(parentValue any, key string) any {
 
 			startIndex := strings.Index(currentKey, "[")
 			endIndex := strings.Index(currentKey, "]")
-			dataIndex := isc.ToInt(currentKey[startIndex+1 : endIndex])
+			dataIndex := util.ToInt(currentKey[startIndex+1 : endIndex])
 			if dataIndex >= 0 {
 				currentKey = currentKey[:startIndex]
 				nextKey = key[endIndex+1:]
@@ -172,7 +172,7 @@ func (jsonObject *Object) doGet(parentValue any, key string) any {
 
 		startIndex := strings.Index(key, "[")
 		endIndex := strings.Index(key, "]")
-		dataIndex := isc.ToInt(key[startIndex+1 : endIndex])
+		dataIndex := util.ToInt(key[startIndex+1 : endIndex])
 
 		parentValueT := reflect.ValueOf(parentValue)
 		for arrayIndex := 0; arrayIndex < parentValueT.Len(); arrayIndex++ {
@@ -191,64 +191,64 @@ func (jsonObject *Object) doGet(parentValue any, key string) any {
 }
 
 func (jsonObject *Object) GetString(key string) string {
-	return isc.ToString(jsonObject.Get(key))
+	return util.ToString(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetInt(key string) int {
-	return isc.ToInt(jsonObject.Get(key))
+	return util.ToInt(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetInt8(key string) int8 {
-	return isc.ToInt8(jsonObject.Get(key))
+	return util.ToInt8(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetInt16(key string) int16 {
-	return isc.ToInt16(jsonObject.Get(key))
+	return util.ToInt16(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetInt32(key string) int32 {
-	return isc.ToInt32(jsonObject.Get(key))
+	return util.ToInt32(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetInt64(key string) int64 {
-	return isc.ToInt64(jsonObject.Get(key))
+	return util.ToInt64(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetUInt(key string) uint {
-	return isc.ToUInt(jsonObject.Get(key))
+	return util.ToUInt(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetUInt8(key string) uint8 {
-	return isc.ToUInt8(jsonObject.Get(key))
+	return util.ToUInt8(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetUInt16(key string) uint16 {
-	return isc.ToUInt16(jsonObject.Get(key))
+	return util.ToUInt16(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetUInt32(key string) uint32 {
-	return isc.ToUInt32(jsonObject.Get(key))
+	return util.ToUInt32(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetUInt64(key string) uint64 {
-	return isc.ToUInt64(jsonObject.Get(key))
+	return util.ToUInt64(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetFloat32(key string) float32 {
-	return isc.ToFloat32(jsonObject.Get(key))
+	return util.ToFloat32(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetFloat64(key string) float64 {
-	return isc.ToFloat64(jsonObject.Get(key))
+	return util.ToFloat64(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetBool(key string) bool {
-	return isc.ToBool(jsonObject.Get(key))
+	return util.ToBool(jsonObject.Get(key))
 }
 
 func (jsonObject *Object) GetObject(key string, targetPtrObj any) error {
 	data := jsonObject.Get(key)
-	err := isc.DataToObject(data, targetPtrObj)
+	err := util.DataToObject(data, targetPtrObj)
 	if err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func (jsonObject *Object) GetObject(key string, targetPtrObj any) error {
 func (jsonObject *Object) GetArray(key string) []any {
 	var arrayResult = []any{}
 	data := jsonObject.Get(key)
-	err := isc.DataToObject(data, &arrayResult)
+	err := util.DataToObject(data, &arrayResult)
 	if err != nil {
 		return arrayResult
 	}

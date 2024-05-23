@@ -61,7 +61,7 @@ func TestCallFun(t *testing.T) {
 
 	bean.AddBean("test", &tt)
 	fv := bean.CallFun("test", "Fun", map[string]any{})
-	assert.Equal(t, isc.ToString(fv[0]), "ok")
+	assert.Equal(t, util.ToString(fv[0]), "ok")
 
 	bean.Clean()
 }
@@ -71,7 +71,7 @@ func TestCallFunPtr(t *testing.T) {
 
 	bean.AddBean("test", &tt)
 	fv := bean.CallFun("test", "Fun", map[string]any{})
-	assert.Equal(t, isc.ToString(fv[0]), "ok")
+	assert.Equal(t, util.ToString(fv[0]), "ok")
 
 	bean.Clean()
 }
@@ -81,7 +81,7 @@ func TestCallFunUpper(t *testing.T) {
 
 	bean.AddBean("test", &tt)
 	fv := bean.CallFun("test", "Fun", map[string]any{})
-	assert.Equal(t, isc.ToString(fv[0]), "ok")
+	assert.Equal(t, util.ToString(fv[0]), "ok")
 
 	bean.Clean()
 }
@@ -95,7 +95,7 @@ func TestCallFun1(t *testing.T) {
 	parameterMap["p1"] = "name"
 
 	fv := bean.CallFun("test", "Fun1", parameterMap)
-	assert.Equal(t, isc.ToString(fv[0]), "name")
+	assert.Equal(t, util.ToString(fv[0]), "name")
 
 	bean.Clean()
 }
@@ -109,7 +109,7 @@ func TestCallFun2(t *testing.T) {
 	parameterMap["p1"] = 12
 
 	fv := bean.CallFun("test", "Fun2", parameterMap)
-	assert.Equal(t, isc.ToInt(fv[0]), 12)
+	assert.Equal(t, util.ToInt(fv[0]), 12)
 
 	bean.Clean()
 }
@@ -124,7 +124,7 @@ func TestCallFun3(t *testing.T) {
 	parameterMap["p2"] = 12
 
 	fv := bean.CallFun("test", "Fun3", parameterMap)
-	assert.Equal(t, isc.ToInt(fv[0]), 12)
+	assert.Equal(t, util.ToInt(fv[0]), 12)
 
 	bean.Clean()
 }
@@ -142,7 +142,7 @@ func TestCallFun3(t *testing.T) {
 //	parameterMap["p3"] = inner
 //
 //	fv := bean.CallFun("test", "Fun4", parameterMap)
-//	assert.Equal(t, isc.ToString(fv[0]), "杭州")
+//	assert.Equal(t, util.ToString(fv[0]), "杭州")
 //
 //	bean.Clean()
 //}
@@ -159,7 +159,7 @@ func TestCallFun3(t *testing.T) {
 //	parameterMap["p3"] = "{\"Address\": \"hangzhou\"}"
 //
 //	fv := bean.CallFun("test", "Fun4", parameterMap)
-//	assert.Equal(t, isc.ToString(fv[0]), "杭州")
+//	assert.Equal(t, util.ToString(fv[0]), "杭州")
 //
 //	bean.Clean()
 //}
@@ -176,7 +176,7 @@ func TestCallFun3(t *testing.T) {
 //	parameterMap["p3"] = &inner
 //
 //	fv := bean.CallFun("test", "Fun4Ptr", parameterMap)
-//	assert.Equal(t, isc.ToString(fv[0]), "杭州")
+//	assert.Equal(t, util.ToString(fv[0]), "杭州")
 //
 //	bean.Clean()
 //}
@@ -187,7 +187,7 @@ func TestCallFun5(t *testing.T) {
 	bean.AddBean("test", &tt)
 
 	fv := bean.CallFun("test", "Fun5", map[string]any{})
-	assert.Equal(t, isc.ToInt(fv[0]), 12)
+	assert.Equal(t, util.ToInt(fv[0]), 12)
 
 	bean.Clean()
 }
@@ -198,7 +198,7 @@ func TestCallFun6(t *testing.T) {
 	bean.AddBean("test", tt)
 
 	fv := bean.CallFun("test", "Fun5", map[string]any{})
-	assert.Equal(t, isc.ToInt(fv[0]), 12)
+	assert.Equal(t, util.ToInt(fv[0]), 12)
 
 	bean.Clean()
 }
@@ -210,7 +210,7 @@ func TestCallFun7(t *testing.T) {
 	tt.Age = 13
 
 	fv := bean.CallFun("test", "Fun5", map[string]any{})
-	assert.Equal(t, isc.ToInt(fv[0]), 12)
+	assert.Equal(t, util.ToInt(fv[0]), 12)
 
 	bean.Clean()
 }
@@ -221,7 +221,7 @@ func TestCallPtrFun1(t *testing.T) {
 	bean.AddBean("test", &tt)
 
 	fv := bean.CallFun("test", "PtrFun", map[string]any{})
-	assert.Equal(t, isc.ToString(fv[0]), "ok")
+	assert.Equal(t, util.ToString(fv[0]), "ok")
 
 	bean.Clean()
 }
@@ -235,7 +235,7 @@ func TestCallPtrFun2(t *testing.T) {
 	parameterMap["p1"] = "name"
 
 	fv := bean.CallFun("test", "PtrFun1", parameterMap)
-	assert.Equal(t, isc.ToString(fv[0]), "name")
+	assert.Equal(t, util.ToString(fv[0]), "name")
 
 	bean.Clean()
 }
@@ -249,7 +249,7 @@ func TestCallPtrFun3(t *testing.T) {
 	parameterMap["p1"] = "name"
 
 	fv := bean.CallFun("test", "Fun1", parameterMap)
-	assert.Equal(t, isc.ToString(fv[0]), "name")
+	assert.Equal(t, util.ToString(fv[0]), "name")
 
 	bean.Clean()
 }

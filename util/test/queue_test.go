@@ -8,7 +8,7 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	queue := isc.NewQueue()
+	queue := util.NewQueue()
 
 	// 返回当前还有多少个
 	num := queue.Offer("dsf")

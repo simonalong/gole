@@ -1,4 +1,4 @@
-package isc
+package util
 
 import (
 	"reflect"
