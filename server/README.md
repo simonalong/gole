@@ -201,7 +201,7 @@ package main
 import (
     "github.com/simonalong/gole/server"
     // 这里：不引入就会在swagger生成的页面中找不到doc.json文件 
-    _ "isc-xx-service/docs"
+    _ "xx-service/docs"
 )
 
 // @Title xxx

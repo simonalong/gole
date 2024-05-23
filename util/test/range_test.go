@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 	"testing"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	baseHttp "github.com/simonalong/gole/http"
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 	"net/http"
 	"testing"
 	"unsafe"

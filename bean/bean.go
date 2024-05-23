@@ -2,9 +2,9 @@ package bean
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/simonalong/gole/isc"
 	"github.com/simonalong/gole/logger"
 	"github.com/simonalong/gole/server/rsp"
+	"github.com/simonalong/gole/util"
 	"reflect"
 	"strings"
 )

@@ -3,9 +3,9 @@ package orm
 import (
 	"fmt"
 	"github.com/simonalong/gole/config"
-	"github.com/simonalong/gole/isc"
 	"github.com/simonalong/gole/listener"
 	"github.com/simonalong/gole/logger"
+	"github.com/simonalong/gole/util"
 	"github.com/sirupsen/logrus"
 	"strings"
 )

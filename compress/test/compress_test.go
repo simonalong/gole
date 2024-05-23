@@ -3,7 +3,7 @@ package test
 import (
 	"github.com/simonalong/gole/compress"
 	"github.com/simonalong/gole/file"
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 	"testing"
 )
 

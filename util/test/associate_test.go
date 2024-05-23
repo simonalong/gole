@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 )
 
 type AssociateStruct struct {

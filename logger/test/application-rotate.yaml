@@ -1,7 +1,7 @@
 base:
   application:
     # 服务名
-    name: isc-demo
+    name: demo
   logger:
     # 日志滚动策略
     rotate:

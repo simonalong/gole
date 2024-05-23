@@ -6,6 +6,7 @@ validate包核查模块，用于对入参的校验
 这里举个例子，快速使用
 
 ### 基于gole的web的项目的示例：
+
 ```go
 // main.go 文件
 package main
@@ -15,7 +16,7 @@ import (
   "encoding/json"
   "github.com/gin-gonic/gin"
   "github.com/simonalong/gole/http"
-  "github.com/simonalong/gole/isc"
+  "github.com/simonalong/gole/util"
   "github.com/simonalong/gole/logger"
   "github.com/simonalong/gole/server"
   "github.com/simonalong/gole/server/rsp"

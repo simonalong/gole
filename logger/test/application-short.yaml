@@ -1,4 +1,4 @@
 base:
   application:
     # 服务名
-    name: isc-demo
+    name: demo

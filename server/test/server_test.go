@@ -2,10 +2,10 @@ package test
 
 import (
 	"fmt"
-	"github.com/simonalong/gole/isc"
 	"github.com/simonalong/gole/listener"
 	"github.com/simonalong/gole/server/rsp"
 	"github.com/simonalong/gole/server/test/pojo"
+	"github.com/simonalong/gole/util"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -15,15 +15,15 @@ import (
 
 func TestApiVersion(t *testing.T) {
 	fmt.Printf("step 1\n")
-	server.RegisterRouteWithHeaders("/api/sample", server.HmGet, []string{"isc-api-version"}, []string{"1.0"}, func(c *gin.Context) {
+	server.RegisterRouteWithHeaders("/api/sample", server.HmGet, []string{"api-version"}, []string{"1.0"}, func(c *gin.Context) {
 		c.Data(200, "text/plain", []byte("hello 1.0"))
 	})
 	fmt.Printf("step 2\n")
-	server.RegisterRouteWithHeaders("/api/sample", server.HmGet, []string{"isc-api-version"}, []string{"2.0"}, func(c *gin.Context) {
+	server.RegisterRouteWithHeaders("/api/sample", server.HmGet, []string{"api-version"}, []string{"2.0"}, func(c *gin.Context) {
 		c.Data(200, "text/plain", []byte("hello 2.0"))
 	})
 	fmt.Printf("step 3\n")
-	server.RegisterRouteWithHeaders("/api/sample", server.HmGet, []string{"isc-api-version"}, []string{"3.0"}, func(c *gin.Context) {
+	server.RegisterRouteWithHeaders("/api/sample", server.HmGet, []string{"api-version"}, []string{"3.0"}, func(c *gin.Context) {
 		c.Data(200, "text/plain", []byte("hello 3.0"))
 	})
 	server.StartServer()

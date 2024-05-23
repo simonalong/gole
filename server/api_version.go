@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/simonalong/gole/isc"
-	. "github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
+	. "github.com/simonalong/gole/util"
 )
 
 type ApiPath struct {

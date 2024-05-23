@@ -2,7 +2,7 @@ package test
 
 import (
 	"github.com/magiconair/properties/assert"
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 	"os"
 	"path/filepath"
 	"testing"

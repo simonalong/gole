@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/simonalong/gole/isc"
+	. "github.com/simonalong/gole/util"
 )
 
 func TestNumber(t *testing.T) {

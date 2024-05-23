@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 )
 
 type DatabaseType int

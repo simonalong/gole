@@ -59,7 +59,7 @@ root@user ~> curl http://localhost:8080/api/get
 ### 包列表
 |包名        | 简介 |
 | --------   | :----: |
-| [isc](/isc)| 基础工具（更新中）|
+| [isc](/util)| 基础工具（更新中）|
 | [config](/config)| 配置文件管理|
 | [validate](/validate)|校验核查 |
 | [logger](/logger)| 日志 |

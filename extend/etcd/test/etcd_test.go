@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/simonalong/gole/config"
 	"github.com/simonalong/gole/extend/etcd"
-	"github.com/simonalong/gole/isc"
 	"github.com/simonalong/gole/time"
+	"github.com/simonalong/gole/util"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"testing"
 )

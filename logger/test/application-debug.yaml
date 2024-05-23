@@ -1,7 +1,7 @@
 base:
   application:
     # 服务名
-    name: isc-demo
+    name: demo
   logger:
     # 日志级别（大小写不敏感）：debug、info、warn、error、fatal、panic；默认：info
     level: debug

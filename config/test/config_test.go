@@ -3,8 +3,8 @@ package test
 import (
 	"github.com/magiconair/properties/assert"
 	"github.com/simonalong/gole/config"
-	"github.com/simonalong/gole/isc"
 	"github.com/simonalong/gole/logger"
+	"github.com/simonalong/gole/util"
 	"os"
 	"testing"
 )

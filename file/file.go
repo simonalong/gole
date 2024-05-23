@@ -1,7 +1,7 @@
 package file
 
 import (
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 	"io"
 	"os"
 	"path/filepath"

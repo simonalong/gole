@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/simonalong/gole/file"
 
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 	"gopkg.in/yaml.v2"
 )
 

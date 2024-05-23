@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/simonalong/gole/encoding"
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 )
 
 var testData = []struct{ utf8, other, otherEncoding string }{

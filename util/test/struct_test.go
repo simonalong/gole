@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"github.com/simonalong/gole/isc"
+	"github.com/simonalong/gole/util"
 	"reflect"
 	"testing"
 )
