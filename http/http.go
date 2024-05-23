@@ -571,7 +571,7 @@ func parseStandard(statusCode int, headers http.Header, responseResult any, errs
 
 	// 判断业务的失败信息
 	if standRsp.Code != 0 && standRsp.Code != 200 {
-		return statusCode, headers, nil, &NetError{Error: fmt.Sprintf("remote err, bizCode=%d, message=%s", standRsp.Code, standRsp.Message)}
+		return statusCode, headers, nil, &NetError{ErrMsg: fmt.Sprintf("remote err, bizCode=%d, message=%s", standRsp.Code, standRsp.Message)}
 	}
 
 	return statusCode, headers, standRsp.Data, nil
