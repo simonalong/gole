@@ -53,11 +53,11 @@ func AddHook(httpHook GobaseHttpHook) {
 }
 
 type NetError struct {
-	ErrMsg string
+	Error string
 }
 
 func (error *NetError) Error() string {
-	return error.ErrMsg
+	return error.Error
 }
 
 type DataResponse[T any] struct {
@@ -502,7 +502,7 @@ func call(httpRequest *http.Request, url string) (int, http.Header, any, error) 
 func doParseResponse(httpResponse *http.Response, err error) (int, http.Header, any, error) {
 	if err != nil && httpResponse == nil {
 		log.Printf("Error sending request to API endpoint. %+v", err)
-		return -1, nil, nil, &NetError{ErrMsg: "Error sending request, err" + err.Error()}
+		return -1, nil, nil, &NetError{Error: "Error sending request, err" + err.Error()}
 	} else {
 		if httpResponse == nil {
 			log.Printf("httpResponse is nil\n")
@@ -519,14 +519,14 @@ func doParseResponse(httpResponse *http.Response, err error) (int, http.Header, 
 		headers := httpResponse.Header
 		if code != http.StatusOK {
 			body, _ := io.ReadAll(httpResponse.Body)
-			return code, headers, nil, &NetError{ErrMsg: "remote error, url: code " + strconv.Itoa(code) + ", message: " + string(body)}
+			return code, headers, nil, &NetError{Error: "remote error, url: code " + strconv.Itoa(code) + ", message: " + string(body)}
 		}
 
 		// We have seen inconsistencies even when we get 200 OK response
 		body, err := io.ReadAll(httpResponse.Body)
 		if err != nil {
 			log.Printf("Couldn't parse response body(%v)", err)
-			return code, headers, nil, &NetError{ErrMsg: "Couldn't parse response body, err: " + err.Error()}
+			return code, headers, nil, &NetError{Error: "Couldn't parse response body, err: " + err.Error()}
 		}
 
 		return code, headers, body, nil
@@ -571,7 +571,7 @@ func parseStandard(statusCode int, headers http.Header, responseResult any, errs
 
 	// 判断业务的失败信息
 	if standRsp.Code != 0 && standRsp.Code != 200 {
-		return statusCode, headers, nil, &NetError{ErrMsg: fmt.Sprintf("remote err, bizCode=%d, message=%s", standRsp.Code, standRsp.Message)}
+		return statusCode, headers, nil, &NetError{Error: fmt.Sprintf("remote err, bizCode=%d, message=%s", standRsp.Code, standRsp.Message)}
 	}
 
 	return statusCode, headers, standRsp.Data, nil

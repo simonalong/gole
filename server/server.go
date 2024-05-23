@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	http2 "github.com/simonalong/gole/http"
 	"github.com/simonalong/gole/server/rsp"
 	"github.com/simonalong/gole/store"
 	"io"
@@ -169,7 +170,7 @@ func ErrHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				rsp.FailOfStandard(c, 500, fmt.Sprintf("业务异常：%v", err))
+				rsp.Fail(c, 500, http2.NetError{Error: fmt.Sprintf("业务异常：%v", err)})
 				return
 			}
 		}()
