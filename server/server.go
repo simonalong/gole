@@ -40,6 +40,7 @@ const (
 	HmOptions
 	HmHead
 	HmGetPost
+	HmNoRoute
 )
 
 var GoBaseVersion = "1.5.1"
@@ -59,6 +60,10 @@ func init() {
 	isc.PrintBanner()
 	config.LoadConfig()
 	printVersionAndProfile()
+}
+
+func GetEngine() *gin.Engine {
+	return engine
 }
 
 // 提供给外部注册使用
@@ -369,6 +374,8 @@ func RegisterRoute(path string, method HttpMethod, handler gin.HandlerFunc) gin.
 	case HmGetPost:
 		engine.GET(path, handler)
 		engine.POST(path, handler)
+	case HmNoRoute:
+		engine.NoRoute(handler)
 	}
 	return engine
 }
@@ -407,6 +414,10 @@ func RegisterRouteWithHeaders(path string, method HttpMethod, header []string, v
 	}
 	p.AddVersion(header, versionName, handler)
 	return engine
+}
+
+func NoRoute(handler gin.HandlerFunc) gin.IRoutes {
+	return RegisterRoute("", HmNoRoute, handler)
 }
 
 func Post(path string, handler gin.HandlerFunc) gin.IRoutes {
