@@ -1,5 +1,3 @@
-![CI](https://github.com/simonalong/gole/actions/workflows/go.yml/badge.svg)
-
 # gole
 
 gole 框架是个人总结的一套至简化工具框架。遵从大道至简原则，让开发者在开发go的项目方面使用更简单
