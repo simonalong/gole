@@ -616,16 +616,16 @@ func doInvokeValue(fieldMapValue reflect.Value, field reflect.StructField, field
 
 	var fValue reflect.Value
 	if v, exist := getValueFromMapValue(fieldMapValue, field.Name); exist {
-		// 兼容DataBaseUser格式读取
+		// 兼容DataGoleUser格式读取
 		fValue = v
 	} else if v, exist := getValueFromMapValue(fieldMapValue, BigCamelToMiddleLine(field.Name)); exist {
-		// 兼容data-base-user格式读取
+		// 兼容data-gole-user格式读取
 		fValue = v
 	} else if v, exist := getValueFromMapValue(fieldMapValue, BigCamelToSmallCamel(field.Name)); exist {
-		// 兼容dataBaseUser格式读取
+		// 兼容dataGoleUser格式读取
 		fValue = v
 	} else if v, exist := getValueFromMapValue(fieldMapValue, BigCamelToUnderLine(field.Name)); exist {
-		// 兼容data_base_user格式读取
+		// 兼容data_gole_user格式读取
 		fValue = v
 	} else {
 		aliasJson := field.Tag.Get("json")

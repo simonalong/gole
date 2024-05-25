@@ -4,7 +4,7 @@
 
 全部配置
 ```yaml
-base:
+gole:
   etcd:
     # etcd的服务ip:port列表   
     endpoints:
@@ -39,15 +39,15 @@ func Test1(t *testing.T) {
     etcdClient, _ := etcd.NewEtcdClient()
 
     ctx := context.Background()
-    etcdClient.Put(ctx, "gobase.k1", "testValue")
-    rsp, _ := etcdClient.Get(ctx, "gobase.k1")
+    etcdClient.Put(ctx, "gole.k1", "testValue")
+    rsp, _ := etcdClient.Get(ctx, "gole.k1")
 }
 ```
 
 ### 示例
 配置示例
 ```yaml
-base:
+gole:
   etcd:
     # 是否启用etcd
     enable: true
@@ -67,7 +67,7 @@ func Test1(t *testing.T) {
     etcdClient, _ := etcd.NewEtcdClient()
     
     ctx := context.Background()
-    etcdClient.Put(ctx, "gobase.k1", "testValue")
-    rsp, _ := etcdClient.Get(ctx, "gobase.k1")
+    etcdClient.Put(ctx, "gole.k1", "testValue")
+    rsp, _ := etcdClient.Get(ctx, "gole.k1")
 }
 ```

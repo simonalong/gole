@@ -11,8 +11,8 @@ import (
 func init() {
 	config.LoadConfig()
 
-	if config.ExistConfigFile() && config.GetValueBoolDefault("base.emqx.enable", false) {
-		err := config.GetValueObject("base.emqx", &config.EmqxCfg)
+	if config.ExistConfigFile() && config.GetValueBoolDefault("gole.emqx.enable", false) {
+		err := config.GetValueObject("gole.emqx", &config.EmqxCfg)
 		if err != nil {
 			logger.Warn("读取emqx配置异常, %v", err.Error())
 			return
@@ -55,7 +55,7 @@ func (log emqxLogger) Printf(format string, v ...interface{}) {
 }
 
 func NewEmqxClient() (mqtt.Client, error) {
-	if !config.GetValueBoolDefault("base.emqx.enable", false) {
+	if !config.GetValueBoolDefault("gole.emqx.enable", false) {
 		logger.Error("emqx没有配置，请先配置")
 		return nil, errors.New("emqx没有配置，请先配置")
 	}
@@ -86,15 +86,15 @@ func localEmqxOptions() *mqtt.ClientOptions {
 		opts.SetPassword(config.EmqxCfg.Password)
 	}
 
-	if config.EmqxCfg.CleanSession != true && config.GetValueString("base.emqx.clean-session") != "" {
+	if config.EmqxCfg.CleanSession != true && config.GetValueString("gole.emqx.clean-session") != "" {
 		opts.SetCleanSession(config.EmqxCfg.CleanSession)
 	}
 
-	if config.EmqxCfg.Order != true && config.GetValueString("base.emqx.order") != "" {
+	if config.EmqxCfg.Order != true && config.GetValueString("gole.emqx.order") != "" {
 		opts.SetOrderMatters(config.EmqxCfg.Order)
 	}
 
-	if config.EmqxCfg.WillEnabled != false && config.GetValueString("base.emqx.will-enabled") != "" {
+	if config.EmqxCfg.WillEnabled != false && config.GetValueString("gole.emqx.will-enabled") != "" {
 		opts.WillEnabled = config.EmqxCfg.WillEnabled
 	}
 
@@ -106,7 +106,7 @@ func localEmqxOptions() *mqtt.ClientOptions {
 		opts.WillQos = config.EmqxCfg.WillQos
 	}
 
-	if config.EmqxCfg.WillRetained != false && config.GetValueString("base.emqx.will-retained") != "" {
+	if config.EmqxCfg.WillRetained != false && config.GetValueString("gole.emqx.will-retained") != "" {
 		opts.WillRetained = config.EmqxCfg.WillRetained
 	}
 
@@ -114,64 +114,64 @@ func localEmqxOptions() *mqtt.ClientOptions {
 		opts.ProtocolVersion = config.EmqxCfg.ProtocolVersion
 	}
 
-	if config.EmqxCfg.KeepAlive != 30 && config.GetValueString("base.emqx.keep-alive") != "" {
+	if config.EmqxCfg.KeepAlive != 30 && config.GetValueString("gole.emqx.keep-alive") != "" {
 		opts.KeepAlive = config.EmqxCfg.KeepAlive
 	}
 
-	if config.EmqxCfg.PingTimeout != "10s" && config.GetValueString("base.emqx.ping-timeout") != "" {
+	if config.EmqxCfg.PingTimeout != "10s" && config.GetValueString("gole.emqx.ping-timeout") != "" {
 		t, err := t0.ParseDuration(config.EmqxCfg.PingTimeout)
 		if err != nil {
-			logger.Warn("读取配置【base.emqx.ping-timeout】异常：%v", err.Error())
+			logger.Warn("读取配置【gole.emqx.ping-timeout】异常：%v", err.Error())
 		} else {
 			opts.PingTimeout = t
 		}
 	}
 
-	if config.EmqxCfg.ConnectTimeout != "30s" && config.GetValueString("base.emqx.connect-timeout") != "" {
+	if config.EmqxCfg.ConnectTimeout != "30s" && config.GetValueString("gole.emqx.connect-timeout") != "" {
 		t, err := t0.ParseDuration(config.EmqxCfg.ConnectTimeout)
 		if err != nil {
-			logger.Warn("读取配置【base.emqx.connect-timeout】异常：%v", err.Error())
+			logger.Warn("读取配置【gole.emqx.connect-timeout】异常：%v", err.Error())
 		} else {
 			opts.PingTimeout = t
 		}
 	}
 
-	if config.EmqxCfg.MaxReconnectInterval != "10m" && config.GetValueString("base.emqx.max-reconnect-interval") != "" {
+	if config.EmqxCfg.MaxReconnectInterval != "10m" && config.GetValueString("gole.emqx.max-reconnect-interval") != "" {
 		t, err := t0.ParseDuration(config.EmqxCfg.MaxReconnectInterval)
 		if err != nil {
-			logger.Warn("读取配置【base.emqx.max-reconnect-interval】异常：%v", err.Error())
+			logger.Warn("读取配置【gole.emqx.max-reconnect-interval】异常：%v", err.Error())
 		} else {
 			opts.MaxReconnectInterval = t
 		}
 	}
 
-	if config.EmqxCfg.AutoReconnect != true && config.GetValueString("base.emqx.auto-reconnect") != "" {
+	if config.EmqxCfg.AutoReconnect != true && config.GetValueString("gole.emqx.auto-reconnect") != "" {
 		opts.AutoReconnect = config.EmqxCfg.AutoReconnect
 	}
 
-	if config.EmqxCfg.ConnectRetryInterval != "30s" && config.GetValueString("base.emqx.connect-retry-interval") != "" {
+	if config.EmqxCfg.ConnectRetryInterval != "30s" && config.GetValueString("gole.emqx.connect-retry-interval") != "" {
 		t, err := t0.ParseDuration(config.EmqxCfg.ConnectRetryInterval)
 		if err != nil {
-			logger.Warn("读取配置【base.emqx.connect-retry-interval】异常：%v", err.Error())
+			logger.Warn("读取配置【gole.emqx.connect-retry-interval】异常：%v", err.Error())
 		} else {
 			opts.ConnectRetryInterval = t
 		}
 	}
 
-	if config.EmqxCfg.ConnectRetry != false && config.GetValueString("base.emqx.connect-retry") != "" {
+	if config.EmqxCfg.ConnectRetry != false && config.GetValueString("gole.emqx.connect-retry") != "" {
 		opts.ConnectRetry = config.EmqxCfg.ConnectRetry
 	}
 
-	if config.EmqxCfg.WriteTimeout != "0" && config.GetValueString("base.emqx.write-timeout") != "" {
+	if config.EmqxCfg.WriteTimeout != "0" && config.GetValueString("gole.emqx.write-timeout") != "" {
 		t, err := t0.ParseDuration(config.EmqxCfg.WriteTimeout)
 		if err != nil {
-			logger.Warn("读取配置【base.emqx.write-timeout】异常：%v", err.Error())
+			logger.Warn("读取配置【gole.emqx.write-timeout】异常：%v", err.Error())
 		} else {
 			opts.WriteTimeout = t
 		}
 	}
 
-	if config.EmqxCfg.ResumeSubs != false && config.GetValueString("base.emqx.resume-subs") != "" {
+	if config.EmqxCfg.ResumeSubs != false && config.GetValueString("gole.emqx.resume-subs") != "" {
 		opts.ResumeSubs = config.EmqxCfg.ResumeSubs
 	}
 
@@ -179,7 +179,7 @@ func localEmqxOptions() *mqtt.ClientOptions {
 		opts.MaxResumePubInFlight = config.EmqxCfg.MaxResumePubInFlight
 	}
 
-	if config.EmqxCfg.AutoAckDisabled != false && config.GetValueString("base.emqx.auto-ack-disabled") != "" {
+	if config.EmqxCfg.AutoAckDisabled != false && config.GetValueString("gole.emqx.auto-ack-disabled") != "" {
 		opts.AutoAckDisabled = config.EmqxCfg.AutoAckDisabled
 	}
 

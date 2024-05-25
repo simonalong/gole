@@ -8,32 +8,32 @@ import (
 	"testing"
 )
 
-func Event1Lister1(event listener.BaseEvent) {
+func Event1Lister1(event listener.GoleEvent) {
 	ev := event.(Event1)
 	fmt.Println("Event1Lister1: " + ev.Company)
 }
 
-func Event1Lister1_1(event listener.BaseEvent) {
+func Event1Lister1_1(event listener.GoleEvent) {
 	ev := event.(Event1_1)
 	fmt.Println("Event1Lister1_1: " + ev.Company)
 }
 
-func Event1Lister2(event listener.BaseEvent) {
+func Event1Lister2(event listener.GoleEvent) {
 	ev := event.(Event1)
 	fmt.Println("Event1Lister2: " + ev.Company)
 }
 
-func Event1Lister3(event listener.BaseEvent) {
+func Event1Lister3(event listener.GoleEvent) {
 	ev := event.(Event1)
 	fmt.Println("Event1Lister3: " + ev.Company)
 }
 
-func Event2Lister1(event listener.BaseEvent) {
+func Event2Lister1(event listener.GoleEvent) {
 	ev := event.(Event2)
 	fmt.Println("Event2Lister1: " + ev.Address)
 }
 
-func Event2Lister2(event listener.BaseEvent) {
+func Event2Lister2(event listener.GoleEvent) {
 	ev := event.(Event2)
 	fmt.Println("Event2Lister2: " + ev.Address)
 }
@@ -101,13 +101,13 @@ func TestPublish1_1(t *testing.T) {
 }
 
 func TestPublish2(t *testing.T) {
-	listener.AddListener("event1", func(event listener.BaseEvent) {
+	listener.AddListener("event1", func(event listener.GoleEvent) {
 		assert.Equal(t, "公司", event.(Event1).Company)
 	})
-	listener.AddListener("event1", func(event listener.BaseEvent) {
+	listener.AddListener("event1", func(event listener.GoleEvent) {
 		assert.Equal(t, "公司", event.(Event1).Company)
 	})
-	listener.AddListener("event1", func(event listener.BaseEvent) {
+	listener.AddListener("event1", func(event listener.GoleEvent) {
 		assert.Equal(t, "公司", event.(Event1).Company)
 	})
 
@@ -115,7 +115,7 @@ func TestPublish2(t *testing.T) {
 }
 
 func init() {
-	listener.AddListener("event1", func(event listener.BaseEvent) {
+	listener.AddListener("event1", func(event listener.GoleEvent) {
 		logger.Info(event.(Event1).Company)
 	})
 }

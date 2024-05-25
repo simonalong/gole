@@ -24,7 +24,7 @@ gole定位是工具框架，包含各种各样的工具，并对开发中的各�
 
 ```yaml
 # application.yml 内容
-base:
+gole:
   server:
     # 是否启用，默认：false
     enable: true
@@ -80,7 +80,7 @@ root@user ~> curl http://localhost:8080/api/get
 | [extend/emqx](/extend/kafka)| kafka客户端的封装 |
 
 ### gole 项目测试
-根目录提供go_test.sh文件，统一执行所有gobase中包的测试模块
+根目录提供go_test.sh文件，统一执行所有gole中包的测试模块
 ```shell
 sh go_test.sh
 ```

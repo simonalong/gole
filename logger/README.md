@@ -17,7 +17,7 @@ func main() {
 ```
 配置
 ```yaml
-base:
+gole:
   logger:
     level: info
     # 日志文件目录，默认工程目录的logs文件夹
@@ -64,10 +64,10 @@ func main() {
 }
 ```
 ### 2. 线上日志级别动态修改
-支持线上动态的日志修改，base.logger.level为默认分组的日志级别，如下修改为默认分组
+支持线上动态的日志修改，gole.logger.level为默认分组的日志级别，如下修改为默认分组
 #### 2.1 root默认分组修改
 ```shell
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.logger.level", "value":"debug"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.logger.level", "value":"debug"}'
 ```
 ```go
 func main() {
@@ -79,7 +79,7 @@ func main() {
 #### 2.2 指定分组修改
 如下为指定group名字为xxx的，设置日志级别为debug
 ```shell
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.logger.group.xxxx.level", "value":"debug"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.logger.group.xxxx.level", "value":"debug"}'
 ```
 ```go
 func main() {

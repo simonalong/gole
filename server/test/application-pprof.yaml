@@ -1,5 +1,5 @@
 api-module: demo
-base:
+gole:
   server:
     enable: true
     gin:

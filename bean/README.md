@@ -82,7 +82,7 @@ func TestCallFun1(t *testing.T) {
 在运行中如果出现问题，需要查看某个对象的属性和函数的时候，就可以使用该功能，进行动态的查看、修改对应属性，以及动态的执行对应的函数
 
 ```yaml
-base:
+gole:
   endpoint:
     # 是否启用bean的端点，默认false
     bean:

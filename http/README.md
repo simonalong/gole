@@ -32,7 +32,7 @@ func TestGetSimple(t *testing.T) {
 ### 配置
 ```yaml
 # http的配置
-base:
+gole:
   http:
     # 通用的超时配置，链接、重定向、响应的所有超时时间；默认0，就是不超时
     timeout: 5s
@@ -74,7 +74,7 @@ base:
 ```
 如下是http的默认配置 Transport `DefaultTransport`
 ```yaml
-base:
+gole:
   http:
     transport:
       # 使用Dial、DialTLS或DialContext func或TLSClientConfig字段时候，默认关闭http2；如果想要开启，则请设置为true

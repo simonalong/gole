@@ -5,17 +5,17 @@ import (
 	"testing"
 )
 
-type ValueBaseEntity struct {
+type ValueGoleEntity struct {
 	Name string `match:"value={zhou, 宋江}"`
 	Age  int    `match:"value={12, 13}"`
 }
 
-type ValueBaseEntityOne struct {
+type ValueGoleEventOne struct {
 	Name string `match:"value=zhou"`
 	Age  int    `match:"value=12"`
 }
 
-type ValueBasePtrEntity struct {
+type ValueGolePtrEntity struct {
 	Name *string `match:"value={zhou, 宋江}"`
 	Age  *int    `match:"value={12, 13}"`
 }
@@ -77,114 +77,114 @@ type ValueSlicePtrEntity struct {
 }
 
 // 测试基本类型：一个值的情况
-func TestValueBase2(t *testing.T) {
-	var value ValueBaseEntityOne
+func TestValueGole2(t *testing.T) {
+	var value ValueGoleEventOne
 	var result bool
 	var err string
 
 	//测试 正常情况
-	value = ValueBaseEntityOne{Age: 12}
+	value = ValueGoleEventOne{Age: 12}
 	result, _, err = validate.Check(value, "age")
 	TrueErr(t, result, err)
 
 	// 测试 正常情况
-	value = ValueBaseEntityOne{Age: 13}
+	value = ValueGoleEventOne{Age: 13}
 	result, _, err = validate.Check(value, "age")
 	Equal(t, err, "属性 Age 的值 13 不在只可用列表 [12] 中", result, false)
 
 	//测试 正常情况
-	value = ValueBaseEntityOne{Name: "zhou"}
+	value = ValueGoleEventOne{Name: "zhou"}
 	result, _, err = validate.Check(value, "name")
 	TrueErr(t, result, err)
 
 	// 测试 正常情况
-	value = ValueBaseEntityOne{Name: "宋江"}
+	value = ValueGoleEventOne{Name: "宋江"}
 	result, _, err = validate.Check(value, "name")
 	Equal(t, err, "属性 Name 的值 宋江 不在只可用列表 [zhou] 中", result, false)
 }
 
 // 测试基本类型：多个值的情况
-func TestValueBase(t *testing.T) {
-	var value ValueBaseEntity
+func TestValueGole(t *testing.T) {
+	var value ValueGoleEntity
 	var result bool
 	var err string
 
 	//测试 正常情况
-	value = ValueBaseEntity{Age: 12}
+	value = ValueGoleEntity{Age: 12}
 	result, _, err = validate.Check(value, "age")
 	TrueErr(t, result, err)
 
 	// 测试 正常情况
-	value = ValueBaseEntity{Age: 13}
+	value = ValueGoleEntity{Age: 13}
 	result, _, err = validate.Check(value, "age")
 	TrueErr(t, result, err)
 
 	// 测试 异常情况
-	value = ValueBaseEntity{Age: 14}
+	value = ValueGoleEntity{Age: 14}
 	result, _, err = validate.Check(value, "age")
 	Equal(t, err, "属性 Age 的值 14 不在只可用列表 [12 13] 中", false, result)
 
 	// 测试 正常情况
-	value = ValueBaseEntity{Name: "zhou"}
+	value = ValueGoleEntity{Name: "zhou"}
 	result, _, err = validate.Check(value, "name")
 	TrueErr(t, result, err)
 
 	// 测试 正常情况
-	value = ValueBaseEntity{Name: "宋江"}
+	value = ValueGoleEntity{Name: "宋江"}
 	result, _, err = validate.Check(value, "name")
 	TrueErr(t, result, err)
 
 	// 测试 异常情况
-	value = ValueBaseEntity{Name: "陈真"}
+	value = ValueGoleEntity{Name: "陈真"}
 	result, _, err = validate.Check(value, "name")
 	Equal(t, err, "属性 Name 的值 陈真 不在只可用列表 [zhou 宋江] 中", false, result)
 }
 
 // 测试基本类型：指针类型
-func TestValueBasePtr(t *testing.T) {
-	var value *ValueBasePtrEntity
+func TestValueGolePtr(t *testing.T) {
+	var value *ValueGolePtrEntity
 	var result bool
 	var err string
 	var age int
 	var name string
 
 	//测试 正常情况
-	value = &ValueBasePtrEntity{}
+	value = &ValueGolePtrEntity{}
 	age = 12
 	value.Age = &age
 	result, _, err = validate.Check(value, "age")
 	TrueErr(t, result, err)
 
 	//测试 正常情况
-	value = &ValueBasePtrEntity{}
+	value = &ValueGolePtrEntity{}
 	age = 13
 	value.Age = &age
 	result, _, err = validate.Check(value, "age")
 	TrueErr(t, result, err)
 
 	// 测试 异常情况
-	value = &ValueBasePtrEntity{}
+	value = &ValueGolePtrEntity{}
 	age = 14
 	value.Age = &age
 	result, _, err = validate.Check(value, "age")
 	Equal(t, err, "属性 Age 的值 14 不在只可用列表 [12 13] 中", result, false)
 
 	// 测试 正常情况
-	value = &ValueBasePtrEntity{}
+	value = &ValueGolePtrEntity{}
 	name = "zhou"
 	value.Name = &name
 	result, _, err = validate.Check(value, "name")
 	TrueErr(t, result, err)
 
 	// 测试 正常情况
-	value = &ValueBasePtrEntity{}
+	value = &ValueGolePtrEntity{}
 	name = "宋江"
 	value.Name = &name
 	result, _, err = validate.Check(value, "name")
 	TrueErr(t, result, err)
 
 	// 测试 异常情况
-	value = &ValueBasePtrEntity{}
+	value = &ValueGolePtrEntity{}
 	name = "陈真"
 	value.Name = &name
 	result, _, err = validate.Check(value, "name")
@@ -500,9 +500,9 @@ func TestValueSlicePtr(t *testing.T) {
 
 // value的基准测试
 func Benchmark_Value(b *testing.B) {
-	var value ValueBaseEntityOne
+	var value ValueGoleEventOne
 	for i := 0; i < b.N; i++ {
-		value = ValueBaseEntityOne{Age: 12}
+		value = ValueGoleEventOne{Age: 12}
 		validate.Check(value, "age")
 	}
 }

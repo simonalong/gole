@@ -15,7 +15,7 @@ config包主要用于加载和管理项目中配置文件中的内容，配置�
 
 ### 3. 支持profile加载不同配置文件
 格式：application-{profile}.yyy
-其中profile对应的变量为：base.profiles.active
+其中profile对应的变量为：gole.profiles.active
 变量的设置可以有如下
 - 本地配置
 - 环境变量配置
@@ -27,7 +27,7 @@ config包主要用于加载和管理项目中配置文件中的内容，配置�
 #### 代码中读取指定环境配置
 ```go
 // 配置环境
-os.Setenv("base.profiles.active", "local")
+os.Setenv("gole.profiles.active", "local")
 
 // 然后再加载的时候就会加载local的配置文件
 config.LoadConfig()
@@ -62,8 +62,8 @@ config.getValueObject("xxx.xxx", &xxx)
 ```go
 var ServerCfg ServerConfig
 
-// base前缀
-type BaseConfig struct {
+// gole前缀
+type GoleConfig struct {
     Application AppApplication
     Data string
 }
@@ -74,7 +74,7 @@ type AppApplication struct {
 ```
 
 ```yaml
-base:
+gole:
   application:
     name: "xxx-local"
   data: "test"
@@ -82,15 +82,15 @@ base:
 
 ```go
 // 直接读取即可
-config.getValueObject("base", &ServerCfg)
+config.getValueObject("gole", &ServerCfg)
 ```
 
 说明：
 v1.0.12版本后，支持对配置的中划线支持，此外还支持更多配置
-- 中划线：比如：data-base-user
-- 小驼峰：比如：dataBaseUser
-- 大驼峰：比如：DataBaseUser
-- 下划线：比如：data_base_user
+- 中划线：比如：data-gole-user
+- 小驼峰：比如：dataGoleUser
+- 大驼峰：比如：DataGoleUser
+- 下划线：比如：data_gole_user
 
 比如：
 ```yaml
@@ -151,21 +151,21 @@ config.AppendConfigFromAbsPath(xx)
 ```
 
 ### 7. 支持自动读取cm文件
-应用启动会默认读取/home/{base.application.name}/config/application-default.yml对应的内容并覆盖应用的配置中
+应用启动会默认读取/home/{gole.application.name}/config/application-default.yml对应的内容并覆盖应用的配置中
 
-也支持环境变量配置 `base.config.cm.path=xxx`
+也支持环境变量配置 `gole.config.cm.path=xxx`
 
 示例：
 ```go
 // 也可以代码中配置
-os.Setenv("base.config.cm.path", "./application-append.yaml")
+os.Setenv("gole.config.cm.path", "./application-append.yaml")
 ```
 
 ### 8. 支持配置的在线查看以及实时变更
 
 如下配置开启后，就可以在线查看应用的所有配置了
 ```yaml
-base:
+gole:
   endpoint:
     # 配置的动态实时变更，默认关闭
     config:
@@ -194,7 +194,7 @@ func xxxx() {
     listener.AddListener(listener.EventOfConfigChange, ConfigChangeListener)
 }
 
-func ConfigChangeListener(event listener.BaseEvent) {
+func ConfigChangeListener(event listener.GoleEvent) {
     ev := event.(listener.ConfigChangeEvent)
     if ev.Key == "xxx" {
         value := ev.Value

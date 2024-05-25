@@ -3,42 +3,42 @@ package config
 import "github.com/Shopify/sarama"
 
 var ApiModule string
-var BaseCfg BaseConfig
+var GoleCfg GoleConfig
 var RedisCfg RedisConfig
 var KafkaCfg KafkaConfig
 var EtcdCfg EtcdConfig
 var EmqxCfg EmqxConfig
 
-// BaseConfig base前缀
-type BaseConfig struct {
-	Api         BaseApi         `yaml:"api"`
-	Application BaseApplication `yaml:"application"`
-	Server      BaseServer      `yaml:"server"`
-	EndPoint    BaseEndPoint    `yaml:"endpoint"`
-	Logger      BaseLogger      `yaml:"logger"`
-	Profiles    BaseProfile     `yaml:"profiles"`
+// GoleConfig gole前缀
+type GoleConfig struct {
+	Api         GoleApi         `yaml:"api"`
+	Application GoleApplication `yaml:"application"`
+	Server      GoleServer      `yaml:"server"`
+	EndPoint    GoleEndPoint    `yaml:"endpoint"`
+	Logger      GoleLogger      `yaml:"logger"`
+	Profiles    GoleProfile     `yaml:"profiles"`
 }
 
-type BaseApi struct {
+type GoleApi struct {
 	Prefix string `yaml:"prefix"` // api前缀
 }
 
-type BaseApplication struct {
+type GoleApplication struct {
 	Name string `yaml:"name"` // 应用名字
 }
 
-type BaseServer struct {
+type GoleServer struct {
 	Enable    bool          `yaml:"enable"`    // 是否启用
 	Port      int           `yaml:"port"`      // 端口号
-	Gin       BaseGin       `yaml:"gin"`       // web框架gin的配置
-	Exception BaseException `yaml:"exception"` // 异常处理
+	Gin       GoleGin       `yaml:"gin"`       // web框架gin的配置
+	Exception GoleException `yaml:"exception"` // 异常处理
 }
 
-type BaseGin struct {
+type GoleGin struct {
 	Mode string `yaml:"mode"` // 有三种模式：debug/release/test
 }
 
-type BaseEndPoint struct {
+type GoleEndPoint struct {
 	Health EndPointHealth `yaml:"health"` // 健康检查[端点]
 	Config EndPointConfig `yaml:"config"` // 配置管理[端点]
 }
@@ -51,7 +51,7 @@ type EndPointConfig struct {
 	Enable bool `yaml:"enable"` // 是否启用
 }
 
-type BaseException struct {
+type GoleException struct {
 	Print ExceptionPrint `yaml:"print"` // 异常返回打印
 }
 
@@ -60,7 +60,7 @@ type ExceptionPrint struct {
 	Exclude []int `yaml:"exclude"` // 排除的httpStatus；默认可不填
 }
 
-type BaseLogger struct {
+type GoleLogger struct {
 	Level string // 日志root级别：trace/debug/info/warn/error/fatal/panic，默认：info
 	Path  string
 	Time  LoggerTime  // 时间配置
@@ -88,7 +88,7 @@ type LoggerSplit struct {
 	Size   int64 `yaml:"size"`   // 日志拆分的单位：MB
 }
 
-type BaseProfile struct {
+type GoleProfile struct {
 	Active string `yaml:"active"`
 }
 
@@ -100,9 +100,9 @@ type StorageConnectionConfig struct {
 	Parameters string `yaml:"parameters"`
 }
 
-// ---------------------------- base.redis ----------------------------
+// ---------------------------- gole.redis ----------------------------
 
-// RedisConfig base.redis前缀
+// RedisConfig gole.redis前缀
 type RedisConfig struct {
 	Password string
 	Username string
@@ -147,7 +147,7 @@ type RedisConfig struct {
 	IdleCheckFrequency int
 }
 
-// RedisStandaloneConfig base.redis.standalone
+// RedisStandaloneConfig gole.redis.standalone
 type RedisStandaloneConfig struct {
 	Addr     string
 	Database int
@@ -156,7 +156,7 @@ type RedisStandaloneConfig struct {
 	ReadOnly bool
 }
 
-// RedisSentinelConfig base.redis.sentinel
+// RedisSentinelConfig gole.redis.sentinel
 type RedisSentinelConfig struct {
 	// 哨兵的集群名字
 	Master string
@@ -185,7 +185,7 @@ type RedisClusterConfig struct {
 	RouteRandomly bool
 }
 
-// ---------------------------- base.logger ----------------------------
+// ---------------------------- gole.logger ----------------------------
 
 type LoggerConfig struct {
 	Level string `yaml:"level"`
@@ -209,7 +209,7 @@ type LoggerConfig struct {
 	} `yaml:"console"`
 }
 
-// ---------------------------- base.datasource ----------------------------
+// ---------------------------- gole.datasource ----------------------------
 type DatasourceConfig struct {
 	Username   string
 	Password   string
@@ -255,7 +255,7 @@ type EtcdConfig struct {
 	PermitWithoutStream bool
 }
 
-// ---------------------------- base.emqx ----------------------------
+// ---------------------------- gole.emqx ----------------------------
 type EmqxServer struct {
 	User *EmqxServerUser // username and password information
 	Host string          // host or host:port
@@ -291,7 +291,7 @@ type EmqxConfig struct {
 	AutoAckDisabled      bool
 }
 
-// ---------------------------- base.kafka ----------------------------
+// ---------------------------- gole.kafka ----------------------------
 type KafkaConfig struct {
 	// 默认 sarama
 	ClientId string

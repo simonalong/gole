@@ -8,16 +8,16 @@ listener包：是gole的事件监听模块
 // 添加事件监听器
 listener.AddListener(eventName string, eventListener EventListener)
 
-// 添加分组的事件监听器，分组默认为：GobaseDefault
+// 添加分组的事件监听器，分组默认为：DefaultGroup
 listener.AddListenerWithGroup(group string, eventName string, eventListener EventListener)
 
 // 发布事件
-listener.PublishEvent(event listener.BaseEvent)
+listener.PublishEvent(event listener.GoleEvent)
 ```
 
 ### 快速使用
 #### 1. 定义事件
-事件要实现接口 `listener.BaseEvent` 的方法
+事件要实现接口 `listener.GoleEvent` 的方法
 
 ```go
 type Event1 struct {
@@ -45,19 +45,19 @@ func TestPublish(t *testing.T) {
 }
 
 // 事件监听器1
-func Event1Lister1(event listener.BaseEvent) {
+func Event1Lister1(event listener.GoleEvent) {
     ev := event.(Event1)
     fmt.Println("Event1Lister1: " + ev.Company)
 }
 
 // 事件监听器2
-func Event1Lister2(event listener.BaseEvent) {
+func Event1Lister2(event listener.GoleEvent) {
     ev := event.(Event1)
     fmt.Println("Event1Lister2: " + ev.Company)
 }
 
 // 事件监听器3
-func Event1Lister3(event listener.BaseEvent) {
+func Event1Lister3(event listener.GoleEvent) {
     ev := event.(Event1)
     fmt.Println("Event1Lister3: " + ev.Company)
 }
@@ -75,7 +75,7 @@ gole内置了几类事件
 ```go
 func init() {
     // 添加服务器启动完成事件监听
-    listener.AddListener(listener.EventOfServerRunFinish, func(event listener.BaseEvent) {
+    listener.AddListener(listener.EventOfServerRunFinish, func(event listener.GoleEvent) {
         logger.Info("应用启动完成")
     })
 }

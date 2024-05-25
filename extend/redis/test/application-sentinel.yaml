@@ -1,4 +1,4 @@
-base:
+gole:
   redis:
     enable: true
     sentinel:

@@ -5,18 +5,18 @@ import (
 	"net/http"
 )
 
-type ResponseBase struct {
+type ResponseGole struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
 type DataResponse[T any] struct {
-	ResponseBase
+	ResponseGole
 	Data T `json:"data"`
 }
 
 type DataArrayResponse[T any] struct {
-	ResponseBase
+	ResponseGole
 	Data []T `json:"data"`
 }
 
@@ -30,7 +30,7 @@ type PagedData[T any] struct {
 }
 
 type PagedResponse[T any] struct {
-	ResponseBase
+	ResponseGole
 	Data PagedData[T] `json:"data"`
 }
 

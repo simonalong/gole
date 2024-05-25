@@ -44,7 +44,7 @@ const (
 	HmNoRoute
 )
 
-var GoBaseVersion = "1.5.1"
+var GoleVersion = "1.5.1"
 var ApiPrefix = "/api"
 
 var engine *gin.Engine = nil
@@ -83,7 +83,7 @@ func InitServer() {
 	if serverLoaded {
 		return
 	}
-	if !config.ExistConfigFile() || !config.GetValueBoolDefault("base.server.enable", false) {
+	if !config.ExistConfigFile() || !config.GetValueBoolDefault("gole.server.enable", false) {
 		return
 	}
 
@@ -91,7 +91,7 @@ func InitServer() {
 		logger.Error("没有找到任何配置文件，服务启动失败")
 		return
 	}
-	mode := config.GetValueStringDefault("base.server.gin.mode", "release")
+	mode := config.GetValueStringDefault("gole.server.gin.mode", "release")
 	if "debug" == mode {
 		gin.SetMode(gin.DebugMode)
 	} else if "test" == mode {
@@ -106,15 +106,15 @@ func InitServer() {
 
 	engine = gin.New()
 
-	if config.GetValueBoolDefault("base.debug.enable", true) {
+	if config.GetValueBoolDefault("gole.debug.enable", true) {
 		// 注册pprof
-		if config.GetValueBoolDefault("base.server.gin.pprof.enable", false) {
+		if config.GetValueBoolDefault("gole.server.gin.pprof.enable", false) {
 			pprofHave = true
 			pprof.Register(engine)
 		}
 	}
 
-	if config.GetValueBoolDefault("base.server.cors.enable", true) {
+	if config.GetValueBoolDefault("gole.server.cors.enable", true) {
 		engine.Use(Cors())
 	}
 	engine.Use(gin.Recovery(), ErrHandler())
@@ -125,18 +125,18 @@ func InitServer() {
 	}
 
 	// 注册 健康检查endpoint
-	if config.GetValueBoolDefault("base.endpoint.health.enable", false) {
+	if config.GetValueBoolDefault("gole.endpoint.health.enable", false) {
 		RegisterHealthCheckEndpoint(apiPreAndModule())
 	}
 
-	if config.GetValueBoolDefault("base.debug.enable", true) {
+	if config.GetValueBoolDefault("gole.debug.enable", true) {
 		// 注册 配置查看和变更功能
-		if config.GetValueBoolDefault("base.endpoint.config.enable", false) {
+		if config.GetValueBoolDefault("gole.endpoint.config.enable", false) {
 			RegisterConfigWatchEndpoint(apiPreAndModule())
 		}
 
 		// 注册 bean管理的功能
-		if config.GetValueBoolDefault("base.endpoint.bean.enable", false) {
+		if config.GetValueBoolDefault("gole.endpoint.bean.enable", false) {
 			RegisterBeanWatchEndpoint(apiPreAndModule())
 		}
 
@@ -145,7 +145,7 @@ func InitServer() {
 	}
 
 	// 注册 swagger的功能
-	if config.GetValueBoolDefault("base.swagger.enable", false) {
+	if config.GetValueBoolDefault("gole.swagger.enable", false) {
 		RegisterSwaggerEndpoint()
 	}
 
@@ -156,9 +156,9 @@ func InitServer() {
 	serverLoaded = true
 }
 
-func ConfigChangeListener(event listener.BaseEvent) {
+func ConfigChangeListener(event listener.GoleEvent) {
 	ev := event.(listener.ConfigChangeEvent)
-	if ev.Key == "base.server.gin.pprof.enable" {
+	if ev.Key == "gole.server.gin.pprof.enable" {
 		if util.ToBool(ev.Value) && !pprofHave {
 			pprofHave = true
 			pprof.Register(engine)
@@ -179,7 +179,7 @@ func ErrHandler() gin.HandlerFunc {
 }
 
 func apiPreAndModule() string {
-	ap := config.GetValueStringDefault("base.api.prefix", "")
+	ap := config.GetValueStringDefault("gole.api.prefix", "")
 	if ap != "" {
 		ApiPrefix = ap
 	}
@@ -187,7 +187,7 @@ func apiPreAndModule() string {
 }
 
 func printVersionAndProfile() {
-	fmt.Printf("----------------------------- gole: %s --------------------------\n", GoBaseVersion)
+	fmt.Printf("----------------------------- gole: %s --------------------------\n", GoleVersion)
 	fmt.Printf("profile：%s\n", config.CurrentProfile)
 	fmt.Printf("--------------------------------------------------------------------------\n")
 }
@@ -207,12 +207,12 @@ func StartServer() {
 
 	listener.PublishEvent(listener.ServerRunStartEvent{})
 
-	if !config.GetValueBoolDefault("base.server.enable", true) {
+	if !config.GetValueBoolDefault("gole.server.enable", true) {
 		return
 	}
 
 	logger.Info("开始启动服务")
-	port := config.GetValueIntDefault("base.server.port", 8080)
+	port := config.GetValueIntDefault("gole.server.port", 8080)
 	logger.Info("服务端口号: %d", port)
 
 	graceRun(port)
@@ -274,36 +274,36 @@ func Engine() *gin.Engine {
 	return engine
 }
 
-func RegisterHealthCheckEndpoint(apiBase string) gin.IRoutes {
-	if "" == apiBase {
+func RegisterHealthCheckEndpoint(apiGole string) gin.IRoutes {
+	if "" == apiGole {
 		return nil
 	}
-	RegisterRoute(apiBase+"/system/status", HmAll, healthSystemStatus)
-	RegisterRoute(apiBase+"/system/init", HmAll, healthSystemInit)
-	RegisterRoute(apiBase+"/system/destroy", HmAll, healthSystemDestroy)
+	RegisterRoute(apiGole+"/system/status", HmAll, healthSystemStatus)
+	RegisterRoute(apiGole+"/system/init", HmAll, healthSystemInit)
+	RegisterRoute(apiGole+"/system/destroy", HmAll, healthSystemDestroy)
 	return engine
 }
 
-func RegisterConfigWatchEndpoint(apiBase string) gin.IRoutes {
-	if "" == apiBase {
+func RegisterConfigWatchEndpoint(apiGole string) gin.IRoutes {
+	if "" == apiGole {
 		return nil
 	}
-	RegisterRoute(apiBase+"/config/values", HmGet, config.GetConfigValues)
-	RegisterRoute(apiBase+"/config/values/yaml", HmGet, config.GetConfigDeepValues)
-	RegisterRoute(apiBase+"/config/value/:key", HmGet, config.GetConfigValue)
-	RegisterRoute(apiBase+"/config/update", HmPut, config.UpdateConfig)
+	RegisterRoute(apiGole+"/config/values", HmGet, config.GetConfigValues)
+	RegisterRoute(apiGole+"/config/values/yaml", HmGet, config.GetConfigDeepValues)
+	RegisterRoute(apiGole+"/config/value/:key", HmGet, config.GetConfigValue)
+	RegisterRoute(apiGole+"/config/update", HmPut, config.UpdateConfig)
 	return engine
 }
 
-func RegisterBeanWatchEndpoint(apiBase string) gin.IRoutes {
-	if "" == apiBase {
+func RegisterBeanWatchEndpoint(apiGole string) gin.IRoutes {
+	if "" == apiGole {
 		return nil
 	}
-	RegisterRoute(apiBase+"/bean/name/all", HmGet, bean.DebugBeanAll)
-	RegisterRoute(apiBase+"/bean/name/list/:name", HmGet, bean.DebugBeanList)
-	RegisterRoute(apiBase+"/bean/field/get", HmPost, bean.DebugBeanGetField)
-	RegisterRoute(apiBase+"/bean/field/set", HmPut, bean.DebugBeanSetField)
-	RegisterRoute(apiBase+"/bean/fun/call", HmPost, bean.DebugBeanFunCall)
+	RegisterRoute(apiGole+"/bean/name/all", HmGet, bean.DebugBeanAll)
+	RegisterRoute(apiGole+"/bean/name/list/:name", HmGet, bean.DebugBeanList)
+	RegisterRoute(apiGole+"/bean/field/get", HmPost, bean.DebugBeanGetField)
+	RegisterRoute(apiGole+"/bean/field/set", HmPut, bean.DebugBeanSetField)
+	RegisterRoute(apiGole+"/bean/fun/call", HmPost, bean.DebugBeanFunCall)
 	return engine
 }
 
@@ -312,25 +312,25 @@ func RegisterSwaggerEndpoint() gin.IRoutes {
 	return engine
 }
 
-func RegisterHelpEndpoint(apiBase string) gin.IRoutes {
-	if "" == apiBase {
+func RegisterHelpEndpoint(apiGole string) gin.IRoutes {
+	if "" == apiGole {
 		return nil
 	}
-	RegisterRoute(apiBase+"/debug/help", HmGet, debug.Help)
+	RegisterRoute(apiGole+"/debug/help", HmGet, debug.Help)
 	return engine
 }
 
-func RegisterCustomHealthCheck(apiBase string, status func() string, init func() string, destroy func() string) gin.IRoutes {
+func RegisterCustomHealthCheck(apiGole string, status func() string, init func() string, destroy func() string) gin.IRoutes {
 	if !checkEngine() {
 		return nil
 	}
-	RegisterRoute(apiBase+"/system/status", HmAll, func(c *gin.Context) {
+	RegisterRoute(apiGole+"/system/status", HmAll, func(c *gin.Context) {
 		c.Data(200, "application/json; charset=utf-8", []byte(status()))
 	})
-	RegisterRoute(apiBase+"/system/init", HmAll, func(c *gin.Context) {
+	RegisterRoute(apiGole+"/system/init", HmAll, func(c *gin.Context) {
 		c.Data(200, "application/json; charset=utf-8", []byte(init()))
 	})
-	RegisterRoute(apiBase+"/system/destroy", HmAll, func(c *gin.Context) {
+	RegisterRoute(apiGole+"/system/destroy", HmAll, func(c *gin.Context) {
 		c.Data(200, "application/json; charset=utf-8", []byte(destroy()))
 	})
 	return engine
@@ -349,7 +349,7 @@ func RegisterRoute(path string, method HttpMethod, handler gin.HandlerFunc) gin.
 		return nil
 	}
 	if engine == nil {
-		logger.Warn("server启动失败，请配置 base.server.enable 或者查看相关日志")
+		logger.Warn("server启动失败，请配置 gole.server.enable 或者查看相关日志")
 		return nil
 	}
 	switch method {
@@ -497,7 +497,7 @@ func getPathAppendApiModel(path string) string {
 	// 获取 api-module
 	apiModel := util.ISCString(config.GetValueString("api-module")).Trim("/")
 	// 获取api前缀
-	ap := util.ISCString(config.GetValueStringDefault("base.api.prefix", "")).Trim("/")
+	ap := util.ISCString(config.GetValueStringDefault("gole.api.prefix", "")).Trim("/")
 	if ap != "" {
 		ApiPrefix = "/" + string(ap)
 	}

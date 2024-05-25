@@ -1,6 +1,6 @@
 #api-module: sample
 
-base:
+gole:
   profiles:
     # 激活环境配置
     active: default

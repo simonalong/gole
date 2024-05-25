@@ -14,7 +14,7 @@ import (
 	"xorm.io/xorm/log"
 )
 
-type GobaseXormHook interface {
+type GoleXormHook interface {
 	BeforeProcess(c *contexts.ContextHook, driverName string) (context.Context, error)
 	AfterProcess(c *contexts.ContextHook, driverName string) error
 }
@@ -22,16 +22,16 @@ type GobaseXormHook interface {
 var defaultXormHooks []DefaultXormHook
 
 type DefaultXormHook struct {
-	driverName     string
-	gobaseXormHook GobaseXormHook
+	driverName   string
+	goleXormHook GoleXormHook
 }
 
 func (defaultHook *DefaultXormHook) BeforeProcess(c *contexts.ContextHook) (context.Context, error) {
-	return defaultHook.gobaseXormHook.BeforeProcess(c, defaultHook.driverName)
+	return defaultHook.goleXormHook.BeforeProcess(c, defaultHook.driverName)
 }
 
 func (defaultHook *DefaultXormHook) AfterProcess(c *contexts.ContextHook) error {
-	return defaultHook.gobaseXormHook.AfterProcess(c, defaultHook.driverName)
+	return defaultHook.goleXormHook.AfterProcess(c, defaultHook.driverName)
 }
 
 func init() {
@@ -54,8 +54,8 @@ func NewXormDbWithNameParams(datasourceName string, params map[string]string) (*
 	return doNewXormDb(datasourceName, params)
 }
 
-func AddXormHook(hook GobaseXormHook) {
-	defaultXormHook := DefaultXormHook{gobaseXormHook: hook}
+func AddXormHook(hook GoleXormHook) {
+	defaultXormHook := DefaultXormHook{goleXormHook: hook}
 	defaultXormHooks = append(defaultXormHooks, defaultXormHook)
 	xormDbs := bean.GetBeanWithNamePre(constants.BeanNameXormPre)
 	if xormDbs == nil {
@@ -68,9 +68,9 @@ func AddXormHook(hook GobaseXormHook) {
 
 func doNewXormDb(datasourceName string, params map[string]string) (*xorm.Engine, error) {
 	datasourceConfig := config.DatasourceConfig{}
-	targetDatasourceName := "base.datasource"
+	targetDatasourceName := "gole.datasource"
 	if datasourceName != "" {
-		targetDatasourceName = "base.datasource." + datasourceName
+		targetDatasourceName = "gole.datasource." + datasourceName
 	}
 	err := config.GetValueObject(targetDatasourceName, &datasourceConfig)
 	if err != nil {
@@ -91,24 +91,24 @@ func doNewXormDb(datasourceName string, params map[string]string) (*xorm.Engine,
 		xormDb.AddHook(&hook)
 	}
 
-	maxIdleConns := config.GetValueInt("base.datasource.connect-pool.max-idle-conns")
+	maxIdleConns := config.GetValueInt("gole.datasource.connect-pool.max-idle-conns")
 	if maxIdleConns != 0 {
 		// 设置空闲的最大连接数
 		xormDb.SetMaxIdleConns(maxIdleConns)
 	}
 
-	maxOpenConns := config.GetValueInt("base.datasource.connect-pool.max-open-conns")
+	maxOpenConns := config.GetValueInt("gole.datasource.connect-pool.max-open-conns")
 	if maxOpenConns != 0 {
 		// 设置数据库打开连接的最大数量
 		xormDb.SetMaxOpenConns(maxOpenConns)
 	}
 
-	maxLifeTime := config.GetValueString("base.datasource.connect-pool.max-life-time")
+	maxLifeTime := config.GetValueString("gole.datasource.connect-pool.max-life-time")
 	if maxLifeTime != "" {
 		// 设置连接可重复使用的最大时间
 		t, err := time.ParseDuration(maxLifeTime)
 		if err != nil {
-			logger.Warn("读取配置【base.datasource.connect-pool.max-life-time】异常", err)
+			logger.Warn("读取配置【gole.datasource.connect-pool.max-life-time】异常", err)
 		} else {
 			xormDb.SetConnMaxLifetime(t)
 		}

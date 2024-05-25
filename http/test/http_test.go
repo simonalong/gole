@@ -3,7 +3,7 @@ package test
 import (
 	"context"
 	"fmt"
-	baseHttp "github.com/simonalong/gole/http"
+	goleHttp "github.com/simonalong/gole/http"
 	"github.com/simonalong/gole/util"
 	"net/http"
 	"testing"
@@ -22,7 +22,7 @@ func (*DemoHttpHook) After(ctx context.Context, rsp *http.Response, rspCode int,
 }
 
 func TestGetSimple(t *testing.T) {
-	_, _, data, err := baseHttp.GetSimple("http://10.30.30.78:29013/api/core/license/osinfo")
+	_, _, data, err := goleHttp.GetSimple("http://10.30.30.78:29013/api/core/license/osinfo")
 
 	if err != nil {
 		fmt.Printf("error = %v\n", err)

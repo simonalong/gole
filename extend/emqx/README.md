@@ -3,7 +3,7 @@
 对业内的emqx客户端进行配置化封装，用于简化获取
 ### 全部配置
 ```yaml
-base:
+gole:
   emqx:
     # 是否开启emqx，默认关闭
     enable: true
@@ -43,7 +43,7 @@ func NewEmqxClient() (mqtt.Client, error) {}
 ```yaml
 
 ```yaml
-base:
+gole:
   emqx:
     enable: true
     servers:

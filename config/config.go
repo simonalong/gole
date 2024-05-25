@@ -45,7 +45,7 @@ func LoadConfigFromRelativePath(resourceAbsPath string) {
 func LoadConfigFromAbsPath(resourceAbsPath string) {
 	doLoadConfigFromAbsPath(resourceAbsPath)
 
-	cmPath := os.Getenv("base.config.additional-location")
+	cmPath := os.Getenv("gole.config.additional-location")
 	if cmPath == "" {
 		cmPath = "./config/application-default.yml"
 	}
@@ -53,7 +53,7 @@ func LoadConfigFromAbsPath(resourceAbsPath string) {
 
 	ApiModule = GetValueString("api-module")
 
-	if err := GetValueObject("base", &BaseCfg); err != nil {
+	if err := GetValueObject("gole", &GoleCfg); err != nil {
 		log.Printf("加载 Base 配置失败(%v)", err)
 	}
 }
@@ -200,7 +200,7 @@ func doLoadConfigFromAbsPath(resourceAbsPath string) {
 		profile := getActiveProfile()
 		if profile != "" {
 			CurrentProfile = profile
-			SetValue("base.profiles.active", profile)
+			SetValue("gole.profiles.active", profile)
 			currentProfile := getProfileFromFileName(fileName)
 			if currentProfile == profile {
 				configExist = true
@@ -245,12 +245,12 @@ func AppendFile(filePath string) {
 // 临时写死
 // 优先级：环境变量 > 本地配置
 func getActiveProfile() string {
-	profile := os.Getenv("base.profiles.active")
+	profile := os.Getenv("gole.profiles.active")
 	if profile != "" {
 		return profile
 	}
 
-	profile = GetValueString("base.profiles.active")
+	profile = GetValueString("gole.profiles.active")
 	if profile != "" {
 		return profile
 	}

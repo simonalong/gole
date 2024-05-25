@@ -11,7 +11,7 @@
   "server": {
     "port": 31101
   },
-  "base": {
+  "gole": {
     "application": {
       "name": "sdf-local78-json"
     }

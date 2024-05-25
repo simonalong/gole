@@ -1,15 +1,15 @@
 package listener
 
-type EventListener func(event BaseEvent)
+type EventListener func(event GoleEvent)
 
 var eventWatcherGroupMaps map[string]map[string][]EventListener
 
-type BaseEvent interface {
+type GoleEvent interface {
 	Name() string
 	Group() string
 }
 
-func PublishEvent(event BaseEvent) {
+func PublishEvent(event GoleEvent) {
 	if eventWatcherGroupMaps == nil {
 		return
 	}

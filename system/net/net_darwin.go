@@ -41,11 +41,11 @@ func parseNetstatLine(line string) (stat *IOCountersStat, linkID *uint, err erro
 		linkID = &linkIDUint
 	}
 
-	base := 1
+	gole := 1
 	numberColumns := len(columns)
 	// sometimes Address is omitted
 	if numberColumns < 12 {
-		base = 0
+		gole = 0
 	}
 	if numberColumns < 11 || numberColumns > 13 {
 		err = fmt.Errorf("line %q do have an invalid number of columns %d", line, numberColumns)
@@ -54,15 +54,15 @@ func parseNetstatLine(line string) (stat *IOCountersStat, linkID *uint, err erro
 
 	parsed := make([]uint64, 0, 7)
 	vv := []string{
-		columns[base+3], // Ipkts == PacketsRecv
-		columns[base+4], // Ierrs == Errin
-		columns[base+5], // Ibytes == BytesRecv
-		columns[base+6], // Opkts == PacketsSent
-		columns[base+7], // Oerrs == Errout
-		columns[base+8], // Obytes == BytesSent
+		columns[gole+3], // Ipkts == PacketsRecv
+		columns[gole+4], // Ierrs == Errin
+		columns[gole+5], // Ibytes == BytesRecv
+		columns[gole+6], // Opkts == PacketsSent
+		columns[gole+7], // Oerrs == Errout
+		columns[gole+8], // Obytes == BytesSent
 	}
 	if len(columns) == 12 {
-		vv = append(vv, columns[base+10])
+		vv = append(vv, columns[gole+10])
 	}
 
 	for _, target := range vv {

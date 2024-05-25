@@ -5,7 +5,7 @@
 
 #### 单机
 ```yaml
-base:
+gole:
   redis:
     enable: true
     standalone:
@@ -14,7 +14,7 @@ base:
 
 #### 哨兵
 ```yaml
-base:
+gole:
   redis:
     enable: true
     sentinel:
@@ -27,7 +27,7 @@ base:
 
 #### 集群
 ```yaml
-base:
+gole:
   redis:
     enable: true
     cluster:
@@ -59,7 +59,7 @@ func TestRedis(t *testing.T) {
 
 ### redis所有配置
 ```yaml
-base:
+gole:
   redis:
     # 是否启用redis，默认关闭
     enable: bool

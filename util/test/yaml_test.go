@@ -105,8 +105,8 @@ func TestMapToProperties4(t *testing.T) {
 }
 
 func TestYamlToMap(t *testing.T) {
-	yamlToMapTest(t, "./resources/yml/base.yml")
-	yamlToMapTest(t, "./resources/yml/base1.yml")
+	yamlToMapTest(t, "./resources/yml/gole.yml")
+	yamlToMapTest(t, "./resources/yml/gole1.yml")
 	yamlToMapTest(t, "./resources/yml/array1.yml")
 	yamlToMapTest(t, "./resources/yml/array2.yml")
 	yamlToMapTest(t, "./resources/yml/array3.yml")
@@ -119,9 +119,9 @@ func TestYamlToMap(t *testing.T) {
 }
 
 func TestPropertiesToYaml1(t *testing.T) {
-	//propertiesToYamlTest(t, "./resources/properties/base.properties")
-	//propertiesToYamlTest(t, "./resources/properties/base1.properties")
-	//propertiesToYamlTest(t, "./resources/properties/base2.properties")
+	//propertiesToYamlTest(t, "./resources/properties/gole.properties")
+	//propertiesToYamlTest(t, "./resources/properties/gole1.properties")
+	//propertiesToYamlTest(t, "./resources/properties/gole2.properties")
 	//propertiesToYamlTest(t, "./resources/properties/array1.properties")
 	//propertiesToYamlTest(t, "./resources/properties/array2.properties")
 	//propertiesToYamlTest(t, "./resources/properties/array3.properties")
@@ -132,9 +132,9 @@ func TestPropertiesToYaml1(t *testing.T) {
 }
 
 func TestYamlToKvList1(t *testing.T) {
-	yamlToKvListTest(t, "./resources/yml/base.yml")
-	yamlToKvListTest(t, "./resources/yml/base1.yml")
-	yamlToKvListTest(t, "./resources/yml/base2.yml")
+	yamlToKvListTest(t, "./resources/yml/gole.yml")
+	yamlToKvListTest(t, "./resources/yml/gole1.yml")
+	yamlToKvListTest(t, "./resources/yml/gole2.yml")
 	yamlToKvListTest(t, "./resources/yml/array1.yml")
 	yamlToKvListTest(t, "./resources/yml/array2.yml")
 	yamlToKvListTest(t, "./resources/yml/array3.yml")
@@ -145,9 +145,9 @@ func TestYamlToKvList1(t *testing.T) {
 }
 
 func TestYamlToPropertiesWithKey(t *testing.T) {
-	yamlToPropertiesWithKeyTest(t, "./resources/yml/base.yml")
-	yamlToPropertiesWithKeyTest(t, "./resources/yml/base1.yml")
-	yamlToPropertiesWithKeyTest(t, "./resources/yml/base2.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/gole.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/gole1.yml")
+	yamlToPropertiesWithKeyTest(t, "./resources/yml/gole2.yml")
 	yamlToPropertiesWithKeyTest(t, "./resources/yml/array1.yml")
 	yamlToPropertiesWithKeyTest(t, "./resources/yml/array2.yml")
 	yamlToPropertiesWithKeyTest(t, "./resources/yml/array3.yml")
@@ -158,9 +158,9 @@ func TestYamlToPropertiesWithKey(t *testing.T) {
 }
 
 func TestPropertiesToMap5(t *testing.T) {
-	propertiesToMap(t, "./resources/properties/base.properties")
-	propertiesToMap(t, "./resources/properties/base1.properties")
-	propertiesToMap(t, "./resources/properties/base2.properties")
+	propertiesToMap(t, "./resources/properties/gole.properties")
+	propertiesToMap(t, "./resources/properties/gole1.properties")
+	propertiesToMap(t, "./resources/properties/gole2.properties")
 	propertiesToMap(t, "./resources/properties/array1.properties")
 }
 

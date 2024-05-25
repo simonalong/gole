@@ -1,4 +1,4 @@
-base:
+gole:
   emqx:
     # 是否开启emqx，默认关闭
     enable: true

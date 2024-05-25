@@ -46,7 +46,7 @@ func TestServerGet(t *testing.T) {
 	})
 
 	// 测试事件监听机制
-	listener.AddListener(listener.EventOfServerRunFinish, func(event listener.BaseEvent) {
+	listener.AddListener(listener.EventOfServerRunFinish, func(event listener.GoleEvent) {
 		logger.Info("应用启动完成")
 	})
 
@@ -81,12 +81,12 @@ func TestServer2(t *testing.T) {
 
 func init() {
 	// 添加服务器启动完成事件监听
-	listener.AddListener(listener.EventOfServerRunFinish, func(event listener.BaseEvent) {
+	listener.AddListener(listener.EventOfServerRunFinish, func(event listener.GoleEvent) {
 		logger.Info("应用启动完成")
 	})
 
 	// 添加服务器启动完成事件监听
-	listener.AddListener(listener.EventOfServerStop, func(event listener.BaseEvent) {
+	listener.AddListener(listener.EventOfServerStop, func(event listener.GoleEvent) {
 		logger.Info("应用退出")
 	})
 }

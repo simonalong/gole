@@ -61,7 +61,7 @@ type InsertReq struct {
 # application.yml 文件
 api-module: app/sample
 
-base:
+gole:
   api:
     # api前缀
     prefix: /api
@@ -198,13 +198,13 @@ func CheckWithParameter(parameterMap map[string]interface{}, object interface{},
 
 ```go
 // 修饰一个值
-type ValueBaseEntityOne struct {
+type ValueGoleEventOne struct {
     Name string `match:"value=zhou"`
     Age  int    `match:"value=12"`
 }
 
 // 修饰一个值
-type ValueBaseEntity struct {
+type ValueGoleEvent struct {
     Name string `match:"value={zhou, 宋江}"`
     Age  int    `match:"value={12, 13}"`
 }

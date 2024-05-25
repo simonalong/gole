@@ -1,4 +1,4 @@
-base:
+gole:
   server:
     enable: false
     gin:

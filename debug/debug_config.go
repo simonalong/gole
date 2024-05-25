@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/simonalong/gole/config"
 	"github.com/simonalong/gole/logger"
-	baseNet "github.com/simonalong/gole/system/net"
+	goleNet "github.com/simonalong/gole/system/net"
 	etcdClientV3 "go.etcd.io/etcd/client/v3"
 	"os"
 	"strings"
@@ -40,7 +40,7 @@ func InitWithParameter(endpoints []string, user, password string) {
 	}
 
 	for _, endpoint := range endpoints {
-		if !baseNet.IpPortAvailable(endpoint) {
+		if !goleNet.IpPortAvailable(endpoint) {
 			// 如果想使用调试模式，请在环境变量里面或者配置文件里面配置如下
 			// debug.etcd.endpoints：多个{ip}:{port}格式，中间以逗号（英文逗号）分隔
 			// debug.etcd.user

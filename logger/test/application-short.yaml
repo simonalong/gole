@@ -1,4 +1,4 @@
-base:
+gole:
   application:
     # 服务名
     name: demo

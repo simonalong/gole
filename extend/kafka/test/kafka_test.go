@@ -99,8 +99,8 @@ func TestConsumerOriginal(t *testing.T) {
 
 func TestConfig(t *testing.T) {
 	config.LoadYamlFile("./application-parameter.yaml")
-	if config.GetValueBoolDefault("base.kafka.enable", false) {
-		err := config.GetValueObject("base.kafka", &config.KafkaCfg)
+	if config.GetValueBoolDefault("gole.kafka.enable", false) {
+		err := config.GetValueObject("gole.kafka", &config.KafkaCfg)
 		if err != nil {
 			return
 		}
@@ -111,8 +111,8 @@ func TestConfig(t *testing.T) {
 
 func TestProducerNew(t *testing.T) {
 	config.LoadYamlFile("./application-simple.yaml")
-	if config.GetValueBoolDefault("base.kafka.enable", false) {
-		err := config.GetValueObject("base.kafka", &config.KafkaCfg)
+	if config.GetValueBoolDefault("gole.kafka.enable", false) {
+		err := config.GetValueObject("gole.kafka", &config.KafkaCfg)
 		if err != nil {
 			return
 		}
@@ -139,8 +139,8 @@ func TestProducerNew(t *testing.T) {
 
 func TestProducerNew2(t *testing.T) {
 	config.LoadYamlFile("./application-producer.yaml")
-	if config.GetValueBoolDefault("base.kafka.enable", false) {
-		err := config.GetValueObject("base.kafka", &config.KafkaCfg)
+	if config.GetValueBoolDefault("gole.kafka.enable", false) {
+		err := config.GetValueObject("gole.kafka", &config.KafkaCfg)
 		if err != nil {
 			return
 		}
@@ -172,8 +172,8 @@ func TestProducerNew2(t *testing.T) {
 
 func TestConsumerNew(t *testing.T) {
 	config.LoadYamlFile("./application-simple.yaml")
-	if config.GetValueBoolDefault("base.kafka.enable", false) {
-		err := config.GetValueObject("base.kafka", &config.KafkaCfg)
+	if config.GetValueBoolDefault("gole.kafka.enable", false) {
+		err := config.GetValueObject("gole.kafka", &config.KafkaCfg)
 		if err != nil {
 			return
 		}
@@ -211,8 +211,8 @@ func TestConsumerNew(t *testing.T) {
 
 func TestCreateTopicNew(t *testing.T) {
 	config.LoadYamlFile("./application-admin.yaml")
-	if config.GetValueBoolDefault("base.kafka.enable", false) {
-		err := config.GetValueObject("base.kafka", &config.KafkaCfg)
+	if config.GetValueBoolDefault("gole.kafka.enable", false) {
+		err := config.GetValueObject("gole.kafka", &config.KafkaCfg)
 		if err != nil {
 			return
 		}

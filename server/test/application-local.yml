@@ -1,6 +1,6 @@
 api-module: api/app/sample
 
-base:
+gole:
   application:
     # 应用名称
     name: sample

@@ -5,7 +5,7 @@ server包是用于更加方便的开发web项目而封装的包，开启配置�
 ### 简单示例
 ```yaml
 # application.yml 内容
-base:
+gole:
   server:
     # 是否启用，默认：false
     enable: true
@@ -40,7 +40,7 @@ gole项目内置的一些server的配置
 ```yaml
 api-module: sample
 
-base:
+gole:
   api:
     # api前缀，默认包含api前缀，如果路径本身有api，则不再添加api前缀
     prefix: /api
@@ -108,7 +108,7 @@ base:
 ```
 gole项目内置的一些endpoint端口
 ```shell
-base:
+gole:
   # 内部开放的 endpoint
   endpoint:
     # 健康检查处理，默认关闭，true/false
@@ -138,38 +138,38 @@ root@user ~> curl http://localhost:8080/api/sample/get/data
 提供request和response的打印，用于调试时候使用
 ```shell
 # 开启请求的打印，开启后默认打印所有请求，如果想打印指定uri，请先配置uri
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.request.print.enable", "value":"true"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.request.print.enable", "value":"true"}'
 # 开启响应的打印
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.request.print.enable", "value":"true"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.request.print.enable", "value":"true"}'
 # 开启异常的打印
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.exception.print.enable", "value":"true"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.exception.print.enable", "value":"true"}'
 ```
 
 #### 指定uri打印
 如果不指定uri则会默认打印所有的请求
 ```shell
 # 指定要打印的请求的uri
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.request.print.include-uri[0]", "value":"/api/xx/xxx"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.request.print.include-uri[0]", "value":"/api/xx/xxx"}'
 # 指定不要打印的请求uri
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.request.print.exclude-uri[0]", "value":"/api/xx/xxx"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.request.print.exclude-uri[0]", "value":"/api/xx/xxx"}'
 
 # 指定要打印的响应的uri
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.request.print.include-uri[0]", "value":"/api/xx/xxx"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.request.print.include-uri[0]", "value":"/api/xx/xxx"}'
 # 指定不要打印的响应uri
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.request.print.exclude-uri[0]", "value":"/api/xx/xxx"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.request.print.exclude-uri[0]", "value":"/api/xx/xxx"}'
 ```
 
 提示：<br/>
 - 如果"请求"和"响应"都开启打印，则只会打印"响应"，因为响应中已经包括了"请求"
 - 指定多个uri的话，如下，配置其实是按照properties的方式进行指定的
 ```shell
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.request.print.include-uri[0]", "value":"/api/xx/xxx"}'
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.request.print.include-uri[1]", "value":"/api/xx/xxy"}'
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"base.server.request.print.include-uri[2]", "value":"/api/xx/xxz"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.request.print.include-uri[0]", "value":"/api/xx/xxx"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.request.print.include-uri[1]", "value":"/api/xx/xxy"}'
+curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"gole.server.request.print.include-uri[2]", "value":"/api/xx/xxz"}'
 ...
 ```
 ## swagger 使用介绍
-如果想基于 gobase 来使用 swagger 这里需要按照如下步骤来处理
+如果想基于 gole 来使用 swagger 这里需要按照如下步骤来处理
 
 #### 1. 安装命令
 这个是 go-swagger 必需
@@ -214,7 +214,7 @@ func main() {
 #### 5. 开启开关，运行程序
 代码开启如下开关
 ```yaml
-base:
+gole:
   swagger:
     enable: true
 ```

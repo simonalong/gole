@@ -37,18 +37,18 @@ const (
 	ContentPostForm       string = "application/x-www-form-urlencoded"
 )
 
-var NetHttpHooks []GobaseHttpHook
+var NetHttpHooks []GoleHttpHook
 
 func init() {
-	NetHttpHooks = []GobaseHttpHook{}
+	NetHttpHooks = []GoleHttpHook{}
 }
 
-type GobaseHttpHook interface {
+type GoleHttpHook interface {
 	Before(ctx context.Context, req *http.Request) (context.Context, http.Header)
 	After(ctx context.Context, rsp *http.Response, rspCode int, rspData any, err error)
 }
 
-func AddHook(httpHook GobaseHttpHook) {
+func AddHook(httpHook GoleHttpHook) {
 	NetHttpHooks = append(NetHttpHooks, httpHook)
 }
 
@@ -78,86 +78,86 @@ func createHTTPClient() *http.Client {
 }
 
 func loadClientFromConfig(client *http.Client) {
-	if config.GetValueString("base.http.timeout") != "" {
-		t, err := time.ParseDuration(config.GetValueString("base.http.timeout"))
+	if config.GetValueString("gole.http.timeout") != "" {
+		t, err := time.ParseDuration(config.GetValueString("gole.http.timeout"))
 		if err != nil {
-			logger.Warn("读取配置【base.http.timeout】异常", err)
+			logger.Warn("读取配置【gole.http.timeout】异常", err)
 		} else {
 			client.Timeout = t
 		}
 	}
 
 	transport := &http.Transport{}
-	if config.GetValueString("base.http.transport.tls-handshake-timeout") != "" {
-		t, err := time.ParseDuration(config.GetValueString("base.http.transport.tls-handshake-timeout"))
+	if config.GetValueString("gole.http.transport.tls-handshake-timeout") != "" {
+		t, err := time.ParseDuration(config.GetValueString("gole.http.transport.tls-handshake-timeout"))
 		if err != nil {
-			logger.Warn("读取配置【base.http.transport.tls-handshake-timeout】异常", err)
+			logger.Warn("读取配置【gole.http.transport.tls-handshake-timeout】异常", err)
 		} else {
 			transport.TLSHandshakeTimeout = t
 		}
 	}
 
-	if config.GetValueString("base.http.transport.disable-keep-alives") != "" {
-		transport.DisableKeepAlives = config.GetValueBool("base.http.transport.disable-keep-alives")
+	if config.GetValueString("gole.http.transport.disable-keep-alives") != "" {
+		transport.DisableKeepAlives = config.GetValueBool("gole.http.transport.disable-keep-alives")
 	}
 
-	if config.GetValueString("base.http.transport.disable-compression") != "" {
-		transport.DisableCompression = config.GetValueBool("base.http.transport.disable-compression")
+	if config.GetValueString("gole.http.transport.disable-compression") != "" {
+		transport.DisableCompression = config.GetValueBool("gole.http.transport.disable-compression")
 	}
 
-	if config.GetValueString("base.http.transport.max-idle-conns") != "" {
-		transport.MaxIdleConns = config.GetValueInt("base.http.transport.max-idle-conns")
+	if config.GetValueString("gole.http.transport.max-idle-conns") != "" {
+		transport.MaxIdleConns = config.GetValueInt("gole.http.transport.max-idle-conns")
 	}
 
-	if config.GetValueString("base.http.transport.max-idle-conns-per-host") != "" {
-		transport.MaxIdleConnsPerHost = config.GetValueInt("base.http.transport.max-idle-conns-per-host")
+	if config.GetValueString("gole.http.transport.max-idle-conns-per-host") != "" {
+		transport.MaxIdleConnsPerHost = config.GetValueInt("gole.http.transport.max-idle-conns-per-host")
 	}
 
-	if config.GetValueString("base.http.transport.max-conns-per-host") != "" {
-		transport.MaxConnsPerHost = config.GetValueInt("base.http.transport.max-conns-per-host")
+	if config.GetValueString("gole.http.transport.max-conns-per-host") != "" {
+		transport.MaxConnsPerHost = config.GetValueInt("gole.http.transport.max-conns-per-host")
 	}
 
-	if config.GetValueString("base.http.transport.idle-conn-timeout") != "" {
-		t, err := time.ParseDuration(config.GetValueString("base.http.transport.idle-conn-timeout"))
+	if config.GetValueString("gole.http.transport.idle-conn-timeout") != "" {
+		t, err := time.ParseDuration(config.GetValueString("gole.http.transport.idle-conn-timeout"))
 		if err != nil {
-			logger.Warn("读取配置【base.http.transport.idle-conn-timeout】异常", err)
+			logger.Warn("读取配置【gole.http.transport.idle-conn-timeout】异常", err)
 		} else {
 			transport.IdleConnTimeout = t
 		}
 	}
 
-	if config.GetValueString("base.http.transport.response-header-timeout") != "" {
-		t, err := time.ParseDuration(config.GetValueString("base.http.transport.response-header-timeout"))
+	if config.GetValueString("gole.http.transport.response-header-timeout") != "" {
+		t, err := time.ParseDuration(config.GetValueString("gole.http.transport.response-header-timeout"))
 		if err != nil {
-			logger.Warn("读取配置【base.http.transport.response-header-timeout】异常", err)
+			logger.Warn("读取配置【gole.http.transport.response-header-timeout】异常", err)
 		} else {
 			transport.ResponseHeaderTimeout = t
 		}
 	}
 
-	if config.GetValueString("base.http.transport.expect-continue-timeout") != "" {
-		t, err := time.ParseDuration(config.GetValueString("base.http.transport.expect-continue-timeout"))
+	if config.GetValueString("gole.http.transport.expect-continue-timeout") != "" {
+		t, err := time.ParseDuration(config.GetValueString("gole.http.transport.expect-continue-timeout"))
 		if err != nil {
-			logger.Warn("读取配置【base.http.transport.expect-continue-timeout】异常", err)
+			logger.Warn("读取配置【gole.http.transport.expect-continue-timeout】异常", err)
 		} else {
 			transport.ExpectContinueTimeout = t
 		}
 	}
 
-	if config.GetValueString("base.http.transport.max-response-header-bytes") != "" {
-		transport.MaxResponseHeaderBytes = config.GetValueInt64("base.http.transport.max-response-header-bytes")
+	if config.GetValueString("gole.http.transport.max-response-header-bytes") != "" {
+		transport.MaxResponseHeaderBytes = config.GetValueInt64("gole.http.transport.max-response-header-bytes")
 	}
 
-	if config.GetValueString("base.http.transport.write-buffer-size") != "" {
-		transport.WriteBufferSize = config.GetValueInt("base.http.transport.write-buffer-size")
+	if config.GetValueString("gole.http.transport.write-buffer-size") != "" {
+		transport.WriteBufferSize = config.GetValueInt("gole.http.transport.write-buffer-size")
 	}
 
-	if config.GetValueString("base.http.transport.read-buffer-size") != "" {
-		transport.ReadBufferSize = config.GetValueInt("base.http.transport.read-buffer-size")
+	if config.GetValueString("gole.http.transport.read-buffer-size") != "" {
+		transport.ReadBufferSize = config.GetValueInt("gole.http.transport.read-buffer-size")
 	}
 
-	if config.GetValueString("base.http.transport.force-attempt-HTTP2") != "" {
-		transport.ForceAttemptHTTP2 = config.GetValueBool("base.http.transport.force-attempt-HTTP2")
+	if config.GetValueString("gole.http.transport.force-attempt-HTTP2") != "" {
+		transport.ForceAttemptHTTP2 = config.GetValueBool("gole.http.transport.force-attempt-HTTP2")
 	}
 
 	transport.DialContext = loadConfigOfDialContext()
@@ -166,19 +166,19 @@ func loadClientFromConfig(client *http.Client) {
 
 func loadConfigOfDialContext() func(ctx context.Context, network, addr string) (net.Conn, error) {
 	dialer := &net.Dialer{}
-	if config.GetValueString("base.http.transport.dial-context.timeout") != "" {
-		t, err := time.ParseDuration(config.GetValueString("base.http.transport.dial-context.timeout"))
+	if config.GetValueString("gole.http.transport.dial-context.timeout") != "" {
+		t, err := time.ParseDuration(config.GetValueString("gole.http.transport.dial-context.timeout"))
 		if err != nil {
-			logger.Warn("读取配置【base.http.transport.dial-context.timeout】异常", err)
+			logger.Warn("读取配置【gole.http.transport.dial-context.timeout】异常", err)
 		} else {
 			dialer.Timeout = t
 		}
 	}
 
-	if config.GetValueString("base.http.transport.dial-context.keep-alive") != "" {
-		t, err := time.ParseDuration(config.GetValueString("base.http.transport.dial-context.keep-alive"))
+	if config.GetValueString("gole.http.transport.dial-context.keep-alive") != "" {
+		t, err := time.ParseDuration(config.GetValueString("gole.http.transport.dial-context.keep-alive"))
 		if err != nil {
-			logger.Warn("读取配置【base.http.transport.dial-context.keep-alive】异常", err)
+			logger.Warn("读取配置【gole.http.transport.dial-context.keep-alive】异常", err)
 		} else {
 			dialer.KeepAlive = t
 		}

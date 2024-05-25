@@ -25,7 +25,7 @@ NewXormDbWithParams(params map[string]string)
 ```
 #### 配置
 ```yaml
-base:
+gole:
   datasource:
     # 是否启用，默认关闭
     enable: true
@@ -77,7 +77,7 @@ orm.NewXormDbMasterSlave(masterDatasourceName string, slaveDatasourceNames []str
 ```
 #### 配置
 ```yml
-base:
+gole:
   datasource:
     # 是否启用，默认关闭
     enable: true
@@ -140,10 +140,10 @@ func TestGorm1(t *testing.T) {
     db, _ := orm.NewGormDb()
 
     // 删除表
-    db.Exec("drop table isc_demo.gobase_demo")
+    db.Exec("drop table isc_demo.gole_demo")
 
     //新增表
-    db.Exec("CREATE TABLE gobase_demo(\n" +
+    db.Exec("CREATE TABLE gole_demo(\n" +
         "  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',\n" +
         "  `name` char(20) NOT NULL COMMENT '名字',\n" +
         "  `age` INT NOT NULL COMMENT '年龄',\n" +
@@ -156,11 +156,11 @@ func TestGorm1(t *testing.T) {
     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='测试表'")
 
     // 新增
-    db.Create(&GobaseDemo{Name: "zhou", Age: 18, Address: "杭州"})
-    db.Create(&GobaseDemo{Name: "zhou", Age: 11, Address: "杭州2"})
+    db.Create(&GoleDemo{Name: "zhou", Age: 18, Address: "杭州"})
+    db.Create(&GoleDemo{Name: "zhou", Age: 11, Address: "杭州2"})
     
     // 查询：一行
-    var demo GobaseDemo
+    var demo GoleDemo
     db.First(&demo).Where("name=?", "zhou")
     
     fmt.Println(demo)
@@ -174,10 +174,10 @@ func TestXorm1(t *testing.T) {
     db, _ := orm.NewXormDb()
     
     // 删除表
-    db.Exec("drop table isc_demo.gobase_demo")
+    db.Exec("drop table isc_demo.gole_demo")
     
     //新增表
-    db.Exec("CREATE TABLE gobase_demo(\n" +
+    db.Exec("CREATE TABLE gole_demo(\n" +
         "  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',\n" +
         "  `name` char(20) NOT NULL COMMENT '名字',\n" +
         "  `age` INT NOT NULL COMMENT '年龄',\n" +
@@ -189,12 +189,12 @@ func TestXorm1(t *testing.T) {
         "  PRIMARY KEY (`id`)\n" +
     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='测试表'")
     
-    db.Table("gobase_demo").Insert(&GobaseDemo{Name: "zhou", Age: 18, Address: "杭州"})
+    db.Table("gole_demo").Insert(&GoleDemo{Name: "zhou", Age: 18, Address: "杭州"})
     // 新增
-    db.Table("gobase_demo").Insert(&GobaseDemo{Name: "zhou", Age: 18, Address: "杭州"})
+    db.Table("gole_demo").Insert(&GoleDemo{Name: "zhou", Age: 18, Address: "杭州"})
     
-    var demo GobaseDemo
-    db.Table("gobase_demo").Where("name=?", "zhou").Get(&demo)
+    var demo GoleDemo
+    db.Table("gole_demo").Where("name=?", "zhou").Get(&demo)
     
     fmt.Println(demo)
 }
@@ -208,7 +208,7 @@ func TestXorm1(t *testing.T) {
 支持配置：
 - 打印sql
 ```yaml
-base:
+gole:
   orm:
     show-sql: true
 ```
@@ -227,7 +227,7 @@ curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"k
 ### 更多配置
 在一些场景下，也需要mysql本身提供一些配置，就是最近遇到gorm默认在mariadb下面是报失败，因此增加了这样的配置（version >= 1.5.2）
 ```yaml
-base:
+gole:
   datasource:
     mysql:
       server-version: ""
@@ -242,6 +242,6 @@ base:
 ```
 以上这些配置其实对应的是如下的代码，示例
 ```go
-// 其中的`DisableWithReturning` 对应的就是上面的 base.datasource.mysql.disable-with-returning，其他更多的配置都在里面
+// 其中的`DisableWithReturning` 对应的就是上面的 gole.datasource.mysql.disable-with-returning，其他更多的配置都在里面
 gorm.Open(mysql.New(mysql.Config{Conn: conn, DisableWithReturning: true}))
 ```

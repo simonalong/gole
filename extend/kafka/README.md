@@ -5,7 +5,7 @@
 
 ### 最小配置
 ```yaml
-base:
+gole:
   kafka:
     addrs:
       - xx.xx.xx.xx:xxx
@@ -96,7 +96,7 @@ func GetKafkaConfig() *sarama.Config {}
 
 ## 全部配置 
 ```yaml
-base:
+gole:
   kafka:
     addrs:
       - {ip}:{port}
