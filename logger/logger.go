@@ -7,9 +7,7 @@ import (
 	cmap "github.com/orcaman/concurrent-map"
 	"github.com/rifflock/lfshook"
 	"github.com/simonalong/gole/config"
-	"github.com/simonalong/gole/constants"
 	"github.com/simonalong/gole/listener"
-	"github.com/simonalong/gole/store"
 	"github.com/simonalong/gole/util"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -32,10 +30,10 @@ const (
 
 var gColor = false
 
-//var loggerMap map[string]*logrus.Logger
+// var loggerMap map[string]*logrus.Logger
 var loggerMap cmap.ConcurrentMap
 
-//var rotateMap map[string]*rotatelogs.RotateLogs
+// var rotateMap map[string]*rotatelogs.RotateLogs
 var rotateMap cmap.ConcurrentMap
 var rootLogger *logrus.Logger
 
@@ -369,7 +367,6 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 			black,
 			os.Getenv("HOSTNAME"),
 			config.GetValueStringDefault("gole.application.name", "gole"),
-			store.Get(constants.TRACE_HEAD_ID), store.Get(constants.TRACE_HEAD_USER_ID),
 			levelColor,
 			strings.ToUpper(entry.Level.String()),
 			black,
@@ -381,7 +378,6 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 			timestamp,
 			os.Getenv("HOSTNAME"),
 			config.GetValueStringDefault("gole.application.name", "gole"),
-			store.Get(constants.TRACE_HEAD_ID), store.Get(constants.TRACE_HEAD_USER_ID),
 			strings.ToUpper(entry.Level.String()),
 			funPath,
 			entry.Message,

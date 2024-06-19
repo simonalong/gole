@@ -5,7 +5,6 @@ import (
 	"fmt"
 	http2 "github.com/simonalong/gole/http"
 	"github.com/simonalong/gole/server/rsp"
-	"github.com/simonalong/gole/store"
 	"io"
 	"net/http"
 	"os"
@@ -511,11 +510,6 @@ func getPathAppendApiModel(path string) string {
 
 func RequestSaveHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		store.PutFromHead(c.Request.Header.Clone())
-
-		defer func() {
-			store.Clean()
-		}()
 		c.Next()
 	}
 }
