@@ -445,7 +445,16 @@ func Cast(fieldKind reflect.Kind, valueStr string) (any, error) {
 		}
 		return int32(v), nil
 	case reflect.Int64:
-		return strconv.ParseInt(valueStr, 10, 64)
+		if strings.Contains(valueStr, "E") {
+			f, err := strconv.ParseFloat(valueStr, 64)
+			if err != nil {
+				return nil, err
+			} else {
+				return int64(f), nil
+			}
+		} else {
+			return strconv.ParseInt(valueStr, 10, 64)
+		}
 	case reflect.Uint:
 		v, err := strconv.ParseUint(valueStr, 10, 0)
 		if err != nil {
