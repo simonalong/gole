@@ -215,7 +215,7 @@ func StartServer() {
 
 	logger.Info("开始启动服务")
 	port := config.GetValueIntDefault("gole.server.port", 8080)
-	logger.Info("服务端口号: %d", port)
+	logger.Infof("服务端口号: %d", port)
 
 	graceRun(port)
 }
@@ -240,7 +240,7 @@ func graceRun(port int) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := engineServer.Shutdown(ctx); err != nil {
-		logger.Warn("服务关闭异常: %v", err.Error())
+		logger.Warnf("服务关闭异常: %v", err.Error())
 	}
 	logger.Warn("服务端退出")
 }

@@ -157,7 +157,7 @@ func SetField(beanName string, fieldName string, fieldValue any) {
 			fType = fType.Elem()
 			fValue = fValue.Elem()
 		} else {
-			logger.Warn("对象名【%v】对应的对象不是指针类型，无法修改属性的值", beanName)
+			logger.Warnf("对象名【%v】对应的对象不是指针类型，无法修改属性的值", beanName)
 			return
 		}
 
