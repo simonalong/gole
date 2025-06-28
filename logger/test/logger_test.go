@@ -1,66 +1,74 @@
 package test
 
 import (
-	"github.com/simonalong/gole/config"
-	"github.com/simonalong/gole/logger"
 	"github.com/sirupsen/logrus"
+	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
+	"gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
 	"testing"
 )
 
+func TestInfo1(t *testing.T) {
+	config.LoadYamlFile("./application-debug.yaml")
+	////logger.InitLog()
+
+	logger.Info("hello ", "info")
+	logger.Infof("hello %v", "info")
+}
+
 func TestInfo(t *testing.T) {
 	config.LoadYamlFile("./application-debug.yaml")
-	logger.InitLog()
+	//logger.InitLog()
 
 	// info
-	logger.Info("hello %v", "info")
+	logger.Infof("hello %v", "info")
 	logger.Group("group1").Info("hello", " ", "info")
 	logger.Group("group1").Infof("hello %v", "info")
 }
 
 func TestLevel(t *testing.T) {
 	config.LoadYamlFile("./application-debug.yaml")
-	logger.InitLog()
+	//logger.InitLog()
 
 	// debug
-	logger.Debug("hello %v", "debug")
+	logger.Debugf("hello %v", "debug")
 
 	// info
-	logger.Info("hello %v", "info")
+	logger.Infof("hello %v", "info")
 
 	// warn
-	logger.Warn("hello %v", "warn")
+	logger.Warnf("hello %v", "warn")
 
 	// error
-	logger.Error("hello %v", "error")
+	logger.Errorf("hello %v", "error")
 }
 
 func TestLevelChange(t *testing.T) {
 	config.LoadYamlFile("./application-debug.yaml")
-	logger.InitLog()
+	//logger.InitLog()
 
 	// info
-	logger.Info("hello %v", "info1")
-	logger.Info("hello %v", "info2")
+	logger.Infof("hello %v", "info1")
+	logger.Infof("hello %v", "info2")
 
 	// 设置后下面的不再显示
 	logger.SetGlobalLevel("warn")
-	logger.Info("hello %v", "info3")
+	logger.Infof("hello %v", "info3")
 }
 
 // 日志分组的级别变更
 func TestGroupLevelChange1(t *testing.T) {
 	config.LoadYamlFile("./application-debug.yaml")
-	logger.InitLog()
+	//logger.InitLog()
 
 	// info
-	logger.Info("hello %v", "info1")
+	logger.Infof("hello %v", "info1")
 	logger.Group("group1").Infof("hello %v", "group1 info1")
 	logger.Group("group2").Infof("hello %v", "group2 info2")
 
 	// 设置后下面的不再显示
 	logger.SetGlobalLevel("warn")
 	// 不再打印
-	logger.Info("hello %v", "info3")
+	logger.Infof("hello %v", "info3")
 	// 继续打印
 	logger.Group("group1").Infof("hello %v", "group1 info1")
 	logger.Group("group2").Infof("hello %v", "group2 info2")
@@ -76,12 +84,16 @@ func TestGroupLevelChange1(t *testing.T) {
 // 日志分组的级别变更
 func TestGroupLevelChange2(t *testing.T) {
 	config.LoadYamlFile("./application-group.yaml")
-	logger.InitLog()
+	//logger.InitLog()
+
+	logger.SetGlobalLevel("error")
+	logger.SetGroupLevel("g1", "debug")
+	logger.SetGroupLevel("g2", "error")
 
 	// info
-	logger.Debug("hello %v", "debug")
-	logger.Info("hello %v", "info")
-	logger.Warn("hello %v", "warn")
+	logger.Debugf("hello %v", "debug")
+	logger.Infof("hello %v", "info")
+	logger.Warnf("hello %v", "warn")
 
 	// 只有g1的打印
 	logger.Group("g1").Debugf("hello %v", "g1 debug")
@@ -95,21 +107,21 @@ func TestGroupLevelChange2(t *testing.T) {
 
 func TestLoggerPathShort(t *testing.T) {
 	config.LoadYamlFile("./application-short.yaml")
-	logger.InitLog()
+	//logger.InitLog()
 
 	logger.Info("test")
 }
 
 func TestLoggerPathFull(t *testing.T) {
 	config.LoadYamlFile("./application-full.yaml")
-	logger.InitLog()
+	//logger.InitLog()
 
 	logger.Info("test")
 }
 
 func TestLoggerRotate(t *testing.T) {
 	config.LoadYamlFile("./application-rotate.yaml")
-	logger.InitLog()
+	//logger.InitLog()
 
 	//for i := 0; i < 100; i++ {
 	//	logger.Info("test")
@@ -119,7 +131,7 @@ func TestLoggerRotate(t *testing.T) {
 
 func TestLoggerGroup2(t *testing.T) {
 	config.LoadYamlFile("./application-group2.yaml")
-	logger.InitLog()
+	//logger.InitLog()
 
 	logger.Group("g1", "g2").Debug("test")
 }

@@ -1,4 +1,4 @@
-gole:
+base:
   application:
     # 服务名
     name: demo
@@ -9,7 +9,7 @@ gole:
     home: ./logs/
     # 日志颜色配置
     color:
-      # 启用：true/false，默认：false
+      # 启用：true/false，默认：true
       enable: false
     # 日志滚动策略
     rotate:

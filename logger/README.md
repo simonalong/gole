@@ -87,3 +87,31 @@ func main() {
     logger.Group("group1").Debugf("hello %v", "debug")
 }
 ```
+### 3. 日志颜色
+```yaml
+base:
+  logger:
+    level: debug
+    color:
+      # 启用：true/false，默认：true
+      enable: true
+```
+```go
+func TestLoggerColor(t *testing.T) {
+    config.LoadYamlFile("./application-color.yaml")
+    logger.InitLog()
+	
+    logger.Debug("debug data")
+    logger.Info("info data")
+    logger.Warn("warn data")
+    logger.Error("error data")
+    logger.Fatal("fatal data")
+    //logger.Panic("panic data")
+}
+```
+
+效果
+![color.png](color.png)
+grafana也支持颜色
+![grafana.png](grafana.png)
+![grafana2.png](grafana2.png)

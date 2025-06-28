@@ -1,4 +1,4 @@
-gole:
+base:
   application:
     # 服务名
     name: demo
@@ -7,5 +7,5 @@ gole:
     level: info
     group:
       g1:
-        level: debug
+        level: info
 
