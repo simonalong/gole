@@ -7,12 +7,9 @@ import (
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	cmap "github.com/orcaman/concurrent-map"
 	"github.com/rifflock/lfshook"
+	"github.com/simonalong/gole/config"
+	"github.com/simonalong/gole/util"
 	"github.com/sirupsen/logrus"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/global"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/listener"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/util"
-	"go.opentelemetry.io/otel/trace"
 	"os"
 	"runtime"
 	"strings"
@@ -196,27 +193,6 @@ func InitLog() {
 
 	_gColor := config.GetValueBoolDefault("base.logger.color.enable", false)
 	gColor = _gColor
-
-	listener.AddListenerWithGroup("*", listener.EventOfConfigChange, ConfigChangeListener)
-}
-
-func ConfigChangeListener(event listener.BaseEvent) {
-	ev := event.(listener.ConfigChangeEvent)
-	if ev.Key == "base.logger.level" {
-		SetGlobalLevel(ev.Value)
-	} else if strings.HasPrefix(ev.Key, "base.logger.group") {
-		words := strings.Split(ev.Key, ".")
-		if len(words) != 5 {
-			return
-		}
-		_group := words[3]
-		_level := ev.Value
-		le, err := logrus.ParseLevel(_level)
-		if err != nil {
-			return
-		}
-		Group(_group).SetLevel(le)
-	}
 }
 
 func GetLoggerGroupList(name string) []string {
@@ -392,13 +368,6 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		fieldsStr = strings.Join(fields, " ")
 	}
 	var newLog string
-	var traceId string
-	if config.GetValueBoolDefault("base.opentelemetry.enable", false) {
-		traceId = trace.SpanFromContext(global.GetGlobalContext()).SpanContext().TraceID().String()
-		if traceId == "00000000000000000000000000000000" {
-			traceId = ""
-		}
-	}
 
 	// todo 租户id，字段先预留
 	var tenantId string
@@ -408,7 +377,7 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 			colorTimestampStr(levelStr, timestamp),
 			color.FgDarkGray.Render(config.GetValueStringDefault("base.application.name", "base")),
 			colorLevelStr(levelStr),
-			color.FgLightCyan.Render(traceId),
+			color.FgLightCyan.Render(""),
 			tenantId,
 			color.FgDarkGray.Render(funPath),
 			colorMsgStr(levelStr, entry.Message),
@@ -418,7 +387,7 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 			timestamp,
 			config.GetValueStringDefault("base.application.name", "base"),
 			levelToStr(entry.Level),
-			traceId,
+			"",
 			tenantId,
 			funPath,
 			entry.Message,

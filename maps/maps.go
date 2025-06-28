@@ -913,7 +913,7 @@ func invokeValue(srcMap map[string]interface{}, field reflect.StructField, field
 			// 兼容标签：json
 			srcValue = v
 		} else if v, exist := srcMap[util.BigCamelToSmallCamel(field.Name)]; exist {
-			// 兼容dataSeatakUser格式读取
+			// 兼容dataUser格式读取
 			srcValue = v
 		} else {
 			// 其他格式暂时都不支持

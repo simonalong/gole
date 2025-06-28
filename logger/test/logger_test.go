@@ -1,9 +1,9 @@
 package test
 
 import (
+	"github.com/simonalong/gole/config"
+	"github.com/simonalong/gole/logger"
 	"github.com/sirupsen/logrus"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
 	"testing"
 )
 

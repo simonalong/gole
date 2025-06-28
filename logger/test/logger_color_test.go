@@ -3,8 +3,8 @@ package test
 import (
 	"fmt"
 	"github.com/gookit/color"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
+	"github.com/simonalong/gole/config"
+	"github.com/simonalong/gole/logger"
 	"testing"
 )
 

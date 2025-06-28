@@ -1,9 +1,9 @@
 package test
 
 import (
+	"github.com/simonalong/gole/maps"
+	baseTime "github.com/simonalong/gole/time"
 	"github.com/stretchr/testify/assert"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/maps"
-	baseTime "gitlab.seatakcloud.com/cbb/base/cbb-base/time"
 	"testing"
 	"time"
 )
