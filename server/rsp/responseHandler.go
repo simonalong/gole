@@ -3,16 +3,14 @@ package rsp
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"github.com/simonalong/gole/config"
+	"github.com/simonalong/gole/logger"
+	"github.com/simonalong/gole/util"
 	"io"
 	"net/http"
 	"strings"
 	"time"
-	"unsafe"
-
-	"github.com/gin-gonic/gin"
-	"github.com/simonalong/gole/logger"
-	"github.com/simonalong/gole/util"
 )
 
 type bodyLogWriter struct {
@@ -54,19 +52,19 @@ func ResponseHandler() gin.HandlerFunc {
 		// 状态码
 		statusCode := c.Writer.Status()
 
-		var body any
-		bodyStr := string(data)
-		if "" != bodyStr && unsafe.Sizeof(bodyStr) < 10240 {
-			if strings.HasPrefix(bodyStr, "{") && strings.HasSuffix(bodyStr, "}") {
-				bodys := map[string]any{}
-				_ = util.StrToObject(bodyStr, &bodys)
-				body = bodys
-			} else if strings.HasPrefix(bodyStr, "[") && strings.HasSuffix(bodyStr, "]") {
-				var bodys []any
-				_ = util.StrToObject(bodyStr, &bodys)
-				body = bodys
-			}
-		}
+		//var body any
+		//bodyStr := string(data)
+		//if "" != bodyStr && unsafe.Sizeof(bodyStr) < 10240 {
+		//	if strings.HasPrefix(bodyStr, "{") && strings.HasSuffix(bodyStr, "}") {
+		//		bodys := map[string]any{}
+		//		_ = util.StrToObject(bodyStr, &bodys)
+		//		body = bodys
+		//	} else if strings.HasPrefix(bodyStr, "[") && strings.HasSuffix(bodyStr, "]") {
+		//		var bodys []any
+		//		_ = util.StrToObject(bodyStr, &bodys)
+		//		body = bodys
+		//	}
+		//}
 
 		request := Request{
 			Method:     c.Request.Method,
@@ -74,7 +72,7 @@ func ResponseHandler() gin.HandlerFunc {
 			Ip:         c.ClientIP(),
 			Parameters: c.Params,
 			Headers:    c.Request.Header,
-			Body:       body,
+			//Body:       body,
 		}
 
 		errMessage := ErrorMessage{

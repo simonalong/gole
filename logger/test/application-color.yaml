@@ -1,0 +1,24 @@
+api-module: device/rule/engine
+
+base:
+  api:
+    # api前缀，默认包含api前缀，如果路径本身有api，则不再添加api前缀
+    prefix: /api
+  application:
+    # 应用名，默认为空
+    name: demo
+    # 服务版本号
+    version: v1.0.0
+  server:
+    # 是否启用，默认：true
+    enable: true
+    # 端口号，默认：8080
+    port: 37200
+    gin:
+      # 有三种模式：debug/release/test，默认 release
+      mode: debug
+  logger:
+    level: debug
+    color:
+      # 启用：true/false，默认：true
+      enable: true
