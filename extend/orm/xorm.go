@@ -3,20 +3,12 @@ package orm
 import (
 	"context"
 	"fmt"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base-boot/constants"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/bean"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/global"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/listener"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
-	baseTime "gitlab.seatakcloud.com/cbb/base/cbb-base/time"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/util"
+	"github.com/simonalong/gole/bean"
+	"github.com/simonalong/gole/config"
+	"github.com/simonalong/gole/constants"
+	"github.com/simonalong/gole/logger"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
-	"go.opentelemetry.io/otel/trace"
-	"reflect"
-	"strings"
 	"time"
 	"xorm.io/xorm"
 	"xorm.io/xorm/contexts"
@@ -41,73 +33,6 @@ func (defaultHook *DefaultXormHook) BeforeProcess(c *contexts.ContextHook) (cont
 
 func (defaultHook *DefaultXormHook) AfterProcess(c *contexts.ContextHook) error {
 	return defaultHook.baseXormHook.AfterProcess(c, defaultHook.driverName)
-}
-
-type OtelXormHook struct {
-	datasourceName string
-	driverName     string
-	tracer         trace.Tracer
-	attrs          []attribute.KeyValue
-}
-
-func (otelXormHook *OtelXormHook) BeforeProcess(contextHook *contexts.ContextHook) (context.Context, error) {
-	spanName := contextHook.SQL
-	if contextHook.SQL != "" {
-		spanName = strings.SplitN(contextHook.SQL, " ", 2)[0]
-	}
-	ctx, _ := otelXormHook.tracer.Start(global.GetGlobalContext(), "GormClient: "+spanName, trace.WithSpanKind(trace.SpanKindClient))
-	return ctx, nil
-}
-
-func (otelXormHook *OtelXormHook) AfterProcess(contextHook *contexts.ContextHook) error {
-	span := trace.SpanFromContext(contextHook.Ctx)
-	defer span.End()
-
-	attrs := make([]attribute.KeyValue, 0, len(otelXormHook.attrs)+4)
-	attrs = append(attrs, otelXormHook.attrs...)
-
-	if sys := dbSystem(otelXormHook.driverName); sys.Valid() {
-		attrs = append(attrs, sys)
-	}
-
-	attrs = append(attrs, semconv.DBQueryTextKey.String(contextHook.SQL))
-	attrs = append(attrs, attribute.Key("GormClient.datasource.name").String(otelXormHook.datasourceName))
-	attrs = append(attrs, attribute.Key("execute.time").String(baseTime.ParseDurationForView(contextHook.ExecuteTime)))
-	var argStrSlice []string
-	for _, arg := range contextHook.Args {
-		if reflect.TypeOf(arg) == reflect.TypeOf(time.Time{}) {
-			argStrSlice = append(argStrSlice, baseTime.TimeToStringYmdHmsS(arg.(time.Time)))
-		} else {
-			argStrSlice = append(argStrSlice, util.ToString(arg))
-		}
-	}
-	attrs = append(attrs, attribute.Key("sql.args").StringSlice(argStrSlice))
-
-	if contextHook.Result != nil {
-		rowsAffected, err := contextHook.Result.RowsAffected()
-		if rowsAffected != -1 {
-			attrs = append(attrs, attribute.Key("rows.affected").Int64(rowsAffected))
-		}
-		if err != nil {
-			attrs = append(attrs, attribute.Key("GormClient.err").String(err.Error()))
-			span.SetAttributes(attrs...)
-
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
-		}
-		return err
-	}
-
-	if contextHook.Err != nil {
-		attrs = append(attrs, attribute.Key("GormClient.err").String(contextHook.Err.Error()))
-		span.SetAttributes(attrs...)
-
-		span.RecordError(contextHook.Err)
-		span.SetStatus(codes.Error, contextHook.Err.Error())
-	} else {
-		span.SetAttributes(attrs...)
-	}
-	return contextHook.Err
 }
 
 func dbSystem(driverName string) attribute.KeyValue {
@@ -211,17 +136,6 @@ func doNewXormDb(datasourceName string, params map[string]string) (*xorm.Engine,
 	xormDb.SetLogger(&XormLoggerAdapter{})
 	bean.AddBean(constants.BeanNameXormPre+datasourceName, xormDb)
 
-	// 支持opentelemetry埋点
-	if config.GetValueBoolDefault("base.opentelemetry.enable", false) {
-		xormDb.AddHook(&OtelXormHook{
-			datasourceName: datasourceName,
-			driverName:     datasourceConfig.DriverName,
-			tracer:         global.Tracer,
-		})
-	}
-
-	// 添加orm的配置监听器
-	listener.AddListener(listener.EventOfConfigChange, ConfigChangeListenerOfOrm)
 	return xormDb, nil
 }
 

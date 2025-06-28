@@ -3,10 +3,10 @@ package test
 import (
 	"github.com/gin-gonic/gin"
 	orm2 "github.com/simonalong/gole/extend/orm"
+	"github.com/simonalong/gole/logger"
 	"github.com/simonalong/gole/server"
 	"github.com/simonalong/gole/server/rsp"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
-	baseTime "gitlab.seatakcloud.com/cbb/base/cbb-base/time"
+	baseTime "github.com/simonalong/gole/time"
 	"testing"
 	"time"
 )

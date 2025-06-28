@@ -2,11 +2,8 @@ package orm
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/listener"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/util"
+	"github.com/simonalong/gole/config"
+	"github.com/simonalong/gole/logger"
 	"strings"
 )
 
@@ -61,15 +58,4 @@ func getDbDsn(dbType string, datasourceConfig DatasourceConfig) string {
 		return dsn
 	}
 	return ""
-}
-
-func ConfigChangeListenerOfOrm(event listener.BaseEvent) {
-	ev := event.(listener.ConfigChangeEvent)
-	if ev.Key == "base.orm.show-sql" {
-		if util.ToBool(ev.Value) {
-			logger.Group("orm").SetLevel(logrus.DebugLevel)
-		} else {
-			logger.Group("orm").SetLevel(logrus.InfoLevel)
-		}
-	}
 }

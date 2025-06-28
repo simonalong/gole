@@ -3,8 +3,8 @@ package test
 import (
 	"context"
 	"fmt"
+	"github.com/simonalong/gole/config"
 	orm2 "github.com/simonalong/gole/extend/orm"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
 	"testing"
 	"xorm.io/xorm/contexts"
 )

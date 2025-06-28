@@ -8,10 +8,9 @@ import (
 	driverMysql "github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
 	"github.com/qustavo/sqlhooks/v2"
+	"github.com/simonalong/gole/config"
+	baseLogger "github.com/simonalong/gole/logger"
 	"github.com/sirupsen/logrus"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/listener"
-	baseLogger "gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlserver"
@@ -117,8 +116,6 @@ func doNewGormDb(datasourceName string, gormConfig *gorm.Config) (*gorm.DB, erro
 	}
 
 	gormDb.Logger = &GormLoggerAdapter{}
-	// 添加orm的配置监听器
-	listener.AddListener(listener.EventOfConfigChange, ConfigChangeListenerOfOrm)
 
 	//pGormDb := &GormClient{GormDb: gormDb}
 	GlobalBaseMap[datasourceName] = gormDb

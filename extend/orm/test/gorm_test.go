@@ -3,9 +3,9 @@ package test
 import (
 	"context"
 	"fmt"
+	"github.com/simonalong/gole/config"
 	orm2 "github.com/simonalong/gole/extend/orm"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
-	"gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
+	"github.com/simonalong/gole/logger"
 	"testing"
 	"time"
 )
