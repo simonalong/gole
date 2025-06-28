@@ -181,7 +181,7 @@ func DebugBeanList(c *gin.Context) {
 
 func DebugBeanGetField(c *gin.Context) {
 	fieldGetReq := FieldGetReq{}
-	err := util.DataToObject(c.Request.Body, &fieldGetReq)
+	_, err := util.DataToObject(c.Request.Body, &fieldGetReq)
 	if err != nil {
 		return
 	}
@@ -190,7 +190,7 @@ func DebugBeanGetField(c *gin.Context) {
 
 func DebugBeanSetField(c *gin.Context) {
 	fieldSetReq := FieldSetReq{}
-	err := util.DataToObject(c.Request.Body, &fieldSetReq)
+	_, err := util.DataToObject(c.Request.Body, &fieldSetReq)
 	if err != nil {
 		return
 	}
@@ -200,7 +200,7 @@ func DebugBeanSetField(c *gin.Context) {
 
 func DebugBeanFunCall(c *gin.Context) {
 	funCallReq := FunCallReq{}
-	err := util.DataToObject(c.Request.Body, &funCallReq)
+	_, err := util.DataToObject(c.Request.Body, &funCallReq)
 	if err != nil {
 		return
 	}
