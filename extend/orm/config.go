@@ -1,6 +1,6 @@
 package orm
 
-// ---------------------------- base.datasource ----------------------------
+// ---------------------------- gole.datasource ----------------------------
 
 type DatasourceConfig struct {
 	Username   string

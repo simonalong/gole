@@ -23,38 +23,38 @@ import (
 var GlobalBaseMap map[string]*gorm.DB = make(map[string]*gorm.DB)
 
 func NewGormClient() (*gorm.DB, error) {
-	if !config.GetValueBoolDefault("base.datasource.enable", false) {
-		return nil, errors.New("数据库配置 base.datasource.enable 为false；请开启")
+	if !config.GetValueBoolDefault("gole.datasource.enable", false) {
+		return nil, errors.New("数据库配置 gole.datasource.enable 为false；请开启")
 	}
 	return doNewGormDb("", &gorm.Config{})
 }
 
 func NewGormClientWitConfig(gormConfig *gorm.Config) (*gorm.DB, error) {
-	if !config.GetValueBoolDefault("base.datasource.enable", false) {
-		return nil, errors.New("数据库配置 base.datasource.enable 为false；请开启")
+	if !config.GetValueBoolDefault("gole.datasource.enable", false) {
+		return nil, errors.New("数据库配置 gole.datasource.enable 为false；请开启")
 	}
 	return doNewGormDb("", gormConfig)
 }
 
 func NewGormClientWithName(datasourceName string) (*gorm.DB, error) {
-	if !config.GetValueBoolDefault("base.datasource.enable", false) {
-		return nil, errors.New("数据库配置 base.datasource.enable 为false；请开启")
+	if !config.GetValueBoolDefault("gole.datasource.enable", false) {
+		return nil, errors.New("数据库配置 gole.datasource.enable 为false；请开启")
 	}
 	return doNewGormDb(datasourceName, &gorm.Config{})
 }
 
 func NewGormClientWithNameAndConfig(datasourceName string, gormConfig *gorm.Config) (*gorm.DB, error) {
-	if !config.GetValueBoolDefault("base.datasource.enable", false) {
-		return nil, errors.New("数据库配置 base.datasource.enable 为false；请开启")
+	if !config.GetValueBoolDefault("gole.datasource.enable", false) {
+		return nil, errors.New("数据库配置 gole.datasource.enable 为false；请开启")
 	}
 	return doNewGormDb(datasourceName, gormConfig)
 }
 
 func doNewGormDb(datasourceName string, gormConfig *gorm.Config) (*gorm.DB, error) {
 	datasourceConfig := DatasourceConfig{}
-	targetDatasourceName := "base.datasource"
+	targetDatasourceName := "gole.datasource"
 	if datasourceName != "" {
-		targetDatasourceName = "base.datasource." + datasourceName
+		targetDatasourceName = "gole.datasource." + datasourceName
 	}
 	err := config.GetValueObject(targetDatasourceName, &datasourceConfig)
 	if err != nil {
@@ -81,35 +81,35 @@ func doNewGormDb(datasourceName string, gormConfig *gorm.Config) (*gorm.DB, erro
 		return nil, err
 	}
 
-	maxIdleConns := config.GetValueInt("base.datasource.connect-pool.max-idle-conns")
+	maxIdleConns := config.GetValueInt("gole.datasource.connect-pool.max-idle-conns")
 	if maxIdleConns != 0 {
 		// 设置空闲的最大连接数
 		_db.SetMaxIdleConns(maxIdleConns)
 	}
 
-	maxOpenConns := config.GetValueInt("base.datasource.connect-pool.max-open-conns")
+	maxOpenConns := config.GetValueInt("gole.datasource.connect-pool.max-open-conns")
 	if maxOpenConns != 0 {
 		// 设置数据库打开连接的最大数量
 		_db.SetMaxOpenConns(maxOpenConns)
 	}
 
-	maxLifeTime := config.GetValueString("base.datasource.connect-pool.max-life-time")
+	maxLifeTime := config.GetValueString("gole.datasource.connect-pool.max-life-time")
 	if maxLifeTime != "" {
 		// 设置连接可重复使用的最大时间
 		t, err := time.ParseDuration(maxLifeTime)
 		if err != nil {
-			baseLogger.Warn("读取配置【base.datasource.connect-pool.max-life-time】异常", err)
+			baseLogger.Warn("读取配置【gole.datasource.connect-pool.max-life-time】异常", err)
 		} else {
 			_db.SetConnMaxLifetime(t)
 		}
 	}
 
-	maxIdleTime := config.GetValueString("base.datasource.connect-pool.max-idle-time")
+	maxIdleTime := config.GetValueString("gole.datasource.connect-pool.max-idle-time")
 	if maxIdleTime != "" {
 		// 设置conn最大空闲时间设置连接空闲的最大时间
 		t, err := time.ParseDuration(maxIdleTime)
 		if err != nil {
-			baseLogger.Warn("读取配置【base.datasource.connect-pool.max-idle-time】异常", err)
+			baseLogger.Warn("读取配置【gole.datasource.connect-pool.max-idle-time】异常", err)
 		} else {
 			_db.SetConnMaxIdleTime(t)
 		}
@@ -160,15 +160,15 @@ func getMysqlConfig(dsn, driverName string) mysql.Config {
 	return mysql.Config{
 		DriverName:                    driverName,
 		DSN:                           dsn,
-		ServerVersion:                 config.GetValueStringDefault("base.datasource.mysql.server-version", ""),
-		SkipInitializeWithVersion:     config.GetValueBoolDefault("base.datasource.mysql.skip-initialize-with-version", false),
-		DefaultStringSize:             config.GetValueUIntDefault("base.datasource.mysql.default-string-size", 0),
-		DisableWithReturning:          config.GetValueBoolDefault("base.datasource.mysql.disable-with-returning", false),
-		DisableDatetimePrecision:      config.GetValueBoolDefault("base.datasource.mysql.disable-datetime-precision", false),
-		DontSupportRenameIndex:        config.GetValueBoolDefault("base.datasource.mysql.dont-support-rename-index", false),
-		DontSupportRenameColumn:       config.GetValueBoolDefault("base.datasource.mysql.dont-support-rename-column", false),
-		DontSupportForShareClause:     config.GetValueBoolDefault("base.datasource.mysql.dont-support-for-share-clause", false),
-		DontSupportNullAsDefaultValue: config.GetValueBoolDefault("base.datasource.mysql.dont-support-null-as-default-value", false),
+		ServerVersion:                 config.GetValueStringDefault("gole.datasource.mysql.server-version", ""),
+		SkipInitializeWithVersion:     config.GetValueBoolDefault("gole.datasource.mysql.skip-initialize-with-version", false),
+		DefaultStringSize:             config.GetValueUIntDefault("gole.datasource.mysql.default-string-size", 0),
+		DisableWithReturning:          config.GetValueBoolDefault("gole.datasource.mysql.disable-with-returning", false),
+		DisableDatetimePrecision:      config.GetValueBoolDefault("gole.datasource.mysql.disable-datetime-precision", false),
+		DontSupportRenameIndex:        config.GetValueBoolDefault("gole.datasource.mysql.dont-support-rename-index", false),
+		DontSupportRenameColumn:       config.GetValueBoolDefault("gole.datasource.mysql.dont-support-rename-column", false),
+		DontSupportForShareClause:     config.GetValueBoolDefault("gole.datasource.mysql.dont-support-for-share-clause", false),
+		DontSupportNullAsDefaultValue: config.GetValueBoolDefault("gole.datasource.mysql.dont-support-null-as-default-value", false),
 	}
 }
 
@@ -192,7 +192,7 @@ func init() {
 }
 
 func AddGormHook(hook BaseGormHook) {
-	if !config.GetValueBoolDefault("base.meter.orm.enable", true) {
+	if !config.GetValueBoolDefault("gole.meter.orm.enable", true) {
 		return
 	}
 	gormHooks = append(gormHooks, hook)

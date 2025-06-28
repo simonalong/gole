@@ -560,18 +560,18 @@ func pre(port int) string {
 }
 
 func TestD(t *testing.T) {
-	port := config.GetValueIntDefault("base.server.port", 8080)
+	port := config.GetValueIntDefault("gole.server.port", 8080)
 	baseMap := util.GoleMapOfSort(
 		"帮助", "curl http://localhost:"+pre(port)+"/debug/help",
 		"日志", util.GoleMapOfSort(
 			"日志分组列表", "curl http://localhost:"+pre(port)+"/logger/list/{name}",
-			"动态修改日志", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"base.logger.level\", \"value\":\"debug\"}'",
+			"动态修改日志", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"gole.logger.level\", \"value\":\"debug\"}'",
 		),
 		"http接口出入参", util.GoleMapOfSort(
-			"指定url打印请求", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"base.server.request.print.include-uri[0]\", \"value\":\"/api/xx/xxx\"}'",
-			"指定url不打印请求", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"base.server.request.print.exclude-uri[0]\", \"value\":\"/api/xx/xxx\"}'",
-			"指定url打印请求和响应", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"base.server.response.print.include-uri[0]\", \"value\":\"/api/xx/xxx\"}'",
-			"指定url不打印请求和响应", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"base.server.response.print.exclude-uri[0]\", \"value\":\"/api/xx/xxx\"}'",
+			"指定url打印请求", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"gole.server.request.print.include-uri[0]\", \"value\":\"/api/xx/xxx\"}'",
+			"指定url不打印请求", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"gole.server.request.print.exclude-uri[0]\", \"value\":\"/api/xx/xxx\"}'",
+			"指定url打印请求和响应", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"gole.server.response.print.include-uri[0]\", \"value\":\"/api/xx/xxx\"}'",
+			"指定url不打印请求和响应", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"gole.server.response.print.exclude-uri[0]\", \"value\":\"/api/xx/xxx\"}'",
 		),
 		"bean管理", util.GoleMapOfSort(
 			"获取注册的所有bean", "curl http://localhost:"+pre(port)+"/bean/name/all",
@@ -581,7 +581,7 @@ func TestD(t *testing.T) {
 			"调用bean的函数", "curl -X POST http://localhost:"+pre(port)+"/bean/fun/call' -d '{\"bean\": \"xx\", \"fun\": \"xxx\", \"parameter\": {\"p1\":\"xx\", \"p2\": \"xxx\"}}'",
 		),
 		"pprof", util.GoleMapOfSort(
-			"动态启用pprof", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"base.server.gin.pprof.enable\", \"value\":\"true\"}'",
+			"动态启用pprof", "curl -X PUT http://localhost:"+pre(port)+"/config/update -d '{\"key\":\"gole.server.gin.pprof.enable\", \"value\":\"true\"}'",
 		),
 		"配置处理", util.GoleMapOfSort(
 			"服务所有配置", "curl http://localhost:"+pre(port)+"/config/values",

@@ -9,9 +9,9 @@ import (
 
 func getDbDsnWithName(datasourceName string) (string, error) {
 	datasourceConfig := DatasourceConfig{}
-	targetDatasourceName := "base.datasource"
+	targetDatasourceName := "gole.datasource"
 	if datasourceName != "" {
-		targetDatasourceName = "base.datasource." + datasourceName
+		targetDatasourceName = "gole.datasource." + datasourceName
 	}
 	err := config.GetValueObject(targetDatasourceName, &datasourceConfig)
 	if err != nil {
@@ -24,9 +24,9 @@ func getDbDsnWithName(datasourceName string) (string, error) {
 
 func getDbDsn(dbType string, datasourceConfig DatasourceConfig) string {
 	sqlConfigMap := map[string]string{}
-	err := config.GetValueObject("base.datasource.url-config", &sqlConfigMap)
+	err := config.GetValueObject("gole.datasource.url-config", &sqlConfigMap)
 	if err != nil {
-		logger.Warn("读取配置【base.datasource.url-config】异常", err)
+		logger.Warn("读取配置【gole.datasource.url-config】异常", err)
 	}
 
 	switch dbType {

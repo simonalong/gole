@@ -236,6 +236,6 @@ base:
 ```
 以上这些配置其实对应的是如下的代码，示例
 ```go
-// 其中的`DisableWithReturning` 对应的就是上面的 base.datasource.mysql.disable-with-returning，其他更多的配置都在里面
+// 其中的`DisableWithReturning` 对应的就是上面的 gole.datasource.mysql.disable-with-returning，其他更多的配置都在里面
 gorm.Open(mysql.New(mysql.Config{Conn: conn, DisableWithReturning: true}))
 ```

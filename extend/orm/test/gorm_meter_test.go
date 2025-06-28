@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// base.profiles.active=demo-http
+// gole.profiles.active=demo-http
 func TestGormMeter(t *testing.T) {
 	db, err := orm2.NewGormClient()
 	if err != nil {
