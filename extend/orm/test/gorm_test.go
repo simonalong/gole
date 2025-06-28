@@ -3,22 +3,26 @@ package test
 import (
 	"context"
 	"fmt"
-	"github.com/simonalong/gole/config"
 	orm2 "github.com/simonalong/gole/extend/orm"
-	"github.com/simonalong/gole/logger"
+	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
+	"gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
 	"testing"
 	"time"
 )
 
 func TestGorm1(t *testing.T) {
-	config.LoadYamlFile("./application-test1.yaml")
-	db, _ := orm2.NewGormDb()
+	config.LoadYamlFile("./application.yaml")
+	db, err := orm2.NewGormClient()
+	if err != nil {
+		logger.Fatalf("数据库连接创建失败：%v", err)
+		return
+	}
 
 	// 删除表
-	db.Exec("drop table isc_demo.gole_demo1")
+	db.Exec("drop table test.base_demo")
 
 	//新增表
-	db.Exec("CREATE TABLE gole_demo(\n" +
+	db.Exec("CREATE TABLE base_demo(\n" +
 		"  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',\n" +
 		"  `name` char(20) NOT NULL COMMENT '名字',\n" +
 		"  `age` INT NOT NULL COMMENT '年龄',\n" +
@@ -31,15 +35,15 @@ func TestGorm1(t *testing.T) {
 		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='测试表'")
 
 	// 新增
-	db.Create(&GoleDemo{Name: "zhou", Age: 18, Address: "杭州"})
-	db.Create(&GoleDemo{Name: "zhou", Age: 11, Address: "杭州2"})
+	db.Create(&BaseDemo{Name: "zhou", Age: 18, Address: "杭州"})
+	db.Create(&BaseDemo{Name: "zhou", Age: 11, Address: "杭州2"})
 
 	// 查询：一行
-	var demo GoleDemo
+	var demo BaseDemo
 	db.First(&demo).Where("name=?", "zhou")
 
 	dd, _ := db.DB()
-	dd.Query("select * from gole_demo")
+	dd.Query("select * from base_demo")
 
 	// 查询：多行
 	fmt.Println(demo)
@@ -47,19 +51,19 @@ func TestGorm1(t *testing.T) {
 
 func TestGormOfLoggerChange(t *testing.T) {
 	config.LoadYamlFile("./application-test1.yaml")
-	//orm2.AddGormHook(&GoleOrmHookDemo{})
-	db, _ := orm2.NewGormDb()
+	//orm2.AddGormHook(&MeterGormHook{})
+	db, _ := orm2.NewGormClient()
 
 	logger.InitLog()
 
 	//// 删除库
-	//db.Exec("drop database isc_demo")
+	//db.Exec("drop database test")
 	//
 	//// 创建库
-	//db.Exec("create database isc_demo")
+	//db.Exec("create database test")
 
 	//新增表
-	//db.Exec("CREATE TABLE isc_demo.gole_demo(\n" +
+	//db.Exec("CREATE TABLE test.base_demo(\n" +
 	//	"  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',\n" +
 	//	"  `name` char(20) NOT NULL COMMENT '名字',\n" +
 	//	"  `age` INT NOT NULL COMMENT '年龄',\n" +
@@ -72,20 +76,20 @@ func TestGormOfLoggerChange(t *testing.T) {
 	//	") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='测试表'")
 
 	// 新增
-	db.Create(&GoleDemo{Name: "zhou", Age: 18, Address: "杭州"})
-	db.Create(&GoleDemo{Name: "zhou", Age: 11, Address: "杭州2"})
+	db.Create(&BaseDemo{Name: "zhou", Age: 18, Address: "杭州"})
+	db.Create(&BaseDemo{Name: "zhou", Age: 11, Address: "杭州2"})
 
 	// 查询：一行
-	var demo GoleDemo
+	var demo BaseDemo
 	for i := 0; i < 100; i++ {
 		db.First(&demo).Where("name=?", "zhou")
 		time.Sleep(time.Second)
 		if i == 2 {
-			config.SetValue("gole.orm.show-sql", true)
+			config.SetValue("base.orm.show-sql", true)
 		}
 
 		if i == 4 {
-			config.SetValue("gole.orm.show-sql", false)
+			config.SetValue("base.orm.show-sql", false)
 		}
 	}
 
@@ -93,34 +97,48 @@ func TestGormOfLoggerChange(t *testing.T) {
 	fmt.Println(demo)
 }
 
-type GoleDemo struct {
+type BaseDemo struct {
 	Id      uint64
 	Name    string
 	Age     int
 	Address string
 }
 
-func (GoleDemo) TableName() string {
-	return "gole_demo"
+func (BaseDemo) TableName() string {
+	return "base_demo"
 }
 
-type GoleOrmHookDemo struct {
+type BaseOrmHookDemo struct {
 }
 
-func (*GoleOrmHookDemo) Before(ctx context.Context, driverName string, parameters map[string]any) (context.Context, error) {
+func (*BaseOrmHookDemo) Before(ctx context.Context, driverName string, parameters map[string]any) (context.Context, error) {
 	fmt.Println("before")
 	fmt.Println(parameters)
 	return ctx, nil
 }
 
-func (*GoleOrmHookDemo) After(ctx context.Context, driverName string, parameters map[string]any) (context.Context, error) {
+func (*BaseOrmHookDemo) After(ctx context.Context, driverName string, parameters map[string]any) (context.Context, error) {
 	fmt.Println("after")
 	fmt.Println(parameters)
 	return ctx, nil
 }
 
-func (*GoleOrmHookDemo) Err(ctx context.Context, driverName string, err error, parameters map[string]any) error {
+func (*BaseOrmHookDemo) Err(ctx context.Context, driverName string, err error, parameters map[string]any) error {
 	fmt.Println("err")
 	fmt.Println(err.Error())
 	return nil
+}
+
+func TestGormHook(t *testing.T) {
+	config.LoadYamlFile("./application-test1.yaml")
+	orm2.AddGormHook(&BaseOrmHookDemo{})
+	db, err := orm2.NewGormClient()
+	if err != nil {
+		logger.Fatalf("数据库连接创建失败：%v", err)
+		return
+	}
+
+	var demo BaseDemo
+	db.First(&demo).Where("name=?", "zhou")
+	fmt.Println(demo)
 }

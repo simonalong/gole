@@ -3,19 +3,17 @@ package orm
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"github.com/gin-gonic/gin"
 	driverMysql "github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
-	"github.com/mattn/go-sqlite3"
 	"github.com/qustavo/sqlhooks/v2"
-	"github.com/simonalong/gole/bean"
-	"github.com/simonalong/gole/config"
-	"github.com/simonalong/gole/constants"
-	"github.com/simonalong/gole/listener"
-	goleLogger "github.com/simonalong/gole/logger"
 	"github.com/sirupsen/logrus"
+	"gitlab.seatakcloud.com/cbb/base/cbb-base/config"
+	"gitlab.seatakcloud.com/cbb/base/cbb-base/listener"
+	baseLogger "gitlab.seatakcloud.com/cbb/base/cbb-base/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -23,31 +21,45 @@ import (
 	"time"
 )
 
-func NewGormDb() (*gorm.DB, error) {
+var GlobalBaseMap map[string]*gorm.DB = make(map[string]*gorm.DB)
+
+func NewGormClient() (*gorm.DB, error) {
+	if !config.GetValueBoolDefault("base.datasource.enable", false) {
+		return nil, errors.New("数据库配置 base.datasource.enable 为false；请开启")
+	}
 	return doNewGormDb("", &gorm.Config{})
 }
 
-func NewGormDbWitConfig(gormConfig *gorm.Config) (*gorm.DB, error) {
+func NewGormClientWitConfig(gormConfig *gorm.Config) (*gorm.DB, error) {
+	if !config.GetValueBoolDefault("base.datasource.enable", false) {
+		return nil, errors.New("数据库配置 base.datasource.enable 为false；请开启")
+	}
 	return doNewGormDb("", gormConfig)
 }
 
-func NewGormDbWithName(datasourceName string) (*gorm.DB, error) {
+func NewGormClientWithName(datasourceName string) (*gorm.DB, error) {
+	if !config.GetValueBoolDefault("base.datasource.enable", false) {
+		return nil, errors.New("数据库配置 base.datasource.enable 为false；请开启")
+	}
 	return doNewGormDb(datasourceName, &gorm.Config{})
 }
 
-func NewGormDbWithNameAndConfig(datasourceName string, gormConfig *gorm.Config) (*gorm.DB, error) {
+func NewGormClientWithNameAndConfig(datasourceName string, gormConfig *gorm.Config) (*gorm.DB, error) {
+	if !config.GetValueBoolDefault("base.datasource.enable", false) {
+		return nil, errors.New("数据库配置 base.datasource.enable 为false；请开启")
+	}
 	return doNewGormDb(datasourceName, gormConfig)
 }
 
 func doNewGormDb(datasourceName string, gormConfig *gorm.Config) (*gorm.DB, error) {
-	datasourceConfig := config.DatasourceConfig{}
-	targetDatasourceName := "gole.datasource"
+	datasourceConfig := DatasourceConfig{}
+	targetDatasourceName := "base.datasource"
 	if datasourceName != "" {
-		targetDatasourceName = "gole.datasource." + datasourceName
+		targetDatasourceName = "base.datasource." + datasourceName
 	}
 	err := config.GetValueObject(targetDatasourceName, &datasourceConfig)
 	if err != nil {
-		goleLogger.Warn("读取读取配置【datasource】异常")
+		baseLogger.Warn("读取读取配置【datasource】异常")
 		return nil, err
 	}
 
@@ -60,50 +72,56 @@ func doNewGormDb(datasourceName string, gormConfig *gorm.Config) (*gorm.DB, erro
 	dsn := getDbDsn(datasourceConfig.DriverName, datasourceConfig)
 	gormDb, err = gorm.Open(getDialect(dsn, datasourceConfig.DriverName), gormConfig)
 	if err != nil {
-		goleLogger.Warn("获取数据库db异常：%v", err.Error())
+		baseLogger.Warnf("连接数据库db异常：%v", err.Error())
 		return nil, err
 	}
 
-	d, _ := gormDb.DB()
+	_db, err := gormDb.DB()
+	if err != nil {
+		baseLogger.Warnf("获取数据库db异常：%v", err.Error())
+		return nil, err
+	}
 
-	maxIdleConns := config.GetValueInt("gole.datasource.connect-pool.max-idle-conns")
+	maxIdleConns := config.GetValueInt("base.datasource.connect-pool.max-idle-conns")
 	if maxIdleConns != 0 {
 		// 设置空闲的最大连接数
-		d.SetMaxIdleConns(maxIdleConns)
+		_db.SetMaxIdleConns(maxIdleConns)
 	}
 
-	maxOpenConns := config.GetValueInt("gole.datasource.connect-pool.max-open-conns")
+	maxOpenConns := config.GetValueInt("base.datasource.connect-pool.max-open-conns")
 	if maxOpenConns != 0 {
 		// 设置数据库打开连接的最大数量
-		d.SetMaxOpenConns(maxOpenConns)
+		_db.SetMaxOpenConns(maxOpenConns)
 	}
 
-	maxLifeTime := config.GetValueString("gole.datasource.connect-pool.max-life-time")
+	maxLifeTime := config.GetValueString("base.datasource.connect-pool.max-life-time")
 	if maxLifeTime != "" {
 		// 设置连接可重复使用的最大时间
 		t, err := time.ParseDuration(maxLifeTime)
 		if err != nil {
-			goleLogger.Warn("读取配置【gole.datasource.connect-pool.max-life-time】异常", err)
+			baseLogger.Warn("读取配置【base.datasource.connect-pool.max-life-time】异常", err)
 		} else {
-			d.SetConnMaxLifetime(t)
+			_db.SetConnMaxLifetime(t)
 		}
 	}
 
-	maxIdleTime := config.GetValueString("gole.datasource.connect-pool.max-idle-time")
+	maxIdleTime := config.GetValueString("base.datasource.connect-pool.max-idle-time")
 	if maxIdleTime != "" {
 		// 设置conn最大空闲时间设置连接空闲的最大时间
 		t, err := time.ParseDuration(maxIdleTime)
 		if err != nil {
-			goleLogger.Warn("读取配置【gole.datasource.connect-pool.max-idle-time】异常", err)
+			baseLogger.Warn("读取配置【base.datasource.connect-pool.max-idle-time】异常", err)
 		} else {
-			d.SetConnMaxIdleTime(t)
+			_db.SetConnMaxIdleTime(t)
 		}
 	}
 
 	gormDb.Logger = &GormLoggerAdapter{}
-	bean.AddBean(constants.BeanNameGormPre+datasourceName, gormDb)
 	// 添加orm的配置监听器
 	listener.AddListener(listener.EventOfConfigChange, ConfigChangeListenerOfOrm)
+
+	//pGormDb := &GormClient{GormDb: gormDb}
+	GlobalBaseMap[datasourceName] = gormDb
 
 	return gormDb, nil
 }
@@ -118,17 +136,15 @@ func getDialect(dsn, driverName string) gorm.Dialector {
 	case "mysql":
 		return mysql.New(getMysqlConfig(dsn, driverName))
 	case "postgresql":
-		return postgres.New(postgres.Config{DSN: dsn, DriverName: WrapDriverName(driverName)})
-	case "sqlite":
-		return sqlite.Dialector{DSN: dsn, DriverName: WrapDriverName(driverName)}
+		return postgres.New(postgres.Config{DSN: dsn, DriverName: wrapDriverName(driverName)})
 	case "sqlserver":
-		return sqlserver.New(sqlserver.Config{DSN: dsn, DriverName: WrapDriverName(driverName)})
+		return sqlserver.New(sqlserver.Config{DSN: dsn, DriverName: wrapDriverName(driverName)})
 	}
 	return nil
 }
 
 func sqlRegister(driverName string) {
-	name := WrapDriverName(driverName)
+	name := wrapDriverName(driverName)
 	for _, driver := range sql.Drivers() {
 		if driver == name {
 			return
@@ -137,13 +153,9 @@ func sqlRegister(driverName string) {
 
 	switch driverName {
 	case "mysql":
-		sql.Register(name, sqlhooks.Wrap(&driverMysql.MySQLDriver{}, &GoleSqlHookProxy{DriverName: driverName}))
+		sql.Register(name, sqlhooks.Wrap(&driverMysql.MySQLDriver{}, &BaseSqlHookProxy{DriverName: driverName}))
 	case "postgresql":
-		sql.Register(name, sqlhooks.Wrap(&pq.Driver{}, &GoleSqlHookProxy{DriverName: driverName}))
-	case "sqlite":
-		sql.Register(name, sqlhooks.Wrap(&sqlite3.SQLiteDriver{}, &GoleSqlHookProxy{DriverName: driverName}))
-		//case "sqlserver": 暂时不支持
-		//	sql.Register(WrapDriverName(driverName), sqlhooks.Wrap(&sqlite3.SQLiteDriver{}, &GoleSqlHookProxy{}))
+		sql.Register(name, sqlhooks.Wrap(&pq.Driver{}, &BaseSqlHookProxy{DriverName: driverName}))
 	}
 }
 
@@ -151,46 +163,49 @@ func getMysqlConfig(dsn, driverName string) mysql.Config {
 	return mysql.Config{
 		DriverName:                    driverName,
 		DSN:                           dsn,
-		ServerVersion:                 config.GetValueStringDefault("gole.datasource.mysql.server-version", ""),
-		SkipInitializeWithVersion:     config.GetValueBoolDefault("gole.datasource.mysql.skip-initialize-with-version", false),
-		DefaultStringSize:             config.GetValueUIntDefault("gole.datasource.mysql.default-string-size", 0),
-		DisableWithReturning:          config.GetValueBoolDefault("gole.datasource.mysql.disable-with-returning", false),
-		DisableDatetimePrecision:      config.GetValueBoolDefault("gole.datasource.mysql.disable-datetime-precision", false),
-		DontSupportRenameIndex:        config.GetValueBoolDefault("gole.datasource.mysql.dont-support-rename-index", false),
-		DontSupportRenameColumn:       config.GetValueBoolDefault("gole.datasource.mysql.dont-support-rename-column", false),
-		DontSupportForShareClause:     config.GetValueBoolDefault("gole.datasource.mysql.dont-support-for-share-clause", false),
-		DontSupportNullAsDefaultValue: config.GetValueBoolDefault("gole.datasource.mysql.dont-support-null-as-default-value", false),
+		ServerVersion:                 config.GetValueStringDefault("base.datasource.mysql.server-version", ""),
+		SkipInitializeWithVersion:     config.GetValueBoolDefault("base.datasource.mysql.skip-initialize-with-version", false),
+		DefaultStringSize:             config.GetValueUIntDefault("base.datasource.mysql.default-string-size", 0),
+		DisableWithReturning:          config.GetValueBoolDefault("base.datasource.mysql.disable-with-returning", false),
+		DisableDatetimePrecision:      config.GetValueBoolDefault("base.datasource.mysql.disable-datetime-precision", false),
+		DontSupportRenameIndex:        config.GetValueBoolDefault("base.datasource.mysql.dont-support-rename-index", false),
+		DontSupportRenameColumn:       config.GetValueBoolDefault("base.datasource.mysql.dont-support-rename-column", false),
+		DontSupportForShareClause:     config.GetValueBoolDefault("base.datasource.mysql.dont-support-for-share-clause", false),
+		DontSupportNullAsDefaultValue: config.GetValueBoolDefault("base.datasource.mysql.dont-support-null-as-default-value", false),
 	}
 }
 
-func WrapDriverName(driverName string) string {
+func wrapDriverName(driverName string) string {
 	if len(gormHooks) != 0 {
 		return driverName + "Hook"
 	}
 	return driverName
 }
 
-type GoleGormHook interface {
+type BaseGormHook interface {
 	Before(ctx context.Context, driverName string, parameters map[string]any) (context.Context, error)
 	After(ctx context.Context, driverName string, parameters map[string]any) (context.Context, error)
 	Err(ctx context.Context, driverName string, err error, parameters map[string]any) error
 }
 
-var gormHooks []GoleGormHook
+var gormHooks []BaseGormHook
 
 func init() {
-	gormHooks = []GoleGormHook{}
+	gormHooks = []BaseGormHook{}
 }
 
-func AddGormHook(hook GoleGormHook) {
+func AddGormHook(hook BaseGormHook) {
+	if !config.GetValueBoolDefault("base.meter.orm.enable", true) {
+		return
+	}
 	gormHooks = append(gormHooks, hook)
 }
 
-type GoleSqlHookProxy struct {
+type BaseSqlHookProxy struct {
 	DriverName string
 }
 
-func (proxy *GoleSqlHookProxy) Before(ctx context.Context, query string, args ...interface{}) (context.Context, error) {
+func (proxy *BaseSqlHookProxy) Before(ctx context.Context, query string, args ...interface{}) (context.Context, error) {
 	var ctxFinal context.Context
 	for _, hook := range gormHooks {
 		parametersMap := map[string]any{
@@ -207,7 +222,7 @@ func (proxy *GoleSqlHookProxy) Before(ctx context.Context, query string, args ..
 	return ctxFinal, nil
 }
 
-func (proxy *GoleSqlHookProxy) After(ctx context.Context, query string, args ...interface{}) (context.Context, error) {
+func (proxy *BaseSqlHookProxy) After(ctx context.Context, query string, args ...interface{}) (context.Context, error) {
 	for _, hook := range gormHooks {
 		parametersMap := map[string]any{
 			"query": query,
@@ -221,7 +236,7 @@ func (proxy *GoleSqlHookProxy) After(ctx context.Context, query string, args ...
 	return ctx, nil
 }
 
-func (proxy *GoleSqlHookProxy) OnError(ctx context.Context, err error, query string, args ...interface{}) error {
+func (proxy *BaseSqlHookProxy) OnError(ctx context.Context, err error, query string, args ...interface{}) error {
 	for _, hook := range gormHooks {
 		parametersMap := map[string]any{
 			"query": query,
@@ -250,28 +265,36 @@ func (l *GormLoggerAdapter) LogMode(level logger.LogLevel) logger.Interface {
 	case logger.Info:
 		levelStr = logrus.InfoLevel
 	}
-	goleLogger.Group("orm").SetLevel(levelStr)
+	baseLogger.Group("orm").SetLevel(levelStr)
 	return l
 }
 
 func (l *GormLoggerAdapter) Info(ctx context.Context, msg string, data ...interface{}) {
-	goleLogger.Info(msg, data)
+	baseLogger.Infof(msg, data)
 }
 
 func (l *GormLoggerAdapter) Warn(ctx context.Context, msg string, data ...interface{}) {
-	goleLogger.Warn(msg, data)
+	baseLogger.Warnf(msg, data)
 }
 
 func (l *GormLoggerAdapter) Error(ctx context.Context, msg string, data ...interface{}) {
-	goleLogger.Error(msg, data)
+	baseLogger.Errorf(msg, data)
 }
 
 func (l *GormLoggerAdapter) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
 	elapsed := time.Since(begin)
 	sqlStr, rowsAffected := fc()
 	if err != nil {
-		goleLogger.Group("orm").Errorf("[SQL][%v]%s; error: %v", elapsed, sqlStr, err.Error())
+		baseLogger.Group("orm").Errorf("[SQL][%v]%s; error: %v", elapsed, sqlStr, err.Error())
 	} else {
-		goleLogger.Group("orm").Debugf("[SQL][%v][row:%v]%s", elapsed, rowsAffected, sqlStr)
+		baseLogger.Group("orm").Debugf("[SQL][%v][row:%v]%s", elapsed, rowsAffected, sqlStr)
+	}
+}
+
+func GlobalGormContextLoad() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		for _, gormDb := range GlobalBaseMap {
+			gormDb.WithContext(c.Request.Context())
+		}
 	}
 }
