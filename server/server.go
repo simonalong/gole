@@ -169,6 +169,7 @@ func ErrHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
+				logger.Errorf("异常：%v", err)
 				rsp.Fail(c, 500, http2.NetError{ErrMsg: fmt.Sprintf("业务异常：%v", err)})
 				return
 			}
