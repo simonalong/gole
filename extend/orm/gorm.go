@@ -282,6 +282,10 @@ func (l *GormLoggerAdapter) Trace(ctx context.Context, begin time.Time, fc func(
 	elapsed := time.Since(begin)
 	sqlStr, rowsAffected := fc()
 	if err != nil {
+		if err.Error() == "record not found" {
+			baseLogger.Group("orm").Debugf("[SQL][%v]%s; error: %v", elapsed, sqlStr, err.Error())
+			return
+		}
 		baseLogger.Group("orm").Errorf("[SQL][%v]%s; error: %v", elapsed, sqlStr, err.Error())
 	} else {
 		baseLogger.Group("orm").Debugf("[SQL][%v][row:%v]%s", elapsed, rowsAffected, sqlStr)
