@@ -132,6 +132,14 @@ func ParseTimeYmdHmsSusLoc(timeStr string, loc *t0.Location) (t0.Time, error) {
 	return t0.ParseInLocation(FmtYMdHmsSuS, timeStr, loc)
 }
 
+func TimeToRFC3339(t t0.Time) string {
+	return t.Format(t0.RFC3339)
+}
+
+func ParseTimeRFC3339(timeStr string) (t0.Time, error) {
+	return t0.ParseInLocation(t0.RFC3339, timeStr, t0.Local)
+}
+
 // TimeInMillis 13位java时间戳
 func TimeInMillis() int64 {
 	return t0.Now().UnixMilli()
