@@ -2,110 +2,35 @@
 
 validate包核查模块，用于对入参的校验
 
-## 快速使用
+* 一、[快速使用](#快速使用)
+  * [api说明](#api说明)
+* 二、[匹配模块](#匹配模块)
+  * 1.[值匹配器：value](#value)
+  * 2.[空值匹配器：isBlank](#空值匹配器)
+  * 3.[非空匹配器：isUnBlank](#非空匹配器)
+  * 4.[范围匹配器：range](#range)
+  * 5.[类型匹配器：model](#model)
+  * 6.[表达式匹配器：condition](#condition)
+  * 7.[正则表达式匹配器：regex](#regex)
+  * 8.[自定义回调匹配器：customize](#customize)
+* 三、[处理模块](#处理模块)
+  * 1.[匹配上接受/拒绝：accept](#accept)
+  * 2.[自定义异常错误码：errCode](#自定义异常错误码)
+  * 3.[自定义异常：errMsg](#自定义异常)
+  * 4.[启用：disable](#disable)
+
+<h2 id="快速使用">快速使用</h2>
+
 这里举个例子，快速使用
 
-### 基于gole的web的项目的示例：
-
-```go
-// main.go 文件
-package main
-
-import (
-  "bytes"
-  "encoding/json"
-  "github.com/gin-gonic/gin"
-  "github.com/simonalong/gole/http"
-  "github.com/simonalong/gole/util"
-  "github.com/simonalong/gole/logger"
-  "github.com/simonalong/gole/server"
-  "github.com/simonalong/gole/server/rsp"
-  "github.com/simonalong/gole/validate"
-  "io/ioutil"
-  "strings"
-)
-
-func main() {
-  server.Post("test/insert", InsertData)
-  server.Run()
-}
-
-// InsertData 数据插入
-func InsertData(c *gin.Context) {
-  insertReq := InsertReq{}
-
-  // 读取body数据，可以采用isc提供的工具
-  err := util.DataToObject(c.Request.Body, &insertReq)
-  if err != nil {
-    // ... 省略
-    return
-  }
-
-  // api示例：核查入参
-  if result, _, errMsg := validate.Check(insertReq); !result {
-    rsp.FailedOfStandard(c, 53, errMsg)
-    logger.Error(errMsg)
-    return
-  }
-
-  // ... 省略
-  rsp.SuccessOfStandard(c, "ok")
-}
-
-type InsertReq struct {
-  Name    string `match:"value={zhou, chen}"`
-  Profile string `match:"range=[0, 10)"`
-}
-```
-```yaml
-# application.yml 文件
-api-module: app/sample
-
-gole:
-  api:
-    # api前缀
-    prefix: /api
-  application:
-    # 应用名称
-    name: sample
-  server:
-    # 是否启用，默认：true
-    enable: true
-    # 端口号
-    port: 8080
-    # web框架gin的配置
-    gin:
-      # 有三种模式：debug/release/test
-      mode: release
-
-```
-
-请求
-```shell
-curl -X POST http://localhost:8080/api/app/sample/test/insert \
-  -H 'Content-Type: application/json' \
-  -d '{
-	"name": "zhou",
-	"profile": "abcde-abcde"
-}'
-```
-返回异常
-```json
-{
-    "code": 53,
-    "data": null,
-    "message": "长度不合法"
-}
-```
-
-### 非web的普通类核查示例：
+### 核查示例：
 
 ```go
 package main
 
 import (
-    "github.com/simonalong/gole/validate"
-    "github.com/simonalong/gole/logger"
+    "gitlab.seatakcloud.com/cbb/base/validate"
+    "gitlab.seatakcloud.com/cbb/base/logger"
 )
 
 type DemoInsert struct {
@@ -133,8 +58,10 @@ func main() {
 1. 这里提供方法Check，用于核查是否符合条件
 2. 提供标签match，标签内容中提供匹配器：value，该匹配器表示匹配的具体的一些值
 
-## api说明
-只提供四个Api，`Check` 和 `CheckWithParameter`
+<h2 id="api说明">api说明</h2>
+
+只提供两个Api，`Check` 和 `CheckWithParameter`
+
 ```go
 // 入参：
 //  @any            待核查对象
@@ -161,7 +88,7 @@ func CheckWithParameter(parameterMap map[string]interface{}, object interface{},
 
 这里将核查部分分为匹配和处理两部分，匹配可以有多种的匹配器，核查的逻辑是只要有任何一个匹配器匹配上则认为匹配上，处理模块用于对匹配上的结果进行处理，比如返回指定的异常，或者匹配后接受还是拒绝对应的值，或者匹配后将某个值更改掉（待支持）
 
-#### 匹配模块
+#### 匹配模块：也叫匹配器
 
 - value：匹配指定的值
 - isBlank：值是否为空字符
@@ -177,7 +104,7 @@ func CheckWithParameter(parameterMap map[string]interface{}, object interface{},
 - regex：匹配正则表达式
 - customize：匹配自定义的回调函数
 
-#### 处理模块
+#### 处理模块：也叫处理器
 
 - errCode: 自定义错误码
 - errMsg: 自定义的异常
@@ -185,11 +112,12 @@ func CheckWithParameter(parameterMap map[string]interface{}, object interface{},
 - disable: 是否启用匹配，默认启用
 
 
-## 匹配模块
+<h2 id="匹配模块">匹配模块</h3>
 
 匹配器可以有多个一起修饰，只要匹配上一个，则认为匹配上
 
-### 1. 值匹配器：value
+<h3 id="value">1. 值匹配器：value</h3>
+
 匹配指定的一些值，可以修饰一个，也可以修饰多个值，可以修饰字符，也可修饰整数（int、int8、int16、int32、int64）、无符号整数（uint、uint8、uint16、uint32、uint64）、浮点数（float32、float64）、bool类型和string类型。<br/>
 
 提示：
@@ -198,13 +126,13 @@ func CheckWithParameter(parameterMap map[string]interface{}, object interface{},
 
 ```go
 // 修饰一个值
-type ValueGoleEventOne struct {
+type ValueBaseEventOne struct {
     Name string `match:"value=zhou"`
     Age  int    `match:"value=12"`
 }
 
 // 修饰一个值
-type ValueGoleEvent struct {
+type ValueBaseEvent struct {
     Name string `match:"value={zhou, 宋江}"`
     Age  int    `match:"value={12, 13}"`
 }
@@ -229,7 +157,8 @@ type ValueStructEntity struct {
 - 数组/分片：对应类型只有为复杂结构才会核查
 - map：其中的key和value类型只有是复杂结构才会核查
 
-### 2. 空值匹配器：isBlank
+<h3 id="空值匹配器">2. 空值匹配器：isBlank</h3>
+
 匹配string类型的值是否为空字符，false：字符不为空则匹配上，true：字符为空则匹配上
 ```go
 // 默认为true
@@ -251,7 +180,8 @@ type IsBlankEntity1 struct {
 
 ```
 
-### 3. 非空匹配器：isUnBlank
+<h3 id="非空匹配器">3. 非空匹配器：isUnBlank</h3>
+
 匹配string类型的值是否为非空字符，true：字符非空则匹配上，false：字符为空则匹配上
 ```go
 // 默认为true
@@ -273,7 +203,8 @@ type IsBlankEntity1 struct {
 
 ```
 
-### 4. 范围匹配器：range
+<h3 id="range">4. 范围匹配器：range</h3>
+
 匹配类型的指定范围，方式使用数学表达式"["、"]"、"("、")"，使用数学表达式的开闭符号
 - [：表示大于等于
 - ]：表示小于等于
@@ -414,7 +345,8 @@ type RangeTimeCalEntity7 struct {
 }
 ```
 
-### 5. 类型匹配器：model
+<h3 id="model">5. 类型匹配器：model</h3>
+
 类型匹配器：指定的几种内置类型进行匹配
 - id_card：身份证
 - phone: 手机号
@@ -444,7 +376,8 @@ type ValueModelIpAddressEntity struct {
 }
 ```
 
-### 6. 表达式匹配器：condition
+<h3 id="condition">6. 表达式匹配器：condition</h3>
+
 表达式匹配器：用于数学计算表达式进行计算，表达式是返回bool类型的表达式。提供两个占位符
 - \#current：当前修饰的值
 - \#root：当前属性所在的对象，比如：#root.Age，表示当前对象中的其他属性Age的值
@@ -464,7 +397,8 @@ type ValueConditionEntity2 struct {
 }
 ```
 
-### 7. 正则表达式匹配器：regex
+<h3 id="regex">7. 正则表达式匹配器：regex</h3>
+
 正则表达式匹配器：用于匹配自定义的正则表达式
 
 ```go
@@ -474,7 +408,8 @@ type ValueRegexEntity struct {
 }
 ```
 
-### 8. 自定义回调匹配器：customize
+<h3 id="customize">8. 自定义回调匹配器：customize</h3>
+
 该匹配器可以用于自定义扩展，比如实际业务场景，某个字段在数据库中存在，这种情况就需要用户自定义扩展
 
 比如：
@@ -538,7 +473,7 @@ package fun
 
 import (
     "fmt"
-    "github.com/simonalong/gole/validate"
+    "github.com/simonalong/base/validate"
 )
 
 type CustomizeEntity2 struct {
@@ -587,10 +522,12 @@ func init() {
 }
 ```
 
-## 处理模块
+<h2 id="处理模块">处理模块</h2>
+
 当匹配后如何处理，这里分为了如下几种处理
 
-### 1. 匹配上接受/拒绝：accept
+<h3 id="accept">1. 匹配上接受/拒绝：accept</h3>
+
 匹配后是接收还是拒绝，目前业内的处理方式都是匹配后接收，在概念上其实叫白名单，对于黑名单的处理，业内是没有，而我们这里用accept实现白名单和黑名单的概念
 
 ```go
@@ -613,7 +550,8 @@ type AcceptEntity3 struct {
 }
 ```
 
-### 2. 自定义异常错误码：errCode
+<h3 id="自定义异常错误码">2. 自定义异常错误码：errCode</h3>
+
 匹配后返回自定义的错误码
 
 ```go
@@ -678,7 +616,8 @@ func init()  {
 }
 ```
 
-### 3. 自定义异常：errMsg
+<h3 id="自定义异常">3. 自定义异常：errMsg</h3>
+
 匹配后返回自定义的异常，提供了两个占位符#current表示修饰的当前属性的值，#root当前属性所在的结构的值，#root.Age表示当前结构中的属性Age对应的值
 
 ```go
@@ -693,12 +632,13 @@ type ErrMsgEntity2 struct {
 }
 ```
 
-### 4. 启用：disable
+<h3 id="disable">4. 启用：disable</h3>
+
 表示是否启用属性本身的核查
 ```go
 type DisableEntity1 struct {
-Name string `match:"value=zhou" disable:"true"`
-Age  int
+    Name string `match:"value=zhou" disable:"true"`
+    Age  int
 }
 
 ```

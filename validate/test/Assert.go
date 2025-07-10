@@ -1,4 +1,4 @@
-package main
+package test
 
 import "testing"
 
@@ -47,7 +47,4 @@ func Equal(t *testing.T, objects ...any) {
 			t.Errorf("期望：%v \n          实际：%v", objects[i+1], objects[i])
 		}
 	}
-}
-
-func main() {
 }

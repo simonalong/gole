@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"github.com/simonalong/gole/validate"
@@ -15,7 +15,7 @@ type ValidateEntity2 struct {
 	Age  int    `match:"value={12, 13}"`
 }
 
-func TestValidateGole1(t *testing.T) {
+func TestValidateBase1(t *testing.T) {
 	var value ValidateEntity
 	var result bool
 	var err string
@@ -36,7 +36,7 @@ func TestValidateGole1(t *testing.T) {
 	Equal(t, err, "[\"属性 Name 的值 陈真 不在只可用列表 [zhou 宋江] 中\",\"属性 Name 的值为非空字符\"]", result, false)
 }
 
-func TestValidateGole2(t *testing.T) {
+func TestValidateBase2(t *testing.T) {
 	var value ValidateEntity2
 	var result bool
 	var err string
@@ -58,7 +58,7 @@ func TestValidateGole2(t *testing.T) {
 }
 
 // 压测进行基准测试
-func BenchmarkValidateGole3(b *testing.B) {
+func BenchmarkValidateBase3(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		validate.Check(ValidateEntity{Age: 12})
 	}

@@ -2,20 +2,17 @@ package matcher
 
 import (
 	"fmt"
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 	"github.com/simonalong/gole/constants"
+	"github.com/simonalong/gole/logger"
+	"github.com/simonalong/gole/time"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	t0 "time"
 	"unicode/utf8"
-
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/compiler"
-	"github.com/antonmedv/expr/parser"
-	"github.com/antonmedv/expr/vm"
-	"github.com/simonalong/gole/logger"
-	"github.com/simonalong/gole/time"
 )
 
 type RangeMatch struct {
@@ -88,7 +85,7 @@ func (rangeMatch *RangeMatch) Match(_ map[string]interface{}, _ any, field refle
 
 	output, err := expr.Run(rangeMatch.Program, env)
 	if err != nil {
-		logger.Error("脚本 %v 执行失败: %v", rangeMatch.Script, err.Error())
+		logger.Errorf("脚本 %v 执行失败: %v", rangeMatch.Script, err.Error())
 		return false
 	}
 
@@ -239,15 +236,9 @@ func BuildRangeMatcher(objectTypeFullName string, fieldKind reflect.Kind, object
 		}
 	}
 
-	tree, err := parser.Parse(script)
+	program, err := expr.Compile(script)
 	if err != nil {
-		logger.Error("脚本：%v 解析异常：%v", script, err.Error())
-		return
-	}
-
-	program, err := compiler.Compile(tree, nil)
-	if err != nil {
-		logger.Error("脚本: %v 编译异常：%v", script, err.Error())
+		logger.Errorf("脚本: %v 编译异常：%v", script, err.Error())
 		return
 	}
 
@@ -263,13 +254,13 @@ func parseRange(fieldKind reflect.Kind, subCondition string) *RangeEntity {
 		endAli := subData[0][6]
 
 		if (begin == "nil" || begin == "") && (end == "nil" || end == "") {
-			logger.Error("range匹配器格式输入错误，start和end不可都为null或者空字符, input=%v", subCondition)
+			logger.Errorf("range匹配器格式输入错误，start和end不可都为null或者空字符, input=%v", subCondition)
 			return nil
 		} else if begin == "past" || begin == "future" {
-			logger.Error("range匹配器格式输入错误, start不可含有past或者future, input=%v", subCondition)
+			logger.Errorf("range匹配器格式输入错误, start不可含有past或者future, input=%v", subCondition)
 			return nil
 		} else if end == "past" || end == "future" {
-			logger.Error("range匹配器格式输入错误, end不可含有past或者future, input=%v", subCondition)
+			logger.Errorf("range匹配器格式输入错误, end不可含有past或者future, input=%v", subCondition)
 			return nil
 		}
 
@@ -321,7 +312,7 @@ func parseRange(fieldKind reflect.Kind, subCondition string) *RangeEntity {
 				}
 				return &RangeEntity{beginAli: beginAli, begin: beginTime.UnixNano(), end: endTime.UnixNano(), endAli: endAli, dateFlag: true, beginNow: beginNow, endNow: endNow}
 			} else if beginTimeIsEmpty && endTimeIsEmpty {
-				logger.Error("range 匹配器格式输入错误，解析数字或者日期失败, time: %v", subData)
+				logger.Errorf("range 匹配器格式输入错误，解析数字或者日期失败, time: %v", subData)
 			} else {
 				if !beginTimeIsEmpty {
 					return &RangeEntity{beginAli: beginAli, begin: beginTime.UnixNano(), end: nil, endAli: endAli, dateFlag: true, beginNow: beginNow, endNow: endNow}

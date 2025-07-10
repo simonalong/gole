@@ -27,7 +27,7 @@ import (
 // util.UnderLine：				小驼峰转换为下划线：dataBaseUser -> data_base_user
 // util.UnderLineToSmallCamel：	下划线转换为小驼峰：data_base_user -> dataBaseUser
 // ...
-// 更多函数可以去见cbb-base的util工具中关于字段格式转换的函数
+// 更多函数可以去见util包的util工具中关于字段格式转换的函数
 type KeyFormat func(string) string
 
 type GoleMap struct {

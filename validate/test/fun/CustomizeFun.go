@@ -43,6 +43,16 @@ type CustomizeEntity7 struct {
 	Age   int
 }
 
+type CustomizeEntity8 struct {
+	Name string `match:"customize=judge8Name"`
+	Age  int
+}
+
+type CustomizeEntity9 struct {
+	Name string `match:"customize=judge9Name"`
+	Age  int
+}
+
 func JudgeString1(name string) bool {
 	if name == "zhou" || name == "宋江" {
 		return true
@@ -167,6 +177,23 @@ func JudgeString7Flag2(flag *bool) (string, bool) {
 	return "", true
 }
 
+// Judge8 返回值
+// 1. bool：是否匹配上
+// 2. string：没有匹配上的异常code
+// 3. string：没有匹配上的异常详情信息
+func Judge8(name string) (bool, string, string) {
+	if name == "zhou" {
+		return false, "XX_CODE_1", "不可为zhou"
+	}
+	return true, "", ""
+}
+
+// Judge9 测试修改值的功能
+func Judge9(entity9 *CustomizeEntity9) (bool, string, string) {
+	entity9.Age = 12
+	return true, "", ""
+}
+
 func init() {
 	validate.RegisterCustomize("judge1Name", JudgeString1)
 	validate.RegisterCustomize("judge2Name", JudgeString2)
@@ -179,4 +206,6 @@ func init() {
 	validate.RegisterCustomize("judge7Name", JudgeString7)
 	validate.RegisterCustomize("judge7Flag", JudgeString7Flag)
 	validate.RegisterCustomize("judge7Flag2", JudgeString7Flag2)
+	validate.RegisterCustomize("judge8Name", Judge8)
+	validate.RegisterCustomize("judge9Name", Judge9)
 }

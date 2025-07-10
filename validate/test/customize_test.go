@@ -1,7 +1,8 @@
-package main
+package test
 
 import (
 	"encoding/json"
+	"github.com/magiconair/properties/assert"
 	"github.com/simonalong/gole/validate"
 	"github.com/simonalong/gole/validate/test/fun"
 	"testing"
@@ -233,4 +234,25 @@ func TestCustomize7_1(t *testing.T) {
 	value = fun.CustomizeEntity7{Flag2: &flag}
 	result, _, _ = validate.Check(value, "flag2")
 	True(t, result)
+}
+
+func TestCustomize8(t *testing.T) {
+	var value fun.CustomizeEntity8
+
+	// 测试 正常情况
+	value = fun.CustomizeEntity8{Name: "zhou"}
+	result, code, msg := validate.Check(value, "name")
+	assert.Equal(t, result, false)
+	assert.Equal(t, code, "XX_CODE_1")
+	assert.Equal(t, msg, "不可为zhou")
+}
+
+// 支持对象为指针类型，可以修改内部属性的值
+func TestCustomize9(t *testing.T) {
+	var value fun.CustomizeEntity9
+
+	// 测试 正常情况
+	value = fun.CustomizeEntity9{Name: "zhou"}
+	_, _, _ = validate.Check(&value, "name")
+	assert.Equal(t, value.Age, 12)
 }

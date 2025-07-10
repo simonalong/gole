@@ -3,13 +3,13 @@ package validate
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/expr-lang/expr"
+	"github.com/simonalong/gole/constants"
 	"reflect"
 	"sort"
 	"strings"
 	"sync"
 
-	"github.com/antonmedv/expr"
-	"github.com/simonalong/gole/constants"
 	"github.com/simonalong/gole/goid"
 	"github.com/simonalong/gole/logger"
 	"github.com/simonalong/gole/util"
@@ -69,7 +69,7 @@ func CheckWithParameter(parameterMap map[string]interface{}, object interface{},
 	// 指针类型按照指针类型
 	if objType.Kind() == reflect.Ptr {
 		objValue = objValue.Elem()
-		return Check(objValue.Interface(), fieldNames...)
+		objType = objType.Elem()
 	}
 
 	if objType.Kind() != reflect.Struct {
@@ -190,13 +190,13 @@ func collectCollector(objType reflect.Type) {
 	}
 
 	lock.Lock()
+	defer lock.Unlock()
 	/* 搜集过则不再搜集 */
 	if _, contain := matcher.MatchMap[objectFullName]; contain {
 		return
 	}
 
 	doCollectCollector(objType)
-	lock.Unlock()
 }
 
 func doCollectCollector(objType reflect.Type) {
@@ -365,6 +365,9 @@ func buildChecker(objectFullName string, fieldKind reflect.Kind, fieldName strin
 
 func check(parameterMap map[string]interface{}, object any, field reflect.StructField, fieldRelValue any, ch chan *CheckResult) {
 	objectType := reflect.TypeOf(object)
+	if objectType.Kind() == reflect.Ptr {
+		objectType = objectType.Elem()
+	}
 
 	if fieldMatcher, contain := matcher.MatchMap[objectType.String()][field.Name]; contain {
 		accept := fieldMatcher.Accept

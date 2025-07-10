@@ -2,15 +2,12 @@ package matcher
 
 import (
 	"fmt"
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 	"github.com/simonalong/gole/constants"
+	"github.com/simonalong/gole/logger"
 	"reflect"
 	"strings"
-
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/compiler"
-	"github.com/antonmedv/expr/parser"
-	"github.com/antonmedv/expr/vm"
-	"github.com/simonalong/gole/logger"
 )
 
 type ConditionMatch struct {
@@ -28,7 +25,7 @@ func (conditionMatch *ConditionMatch) Match(_ map[string]interface{}, object any
 
 	output, err := expr.Run(conditionMatch.Program, env)
 	if err != nil {
-		logger.Error("表达式 %v 执行失败: %v", conditionMatch.expression, err.Error())
+		logger.Errorf("表达式 %v 执行失败: %v", conditionMatch.expression, err.Error())
 		return false
 	}
 
@@ -68,15 +65,9 @@ func BuildConditionMatcher(objectTypeFullName string, fieldKind reflect.Kind, ob
 		return
 	}
 
-	tree, err := parser.Parse(rmvWell(expression))
+	program, err := expr.Compile(rmvWell(expression))
 	if err != nil {
-		logger.Error("脚本：%v 解析异常：%v", expression, err.Error())
-		return
-	}
-
-	program, err := compiler.Compile(tree, nil)
-	if err != nil {
-		logger.Error("脚本: %v 编译异常：%v", expression, err.Error())
+		logger.Errorf("脚本: %v 编译异常：%v", expression, err.Error())
 		return
 	}
 	addMatcher(objectTypeFullName, objectFieldName, &ConditionMatch{Program: program, expression: expression}, errCode, errMsg, true)

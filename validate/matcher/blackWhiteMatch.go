@@ -2,10 +2,9 @@ package matcher
 
 import (
 	"fmt"
+	"github.com/expr-lang/expr"
 	"strings"
 
-	"github.com/antonmedv/expr/compiler"
-	"github.com/antonmedv/expr/parser"
 	"github.com/simonalong/gole/logger"
 )
 
@@ -51,15 +50,15 @@ func addMatcher(objectTypeFullName string, objectFieldName string, matcher Match
 
 		if errMsg != "" {
 			errMsgData := errMsgChange(errMsg)
-			tree, err := parser.Parse(errMsgData)
-			if err != nil {
-				logger.Error("errMsg[%v] parse error: %v", errMsg, err.Error())
-				return
-			}
+			//tree, err := parser.Parse(errMsgData)
+			//if err != nil {
+			//	logger.Errorf("errMsg[%v] parse error: %v", errMsg, err.Error())
+			//	return
+			//}
 
-			program, err := compiler.Compile(tree, nil)
+			program, err := expr.Compile(errMsgData)
 			if err != nil {
-				logger.Error("errMsg[%v] compile error: %v", errMsg, err.Error())
+				logger.Errorf("errMsg[%v] compile error: %v", errMsg, err.Error())
 				return
 			}
 
@@ -78,15 +77,9 @@ func addMatcher(objectTypeFullName string, objectFieldName string, matcher Match
 			}
 
 			if errMsg != "" {
-				tree, err := parser.Parse(errMsgChange(errMsg))
+				program, err := expr.Compile(errMsgChange(errMsg))
 				if err != nil {
-					logger.Error("errMsg[%v] parse error: %v", errMsg, err.Error())
-					return
-				}
-
-				program, err := compiler.Compile(tree, nil)
-				if err != nil {
-					logger.Error("errMsg[%v] compile error: %v", errMsg, err.Error())
+					logger.Errorf("errMsg[%v] compile error: %v", errMsg, err.Error())
 					return
 				}
 

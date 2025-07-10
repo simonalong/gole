@@ -1,12 +1,11 @@
 package matcher
 
 import (
-	"github.com/antonmedv/expr/vm"
+	"github.com/expr-lang/expr/vm"
 	"reflect"
 )
 
 type Matcher interface {
-	//Match(object any, field reflect.StructField, fieldValue any) bool
 	Match(parameterMap map[string]interface{}, object interface{}, field reflect.StructField, fieldValue interface{}) bool
 	IsEmpty() bool
 	GetErrCode() string

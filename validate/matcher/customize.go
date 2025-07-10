@@ -21,7 +21,7 @@ type MatchJudge func(any) bool
 func (customizeMatch *CustomizeMatch) Match(parameterMap map[string]interface{}, object any, field reflect.StructField, fieldValue any) bool {
 	defer func() {
 		if err := recover(); err != nil {
-			logger.Error("call match err: %v", err)
+			logger.Errorf("call match err: %v", err)
 			return
 		}
 	}()
@@ -119,13 +119,22 @@ func (customizeMatch *CustomizeMatch) Match(parameterMap map[string]interface{},
 			return retValues[0].Bool()
 		}
 	} else if len(retValues) == 3 {
-		if retValues[0].Bool() {
-			customizeMatch.SetBlackMsg(retValues[1].String())
+		kind0 := retValues[0].Kind()
+		kind1 := retValues[1].Kind()
+		kind2 := retValues[1].Kind()
+
+		if kind0 == reflect.Bool && kind1 == reflect.String && kind2 == reflect.String {
+			if retValues[0].Bool() {
+				customizeMatch.SetBlackMsg(retValues[2].String())
+			} else {
+				customizeMatch.SetWhiteMsg(retValues[2].String())
+			}
+			customizeMatch.SetErrCode(retValues[1].String())
+			return retValues[0].Bool()
 		} else {
-			customizeMatch.SetWhiteMsg(retValues[1].String())
+			logger.Warnf("函数返回值不合规，返回值为三个参数的情况下，bool、string、string类型；后面两个为errCode和errMsg")
+			return true
 		}
-		customizeMatch.SetErrCode(retValues[1].String())
-		return retValues[0].Bool()
 	} else {
 		logger.Error("函数返回值不合规")
 		return true
@@ -154,7 +163,7 @@ func BuildCustomizeMatcher(objectTypeFullName string, _ reflect.Kind, objectFiel
 
 	fun, contain := funMap[expression]
 	if !contain {
-		logger.Warn("the name of fun not find, funName is [%v]", expression)
+		logger.Warnf("the name of fun not find, funName is [%v]", expression)
 		return
 	}
 	addMatcher(objectTypeFullName, objectFieldName, &CustomizeMatch{funValue: reflect.ValueOf(fun), expression: expression}, errCode, errMsg, true)
@@ -163,26 +172,26 @@ func BuildCustomizeMatcher(objectTypeFullName string, _ reflect.Kind, objectFiel
 func RegisterCustomize(funName string, fun interface{}) {
 	funValue := reflect.ValueOf(fun)
 	if funValue.Kind() != reflect.Func {
-		logger.Warn("fun is not fun[%v] type", funName)
+		logger.Warnf("fun is not fun[%v] type", funName)
 		return
 	}
 
 	if funValue.Type().NumIn() > 3 {
-		logger.Warn("the num of fun[%v] argument need to be less than or equal to 3", funName)
+		logger.Warnf("the num of fun[%v] argument need to be less than or equal to 3", funName)
 		return
 	}
 
 	if funValue.Type().NumOut() > 3 {
-		logger.Warn("the num of fun[%v] return need to be less than or equal to 3", funName)
+		logger.Warnf("the num of fun[%v] return need to be less than or equal to 3", funName)
 		return
 	}
 
 	if funValue.Type().NumOut() == 0 {
-		logger.Warn("the type of fun[%v] return must be bool", funName)
+		logger.Warnf("the type of fun[%v] return must be bool", funName)
 		return
 	} else if funValue.Type().NumOut() == 1 {
 		if funValue.Type().Out(0).Kind() != reflect.Bool {
-			logger.Warn("the type of fun[%v] return must be bool", funName)
+			logger.Warnf("the type of fun[%v] return must be bool", funName)
 			return
 		}
 	} else if funValue.Type().NumOut() == 2 {
@@ -190,12 +199,12 @@ func RegisterCustomize(funName string, fun interface{}) {
 		kind1 := funValue.Type().Out(1).Kind()
 
 		if kind0 != reflect.Bool && kind0 != reflect.String {
-			logger.Warn("return type of fun[%v] return must be bool or string", funName)
+			logger.Warnf("return type of fun[%v] return must be bool or string", funName)
 			return
 		}
 
 		if kind1 != reflect.Bool && kind1 != reflect.String {
-			logger.Warn("return type of fun[%v] return must be bool or string", funName)
+			logger.Warnf("return type of fun[%v] return must be bool or string", funName)
 			return
 		}
 	} else if funValue.Type().NumOut() == 3 {
@@ -204,7 +213,7 @@ func RegisterCustomize(funName string, fun interface{}) {
 		kind2 := funValue.Type().Out(2).Kind()
 
 		if kind0 != reflect.Bool || kind1 != reflect.String || kind2 != reflect.String {
-			logger.Warn("return type of fun[%v] return must be (bool, string, string)", funName)
+			logger.Warnf("return type of fun[%v] return must be (bool, string, string)", funName)
 			return
 		}
 	}

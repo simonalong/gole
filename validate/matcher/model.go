@@ -74,7 +74,7 @@ func BuildModelMatcher(objectTypeFullName string, fieldKind reflect.Kind, object
 
 	pReg, contain := modelMap[modelKey]
 	if !contain && modelKey != constants.IdCard {
-		logger.Error("不包含模式%v", modelKey)
+		logger.Errorf("不包含模式%v", modelKey)
 		return
 	}
 
