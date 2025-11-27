@@ -1,20 +1,20 @@
 package config
 
-var BaseCfg BaseConfig
+var GoleCfg GoleConfig
 
-// BaseConfig base前缀
-type BaseConfig struct {
-	Application BaseApplication `yaml:"application"`
-	Logger      BaseLogger      `yaml:"logger"`
+// GoleConfig base前缀
+type GoleConfig struct {
+	Application GoleApplication `yaml:"application"`
+	Logger      GoleLogger      `yaml:"logger"`
 }
 
-type BaseApplication struct {
+type GoleApplication struct {
 	Name       string `yaml:"name"`        // 应用名字
 	Version    string `yaml:"version"`     // 应用版本
 	BannerShow bool   `yaml:"banner-show"` // 是否展示banner
 }
 
-type BaseLogger struct {
+type GoleLogger struct {
 	Level string // 日志root级别：trace/debug/info/warn/error/fatal/panic，默认：info
 	Path  string
 	Time  LoggerTime  // 时间配置
@@ -42,7 +42,7 @@ type LoggerSplit struct {
 	Size   int64 `yaml:"size"`   // 日志拆分的单位：MB
 }
 
-type BaseProfile struct {
+type GoleProfile struct {
 	Active string `yaml:"active"`
 }
 

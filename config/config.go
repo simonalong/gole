@@ -78,7 +78,7 @@ func LoadConfigFromAbsPath(resourceAbsPath string) {
 	}
 	AppendConfigFromRelativePath(cmPath)
 
-	if err := GetValueObject("gole", &BaseCfg); err != nil {
+	if err := GetValueObject("gole", &GoleCfg); err != nil {
 		log.Printf("加载 Base 配置失败(%v)", err)
 	}
 }

@@ -31,7 +31,7 @@ x.y.z[.s]
 
 ### 1.0.8
 新增：
-1. 新增：baseMap的putAll方法
+1. 新增：GoleMap的putAll方法
 2. 新增：新增int64到Base62格式的编码
 
 优化：

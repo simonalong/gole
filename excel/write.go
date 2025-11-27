@@ -304,7 +304,7 @@ func AppendSheetEntities[T any](targetFile, sheetName string, entities []T) erro
 	return AppendSheetMaps(targetFile, sheetName, dataMaps)
 }
 
-func AddMapsWithBanner(targetFile string, banner *maps.BaseMap, dataMaps []map[string]any) error {
+func AddMapsWithBanner(targetFile string, banner *maps.GoleMap, dataMaps []map[string]any) error {
 	if len(dataMaps) == 0 {
 		return nil
 	}
@@ -339,7 +339,7 @@ func AddMapsWithBanner(targetFile string, banner *maps.BaseMap, dataMaps []map[s
 	return nil
 }
 
-func AddEntitiesWithBanner[T any](targetFile string, banner *maps.BaseMap, entities []T) error {
+func AddEntitiesWithBanner[T any](targetFile string, banner *maps.GoleMap, entities []T) error {
 	if len(entities) == 0 {
 		return nil
 	}
@@ -351,7 +351,7 @@ func AddEntitiesWithBanner[T any](targetFile string, banner *maps.BaseMap, entit
 	return AddMapsWithBanner(targetFile, banner, dataMaps)
 }
 
-func AddDatasWithBanner(targetFile string, banner *maps.BaseMap, datasList [][]string) error {
+func AddDatasWithBanner(targetFile string, banner *maps.GoleMap, datasList [][]string) error {
 	if len(datasList) == 0 {
 		return nil
 	}
@@ -383,7 +383,7 @@ func AddDatasWithBanner(targetFile string, banner *maps.BaseMap, datasList [][]s
 	return nil
 }
 
-func AddSheetEntitiesWithBanner[T any](targetFile, sheetName string, banner *maps.BaseMap, entities []T) error {
+func AddSheetEntitiesWithBanner[T any](targetFile, sheetName string, banner *maps.GoleMap, entities []T) error {
 	if len(entities) == 0 {
 		return nil
 	}
@@ -395,7 +395,7 @@ func AddSheetEntitiesWithBanner[T any](targetFile, sheetName string, banner *map
 	return AddSheetMapsWithBanner(targetFile, sheetName, banner, dataMaps)
 }
 
-func AddSheetMapsWithBanner(targetFile, sheetName string, banner *maps.BaseMap, dataMaps []map[string]any) error {
+func AddSheetMapsWithBanner(targetFile, sheetName string, banner *maps.GoleMap, dataMaps []map[string]any) error {
 	if len(dataMaps) == 0 {
 		return nil
 	}
@@ -433,7 +433,7 @@ func AddSheetMapsWithBanner(targetFile, sheetName string, banner *maps.BaseMap, 
 	return nil
 }
 
-func AddSheetDatasWithBanner(targetFile, sheetName string, banner *maps.BaseMap, datasList [][]string) error {
+func AddSheetDatasWithBanner(targetFile, sheetName string, banner *maps.GoleMap, datasList [][]string) error {
 	excelFile, err := xlsx.OpenFile(targetFile)
 	if err != nil {
 		logger.Errorf("读取文件失败，路径：%v，错误：%v", targetFile, err.Error())
@@ -466,7 +466,7 @@ func AddSheetDatasWithBanner(targetFile, sheetName string, banner *maps.BaseMap,
 	return nil
 }
 
-func AppendDatasWithBanner(targetFile string, banner *maps.BaseMap, datasList [][]string) error {
+func AppendDatasWithBanner(targetFile string, banner *maps.GoleMap, datasList [][]string) error {
 	if len(datasList) == 0 {
 		return nil
 	}
@@ -497,7 +497,7 @@ func AppendDatasWithBanner(targetFile string, banner *maps.BaseMap, datasList []
 	return nil
 }
 
-func AppendMapsWithBanner(targetFile string, banner *maps.BaseMap, dataMaps []map[string]any) error {
+func AppendMapsWithBanner(targetFile string, banner *maps.GoleMap, dataMaps []map[string]any) error {
 	if len(dataMaps) == 0 {
 		return nil
 	}
@@ -531,7 +531,7 @@ func AppendMapsWithBanner(targetFile string, banner *maps.BaseMap, dataMaps []ma
 	return nil
 }
 
-func AppendEntitiesWithBanner[T any](targetFile string, banner *maps.BaseMap, entities []T) error {
+func AppendEntitiesWithBanner[T any](targetFile string, banner *maps.GoleMap, entities []T) error {
 	if len(entities) == 0 {
 		return nil
 	}
@@ -546,7 +546,7 @@ func AppendEntitiesWithBanner[T any](targetFile string, banner *maps.BaseMap, en
 	return AppendMapsWithBanner(targetFile, banner, dataMaps)
 }
 
-func AppendSheetDatasWithBanner(targetFile, sheetName string, banner *maps.BaseMap, datasList [][]string) error {
+func AppendSheetDatasWithBanner(targetFile, sheetName string, banner *maps.GoleMap, datasList [][]string) error {
 	if len(datasList) == 0 {
 		return nil
 	}
@@ -580,7 +580,7 @@ func AppendSheetDatasWithBanner(targetFile, sheetName string, banner *maps.BaseM
 	}
 	return nil
 }
-func AppendSheetMapsWithBanner(targetFile, sheetName string, banner *maps.BaseMap, dataMaps []map[string]any) error {
+func AppendSheetMapsWithBanner(targetFile, sheetName string, banner *maps.GoleMap, dataMaps []map[string]any) error {
 	if len(dataMaps) == 0 {
 		return nil
 	}
@@ -617,7 +617,7 @@ func AppendSheetMapsWithBanner(targetFile, sheetName string, banner *maps.BaseMa
 	}
 	return nil
 }
-func AppendSheetEntitiesWithBanner[T any](targetFile, sheetName string, banner *maps.BaseMap, entities []T) error {
+func AppendSheetEntitiesWithBanner[T any](targetFile, sheetName string, banner *maps.GoleMap, entities []T) error {
 	if len(entities) == 0 {
 		return nil
 	}

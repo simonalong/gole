@@ -1,11 +1,11 @@
-# BaseMap支持功能
-BaseMap是连接golang实体和实体中的中间结构，是普通map的增强版本，提供如下功能
+# GoleMap支持功能
+GoleMap是连接golang实体和实体中的中间结构，是普通map的增强版本，提供如下功能
 1. 提供类型转换：fromJson，fromMap，fromEntity，fromRows等功能，支持of初始化
 2. 并发安全：使用currentMap保证并发安全
 3. 提供有序性：原生map的输出是无序的，对一些功能不友好，这里支持有序
 4. 提供与实体的转化功能：toEntity
 
-### 初始化BaseMap
+### 初始化GoleMap
 ```go
 // ---- 无序map ----
 dataMap := maps.Of("a", 1, "b", 12, "k3", 13, "k4", 14)
@@ -23,7 +23,7 @@ maps.FromMap(xx)
 maps.FromEntity(xx)
 
 // 也支持从td读取的内容格式转换；（有序map） 
-FromRows(rows driver.Rows) []*BaseMap{}
+FromRows(rows driver.Rows) []*GoleMap{}
 ```
 ### 添加值
 ```go

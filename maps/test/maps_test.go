@@ -2,7 +2,7 @@ package test
 
 import (
 	"github.com/simonalong/gole/maps"
-	baseTime "github.com/simonalong/gole/time"
+	goleTime "github.com/simonalong/gole/time"
 	"github.com/simonalong/gole/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -122,7 +122,7 @@ func TestFromEntity1(t *testing.T) {
 		switch index {
 		case 0:
 			d, _ := dataMap.GetTime(key)
-			assert.Equal(t, baseTime.TimeToStringYmdHmsS(entity1.Ts), baseTime.TimeToStringYmdHmsS(d))
+			assert.Equal(t, goleTime.TimeToStringYmdHmsS(entity1.Ts), goleTime.TimeToStringYmdHmsS(d))
 		case 1:
 			d, _ := dataMap.GetString(key)
 			assert.Equal(t, entity1.Name, d)
@@ -157,7 +157,7 @@ func TestFromEntity2(t *testing.T) {
 		switch index {
 		case 0:
 			d, _ := dataMap.GetTime(key)
-			assert.Equal(t, baseTime.TimeToStringYmdHmsS(entity2.Ts), baseTime.TimeToStringYmdHmsS(d))
+			assert.Equal(t, goleTime.TimeToStringYmdHmsS(entity2.Ts), goleTime.TimeToStringYmdHmsS(d))
 		case 1:
 			d, _ := dataMap.GetString(key)
 			assert.Equal(t, entity2.Name, d)
@@ -191,7 +191,7 @@ func TestFromEntity3(t *testing.T) {
 		switch index {
 		case 0:
 			d, _ := dataMap.GetTime(key)
-			assert.Equal(t, baseTime.TimeToStringYmdHmsS(entity3.Ts), baseTime.TimeToStringYmdHmsS(d))
+			assert.Equal(t, goleTime.TimeToStringYmdHmsS(entity3.Ts), goleTime.TimeToStringYmdHmsS(d))
 		case 1:
 			d, _ := dataMap.GetString(key)
 			assert.Equal(t, entity3.Name, d)
@@ -207,20 +207,20 @@ func TestFromEntity3(t *testing.T) {
 
 func TestFromEntity4(t *testing.T) {
 	current := time.Now()
-	baseMap := maps.OfSort(
+	GoleMap := maps.OfSort(
 		"Ts", current,
 		"Name", "test",
 		"Age", 22,
 		"Address", "浙江",
 	)
 
-	dataMap := maps.FromEntity(baseMap)
+	dataMap := maps.FromEntity(GoleMap)
 
 	for index, key := range dataMap.Keys() {
 		switch index {
 		case 0:
 			d, _ := dataMap.GetTime(key)
-			assert.Equal(t, baseTime.TimeToStringYmdHmsS(current), baseTime.TimeToStringYmdHmsS(d))
+			assert.Equal(t, goleTime.TimeToStringYmdHmsS(current), goleTime.TimeToStringYmdHmsS(d))
 		case 1:
 			d, _ := dataMap.GetString(key)
 			assert.Equal(t, "test", d)
@@ -522,7 +522,7 @@ func TestOf2(t *testing.T) {
 	assert.Equal(t, 1, v)
 }
 
-func TestGetBaseMap(t *testing.T) {
+func TestGetGoleMap(t *testing.T) {
 	pMap := maps.Of("a", maps.Of("aa", 12))
 	v, _ := pMap.GetMaps("a")
 
@@ -531,16 +531,16 @@ func TestGetBaseMap(t *testing.T) {
 }
 
 //func TestToJsonOfSort1(t *testing.T) {
-//	baseMap := util.OfSort("a", 12, "b", 2, "c", 3)
-//	assert.Equal(t, "{\"a\":12,\"b\":2,\"c\":3}", baseMap.ToJsonOfSort())
+//	GoleMap := util.OfSort("a", 12, "b", 2, "c", 3)
+//	assert.Equal(t, "{\"a\":12,\"b\":2,\"c\":3}", GoleMap.ToJsonOfSort())
 //
-//	baseMap = util.OfSort("c", 12, "b", 2, "e", 3)
-//	assert.Equal(t, "{\"c\":12,\"b\":2,\"e\":3}", baseMap.ToJsonOfSort())
+//	GoleMap = util.OfSort("c", 12, "b", 2, "e", 3)
+//	assert.Equal(t, "{\"c\":12,\"b\":2,\"e\":3}", GoleMap.ToJsonOfSort())
 //
-//	timeData, _ := baseTime.ParseTime("2024-08-28")
+//	timeData, _ := goleTime.ParseTime("2024-08-28")
 //
-//	baseMap = util.OfSort("c", true, "b", false, "e", "test", "f", timeData, "g")
-//	assert.Equal(t, "{\"c\":true,\"b\":false,\"e\":\"test\",\"f\":\"2024-08-28 00:00:00 +0000 UTC\"}", baseMap.ToJsonOfSort())
+//	GoleMap = util.OfSort("c", true, "b", false, "e", "test", "f", timeData, "g")
+//	assert.Equal(t, "{\"c\":true,\"b\":false,\"e\":\"test\",\"f\":\"2024-08-28 00:00:00 +0000 UTC\"}", GoleMap.ToJsonOfSort())
 //}
 
 func TestToJsonOfSort2(t *testing.T) {
@@ -557,11 +557,11 @@ func TestToJsonOfSort2(t *testing.T) {
 		Man:  true,
 		Addr: "hang",
 	}
-	baseMap := maps.OfSort("c", 12, "b", entity, "e", 3)
-	assert.Equal(t, "{\"c\":12,\"b\":{\"name\":\"test\",\"age\":22,\"man\":true,\"addr\":\"hang\"},\"e\":3}", baseMap.ToJsonOfSort())
+	GoleMap := maps.OfSort("c", 12, "b", entity, "e", 3)
+	assert.Equal(t, "{\"c\":12,\"b\":{\"name\":\"test\",\"age\":22,\"man\":true,\"addr\":\"hang\"},\"e\":3}", GoleMap.ToJsonOfSort())
 
-	baseMap = maps.OfSort("c", 12, "b", &entity, "e", 3)
-	assert.Equal(t, "{\"c\":12,\"b\":{\"name\":\"test\",\"age\":22,\"man\":true,\"addr\":\"hang\"},\"e\":3}", baseMap.ToJsonOfSort())
+	GoleMap = maps.OfSort("c", 12, "b", &entity, "e", 3)
+	assert.Equal(t, "{\"c\":12,\"b\":{\"name\":\"test\",\"age\":22,\"man\":true,\"addr\":\"hang\"},\"e\":3}", GoleMap.ToJsonOfSort())
 }
 
 func TestDeepMap(t *testing.T) {

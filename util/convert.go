@@ -3,7 +3,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	baseTime "github.com/simonalong/gole/time"
+	goleTime "github.com/simonalong/gole/time"
 	"io"
 	"reflect"
 	"regexp"
@@ -818,7 +818,7 @@ func ValueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 			// 特殊处理：string类型转换time.Time类型；比如3ms，三毫秒，这种字符串转换为time.Duration类型
 			sourceValue := reflect.ValueOf(srcValue.Interface())
 			if sourceValue.IsValid() && IsBaseType(sourceValue.Type()) {
-				dataTime, err := baseTime.ParseTime(fmt.Sprintf("%v", sourceValue.Interface()))
+				dataTime, err := goleTime.ParseTime(fmt.Sprintf("%v", sourceValue.Interface()))
 				if err == nil {
 					return reflect.ValueOf(dataTime)
 				} else {

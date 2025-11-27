@@ -679,7 +679,7 @@ func TestStrToObject14(t *testing.T) {
 //	}
 //	var entity TestEntity
 //	_, _ = util.StrToObject(str, &entity)
-//	test.Equal(t, baseTime.TimeToStringYmd(*entity.Entity[0].Demo), "2024-07-12")
+//	test.Equal(t, goleTime.TimeToStringYmd(*entity.Entity[0].Demo), "2024-07-12")
 //}
 
 func TestStrToObject16(t *testing.T) {

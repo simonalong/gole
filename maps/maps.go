@@ -12,7 +12,7 @@ import (
 
 	cmap "github.com/orcaman/concurrent-map"
 	"github.com/simonalong/gole/logger"
-	baseTime "github.com/simonalong/gole/time"
+	goleTime "github.com/simonalong/gole/time"
 	"github.com/simonalong/gole/util"
 )
 
@@ -37,22 +37,22 @@ type KeyFormat func(string) string
 // ...
 type ValueFormat func(string, interface{}) interface{}
 
-type BaseMap struct {
+type GoleMap struct {
 	innerMap cmap.ConcurrentMap
 	sort     bool
 	keys     []string
 }
 
-func New() *BaseMap {
-	return &BaseMap{
+func New() *GoleMap {
+	return &GoleMap{
 		innerMap: cmap.New(),
 		sort:     false,
 		keys:     make([]string, 0),
 	}
 }
 
-func NewSort() *BaseMap {
-	return &BaseMap{
+func NewSort() *GoleMap {
+	return &GoleMap{
 		innerMap: cmap.New(),
 		sort:     true,
 		keys:     make([]string, 0),
@@ -61,12 +61,12 @@ func NewSort() *BaseMap {
 
 // Of 支持：k-v-k-v结构
 // 默认无序，如果想要有序，请使用OfSort()
-func Of(parameters ...any) *BaseMap {
+func Of(parameters ...any) *GoleMap {
 	if parameters == nil || len(parameters) == 0 {
 		return New()
 	}
 
-	pBaseMap := New()
+	pGoleMap := New()
 	for index := 0; index < len(parameters); index++ {
 		data := parameters[index]
 		if reflect.TypeOf(data).Kind() == reflect.String {
@@ -76,19 +76,19 @@ func Of(parameters ...any) *BaseMap {
 				value = parameters[index+1]
 			}
 
-			pBaseMap.Put(key, value)
+			pGoleMap.Put(key, value)
 			index++
 		}
 	}
-	return pBaseMap
+	return pGoleMap
 }
 
-func OfSort(parameters ...any) *BaseMap {
+func OfSort(parameters ...any) *GoleMap {
 	if parameters == nil || len(parameters) == 0 {
 		return NewSort()
 	}
 
-	pBaseMap := NewSort()
+	pGoleMap := NewSort()
 	for index := 0; index < len(parameters); index++ {
 		data := parameters[index]
 		if reflect.TypeOf(data).Kind() == reflect.String {
@@ -98,22 +98,22 @@ func OfSort(parameters ...any) *BaseMap {
 				value = parameters[index+1]
 			}
 
-			pBaseMap.Put(key, value)
+			pGoleMap.Put(key, value)
 			index++
 		}
 	}
-	return pBaseMap
+	return pGoleMap
 }
 
-func From(entity interface{}) (*BaseMap, error) {
+func From(entity interface{}) (*GoleMap, error) {
 	if entity == nil {
 		return nil, nil
 	}
 
-	// 使用类型断言判断 value 是否为 *BaseMap 类型
-	baseMapValue, ok := entity.(*BaseMap)
+	// 使用类型断言判断 value 是否为 *GoleMap 类型
+	GoleMapValue, ok := entity.(*GoleMap)
 	if ok {
-		return baseMapValue, nil
+		return GoleMapValue, nil
 	}
 
 	entityType := reflect.TypeOf(entity)
@@ -129,14 +129,14 @@ func From(entity interface{}) (*BaseMap, error) {
 	}
 }
 
-func FromWithKeyFormat(entity interface{}, keyFormat KeyFormat) (*BaseMap, error) {
+func FromWithKeyFormat(entity interface{}, keyFormat KeyFormat) (*GoleMap, error) {
 	if entity == nil {
 		return nil, nil
 	}
-	// 使用类型断言判断 value 是否为 *BaseMap 类型
-	baseMapValue, ok := entity.(*BaseMap)
+	// 使用类型断言判断 value 是否为 *GoleMap 类型
+	GoleMapValue, ok := entity.(*GoleMap)
 	if ok {
-		return baseMapValue, nil
+		return GoleMapValue, nil
 	}
 	entityType := reflect.TypeOf(entity)
 	if entityType.Kind() == reflect.Map {
@@ -151,13 +151,13 @@ func FromWithKeyFormat(entity interface{}, keyFormat KeyFormat) (*BaseMap, error
 	}
 }
 
-func FromRows(rows driver.Rows) []*BaseMap {
+func FromRows(rows driver.Rows) []*GoleMap {
 	if rows == nil {
-		return []*BaseMap{}
+		return []*GoleMap{}
 	}
 	columns := rows.Columns()
 	dest := make([]driver.Value, len(columns))
-	var ormMapList []*BaseMap
+	var ormMapList []*GoleMap
 	for rows.Next(dest) == nil {
 		ormMap := NewSort()
 		for index, column := range columns {
@@ -168,18 +168,18 @@ func FromRows(rows driver.Rows) []*BaseMap {
 	return ormMapList
 }
 
-func FromSqlRows(rows *sql.Rows) []*BaseMap {
+func FromSqlRows(rows *sql.Rows) []*GoleMap {
 	if rows == nil {
-		return []*BaseMap{}
+		return []*GoleMap{}
 	}
 
 	columns, err := rows.Columns()
 	if err != nil {
 		logger.Errorf("获取columns异常：%v", err)
-		return []*BaseMap{}
+		return []*GoleMap{}
 	}
 
-	var ormMapList []*BaseMap
+	var ormMapList []*GoleMap
 	for rows.Next() {
 		ptrs := make([]interface{}, len(columns))
 		container := make([]interface{}, len(columns))
@@ -188,7 +188,7 @@ func FromSqlRows(rows *sql.Rows) []*BaseMap {
 		}
 		if err := rows.Scan(ptrs...); err != nil {
 			logger.Errorf("scan转换字段异常：%v", err)
-			return []*BaseMap{}
+			return []*GoleMap{}
 		}
 
 		ormMap := OfSort()
@@ -203,13 +203,13 @@ func FromSqlRows(rows *sql.Rows) []*BaseMap {
 	return ormMapList
 }
 
-func FromRowsWithFormat(rows driver.Rows, keyFormat KeyFormat) []*BaseMap {
+func FromRowsWithFormat(rows driver.Rows, keyFormat KeyFormat) []*GoleMap {
 	if rows == nil {
-		return []*BaseMap{}
+		return []*GoleMap{}
 	}
 	columns := rows.Columns()
 	dest := make([]driver.Value, len(columns))
-	var ormMapList []*BaseMap
+	var ormMapList []*GoleMap
 	for rows.Next(dest) == nil {
 		ormMap := NewSort()
 		for index, column := range columns {
@@ -220,12 +220,12 @@ func FromRowsWithFormat(rows driver.Rows, keyFormat KeyFormat) []*BaseMap {
 	return ormMapList
 }
 
-func FromEntityList(entityList []interface{}) []*BaseMap {
+func FromEntityList(entityList []interface{}) []*GoleMap {
 	if len(entityList) == 0 {
-		return []*BaseMap{}
+		return []*GoleMap{}
 	}
 
-	var ormMapList []*BaseMap
+	var ormMapList []*GoleMap
 	for _, entity := range entityList {
 		ormMapList = append(ormMapList, FromEntity(entity))
 	}
@@ -233,15 +233,15 @@ func FromEntityList(entityList []interface{}) []*BaseMap {
 }
 
 // FromEntity 从实体转换为map，默认转换为有序map
-func FromEntity(entity interface{}) *BaseMap {
+func FromEntity(entity interface{}) *GoleMap {
 	if entity == nil {
 		return New()
 	}
 
-	// 使用类型断言判断 value 是否为 *BaseMap 类型
-	baseMapValue, ok := entity.(*BaseMap)
+	// 使用类型断言判断 value 是否为 *GoleMap 类型
+	GoleMapValue, ok := entity.(*GoleMap)
 	if ok {
-		return baseMapValue
+		return GoleMapValue
 	}
 
 	objType := reflect.TypeOf(entity)
@@ -273,7 +273,7 @@ func FromEntity(entity interface{}) *BaseMap {
 }
 
 // FromEntityWithKeyFormat 从实体转换为map，默认转换为有序map
-func FromEntityWithKeyFormat(entity interface{}, keyFormat KeyFormat) *BaseMap {
+func FromEntityWithKeyFormat(entity interface{}, keyFormat KeyFormat) *GoleMap {
 	if entity == nil {
 		return New()
 	}
@@ -304,7 +304,7 @@ func FromEntityWithKeyFormat(entity interface{}, keyFormat KeyFormat) *BaseMap {
 	return entityMap
 }
 
-func FromEntityWithValueFormat(entity interface{}, valueFormat ValueFormat) *BaseMap {
+func FromEntityWithValueFormat(entity interface{}, valueFormat ValueFormat) *GoleMap {
 	if entity == nil {
 		return New()
 	}
@@ -336,7 +336,7 @@ func FromEntityWithValueFormat(entity interface{}, valueFormat ValueFormat) *Bas
 }
 
 // FromMap 从map转换为OrmMap，默认转换为有序map
-func FromMap(dataMap map[string]interface{}) *BaseMap {
+func FromMap(dataMap map[string]interface{}) *GoleMap {
 	if dataMap == nil || len(dataMap) == 0 {
 		return New()
 	}
@@ -347,7 +347,7 @@ func FromMap(dataMap map[string]interface{}) *BaseMap {
 	return resultMap
 }
 
-func FromMapWithKeyFormat(dataMap map[string]interface{}, keyFormat KeyFormat) *BaseMap {
+func FromMapWithKeyFormat(dataMap map[string]interface{}, keyFormat KeyFormat) *GoleMap {
 	if dataMap == nil || len(dataMap) == 0 {
 		return New()
 	}
@@ -358,7 +358,7 @@ func FromMapWithKeyFormat(dataMap map[string]interface{}, keyFormat KeyFormat) *
 	return resultMap
 }
 
-func FromMapWithValueFormat(dataMap map[string]interface{}, valueFormat ValueFormat) *BaseMap {
+func FromMapWithValueFormat(dataMap map[string]interface{}, valueFormat ValueFormat) *GoleMap {
 	if dataMap == nil || len(dataMap) == 0 {
 		return New()
 	}
@@ -372,7 +372,7 @@ func FromMapWithValueFormat(dataMap map[string]interface{}, valueFormat ValueFor
 	return resultMap
 }
 
-func FromMapWithFormat(dataMap map[string]interface{}, keyFormat KeyFormat, valueFormat ValueFormat) *BaseMap {
+func FromMapWithFormat(dataMap map[string]interface{}, keyFormat KeyFormat, valueFormat ValueFormat) *GoleMap {
 	if dataMap == nil || len(dataMap) == 0 {
 		return New()
 	}
@@ -389,7 +389,7 @@ func FromMapWithFormat(dataMap map[string]interface{}, keyFormat KeyFormat, valu
 	return resultMap
 }
 
-func FromJson(jsonOfContent string) (*BaseMap, error) {
+func FromJson(jsonOfContent string) (*GoleMap, error) {
 	if jsonOfContent == "" {
 		return New(), nil
 	}
@@ -403,7 +403,7 @@ func FromJson(jsonOfContent string) (*BaseMap, error) {
 	return FromMap(resultMap), nil
 }
 
-func FromJsonWithFormat(jsonOfContent string, keyFormat KeyFormat, valueFormat ValueFormat) (*BaseMap, error) {
+func FromJsonWithFormat(jsonOfContent string, keyFormat KeyFormat, valueFormat ValueFormat) (*GoleMap, error) {
 	if jsonOfContent == "" {
 		return New(), nil
 	}
@@ -417,7 +417,7 @@ func FromJsonWithFormat(jsonOfContent string, keyFormat KeyFormat, valueFormat V
 	return FromMapWithFormat(resultMap, keyFormat, valueFormat), nil
 }
 
-func FromJsonWithKeyFormat(jsonOfContent string, keyFormat KeyFormat) (*BaseMap, error) {
+func FromJsonWithKeyFormat(jsonOfContent string, keyFormat KeyFormat) (*GoleMap, error) {
 	if jsonOfContent == "" {
 		return New(), nil
 	}
@@ -432,7 +432,7 @@ func FromJsonWithKeyFormat(jsonOfContent string, keyFormat KeyFormat) (*BaseMap,
 }
 
 // AllIsEmpty 所有数据都为空，则返回true
-func AllIsEmpty(dataMaps []*BaseMap) bool {
+func AllIsEmpty(dataMaps []*GoleMap) bool {
 	if dataMaps == nil {
 		return true
 	}
@@ -445,7 +445,7 @@ func AllIsEmpty(dataMaps []*BaseMap) bool {
 	return true
 }
 
-func (receiver *BaseMap) AsDeepMap() *BaseMap {
+func (receiver *GoleMap) AsDeepMap() *GoleMap {
 	dataMap1 := receiver.ToMap()
 	properties, err := util.MapToProperties(dataMap1)
 	if err != nil {
@@ -461,7 +461,7 @@ func (receiver *BaseMap) AsDeepMap() *BaseMap {
 	return FromMap(dataMap)
 }
 
-func (receiver *BaseMap) ToEntity(pEntity interface{}) error {
+func (receiver *GoleMap) ToEntity(pEntity interface{}) error {
 	if pEntity == nil {
 		return errors.New("对象指针为nil")
 	}
@@ -485,7 +485,7 @@ func (receiver *BaseMap) ToEntity(pEntity interface{}) error {
 	return nil
 }
 
-func (receiver *BaseMap) ToMap() map[string]interface{} {
+func (receiver *GoleMap) ToMap() map[string]interface{} {
 	dataMap := receiver.innerMap.Items()
 	rsultMap := map[string]interface{}{}
 	for k, v := range dataMap {
@@ -493,7 +493,7 @@ func (receiver *BaseMap) ToMap() map[string]interface{} {
 			rsultMap[k] = v
 			continue
 		}
-		if mapV := v.(*BaseMap); mapV != nil {
+		if mapV := v.(*GoleMap); mapV != nil {
 			rsultMap[k] = mapV.ToMap()
 		} else {
 			rsultMap[k] = v
@@ -502,13 +502,13 @@ func (receiver *BaseMap) ToMap() map[string]interface{} {
 	return rsultMap
 }
 
-func (receiver *BaseMap) CloneExceptKeys(exceptKeys []string) *BaseMap {
+func (receiver *GoleMap) CloneExceptKeys(exceptKeys []string) *GoleMap {
 	resultMap := receiver.Clone()
 	resultMap.RemoveKeys(exceptKeys)
 	return resultMap
 }
 
-func (receiver *BaseMap) CloneIncludeKeys(includeKeys []string) *BaseMap {
+func (receiver *GoleMap) CloneIncludeKeys(includeKeys []string) *GoleMap {
 	resultMap := receiver.Clone()
 	if len(includeKeys) == 0 {
 		return resultMap
@@ -522,11 +522,11 @@ func (receiver *BaseMap) CloneIncludeKeys(includeKeys []string) *BaseMap {
 	return resultMap
 }
 
-func (receiver *BaseMap) ToJson() string {
+func (receiver *GoleMap) ToJson() string {
 	return util.ToJsonString(receiver.innerMap)
 }
 
-func (receiver *BaseMap) ToJsonOfSort() string {
+func (receiver *GoleMap) ToJsonOfSort() string {
 	if receiver == nil || receiver.IsEmpty() {
 		return "{}"
 	}
@@ -553,8 +553,8 @@ func (receiver *BaseMap) ToJsonOfSort() string {
 			kvs = append(kvs, fmt.Sprintf("\"%v\":\"%v\"", key, valValue.Interface()))
 		} else {
 			var valJson string
-			if valType == reflect.TypeOf(BaseMap{}) {
-				value := val.(*BaseMap)
+			if valType == reflect.TypeOf(GoleMap{}) {
+				value := val.(*GoleMap)
 				valJson = value.ToJsonOfSort()
 			} else {
 				valJson = FromEntity(valValue.Interface()).ToJsonOfSort()
@@ -571,7 +571,7 @@ func (receiver *BaseMap) ToJsonOfSort() string {
 	return jsonResult
 }
 
-func (receiver *BaseMap) ToString() string {
+func (receiver *GoleMap) ToString() string {
 	var keyValue []string
 	for _, key := range receiver.Keys() {
 		val, _ := receiver.Get(key)
@@ -588,7 +588,7 @@ func (receiver *BaseMap) ToString() string {
 	return "[" + strings.Join(keyValue, ",") + "]"
 }
 
-func (receiver *BaseMap) Keys() []string {
+func (receiver *GoleMap) Keys() []string {
 	if receiver.sort {
 		return receiver.keys
 	} else {
@@ -596,7 +596,7 @@ func (receiver *BaseMap) Keys() []string {
 	}
 }
 
-func (receiver *BaseMap) Values() []interface{} {
+func (receiver *GoleMap) Values() []interface{} {
 	if receiver.sort {
 		keys := receiver.keys
 		var valueList []interface{}
@@ -620,7 +620,7 @@ func (receiver *BaseMap) Values() []interface{} {
 // 注意：
 //  1. 如果从无序变为有序，且之前已经有一些数据，则之前的数据顺序至此固定，后续的顺序就按照添加的顺序固定
 //  2. 如果从有序变为无序，且之前已经有一些数据，则顺序就完全乱掉了
-func (receiver *BaseMap) SetSort(sort bool) *BaseMap {
+func (receiver *GoleMap) SetSort(sort bool) *GoleMap {
 	if !receiver.sort && sort {
 		receiver.keys = receiver.innerMap.Keys()
 	} else if receiver.sort && !sort {
@@ -630,16 +630,16 @@ func (receiver *BaseMap) SetSort(sort bool) *BaseMap {
 	return receiver
 }
 
-func (receiver *BaseMap) IsEmpty() bool {
+func (receiver *GoleMap) IsEmpty() bool {
 	return len(receiver.innerMap.Keys()) == 0
 }
 
-func (receiver *BaseMap) IsUnEmpty() bool {
+func (receiver *GoleMap) IsUnEmpty() bool {
 	return len(receiver.innerMap.Keys()) != 0
 }
 
-func (receiver *BaseMap) Clone() *BaseMap {
-	cloneMap := &BaseMap{
+func (receiver *GoleMap) Clone() *GoleMap {
+	cloneMap := &GoleMap{
 		innerMap: cmap.New(),
 		sort:     receiver.sort,
 		keys:     make([]string, 0),
@@ -651,7 +651,7 @@ func (receiver *BaseMap) Clone() *BaseMap {
 	return cloneMap
 }
 
-func (receiver *BaseMap) Put(key string, value interface{}) *BaseMap {
+func (receiver *GoleMap) Put(key string, value interface{}) *GoleMap {
 	if key == "" {
 		return receiver
 	}
@@ -664,7 +664,7 @@ func (receiver *BaseMap) Put(key string, value interface{}) *BaseMap {
 	return receiver
 }
 
-func (receiver *BaseMap) PutAll(otherMap *BaseMap) *BaseMap {
+func (receiver *GoleMap) PutAll(otherMap *GoleMap) *GoleMap {
 	if receiver == nil || otherMap == nil {
 		return nil
 	}
@@ -676,11 +676,11 @@ func (receiver *BaseMap) PutAll(otherMap *BaseMap) *BaseMap {
 	return receiver
 }
 
-func (receiver *BaseMap) Set(key string, value interface{}) *BaseMap {
+func (receiver *GoleMap) Set(key string, value interface{}) *GoleMap {
 	return receiver.Put(key, value)
 }
 
-func (receiver *BaseMap) Contain(key string) bool {
+func (receiver *GoleMap) Contain(key string) bool {
 	if key == "" {
 		return false
 	}
@@ -688,14 +688,14 @@ func (receiver *BaseMap) Contain(key string) bool {
 	return exit
 }
 
-func (receiver *BaseMap) Get(key string) (interface{}, bool) {
+func (receiver *GoleMap) Get(key string) (interface{}, bool) {
 	if key == "" {
 		return nil, false
 	}
 	return receiver.innerMap.Get(key)
 }
 
-func (receiver *BaseMap) GetInt(key string) (int, bool) {
+func (receiver *GoleMap) GetInt(key string) (int, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -707,7 +707,7 @@ func (receiver *BaseMap) GetInt(key string) (int, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetInt8(key string) (int8, bool) {
+func (receiver *GoleMap) GetInt8(key string) (int8, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -719,7 +719,7 @@ func (receiver *BaseMap) GetInt8(key string) (int8, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetInt16(key string) (int16, bool) {
+func (receiver *GoleMap) GetInt16(key string) (int16, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -731,7 +731,7 @@ func (receiver *BaseMap) GetInt16(key string) (int16, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetInt32(key string) (int32, bool) {
+func (receiver *GoleMap) GetInt32(key string) (int32, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -743,7 +743,7 @@ func (receiver *BaseMap) GetInt32(key string) (int32, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetInt64(key string) (int64, bool) {
+func (receiver *GoleMap) GetInt64(key string) (int64, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -755,7 +755,7 @@ func (receiver *BaseMap) GetInt64(key string) (int64, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetUInt(key string) (uint, bool) {
+func (receiver *GoleMap) GetUInt(key string) (uint, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -767,7 +767,7 @@ func (receiver *BaseMap) GetUInt(key string) (uint, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetUInt8(key string) (uint8, bool) {
+func (receiver *GoleMap) GetUInt8(key string) (uint8, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -779,7 +779,7 @@ func (receiver *BaseMap) GetUInt8(key string) (uint8, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetUInt16(key string) (uint16, bool) {
+func (receiver *GoleMap) GetUInt16(key string) (uint16, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -791,7 +791,7 @@ func (receiver *BaseMap) GetUInt16(key string) (uint16, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetUInt32(key string) (uint32, bool) {
+func (receiver *GoleMap) GetUInt32(key string) (uint32, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -803,7 +803,7 @@ func (receiver *BaseMap) GetUInt32(key string) (uint32, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetUInt64(key string) (uint64, bool) {
+func (receiver *GoleMap) GetUInt64(key string) (uint64, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -815,7 +815,7 @@ func (receiver *BaseMap) GetUInt64(key string) (uint64, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetFloat32(key string) (float32, bool) {
+func (receiver *GoleMap) GetFloat32(key string) (float32, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -827,7 +827,7 @@ func (receiver *BaseMap) GetFloat32(key string) (float32, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetFloat64(key string) (float64, bool) {
+func (receiver *GoleMap) GetFloat64(key string) (float64, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -839,7 +839,7 @@ func (receiver *BaseMap) GetFloat64(key string) (float64, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetBool(key string) (bool, bool) {
+func (receiver *GoleMap) GetBool(key string) (bool, bool) {
 	if key == "" {
 		return false, false
 	}
@@ -851,7 +851,7 @@ func (receiver *BaseMap) GetBool(key string) (bool, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetComplex64(key string) (complex64, bool) {
+func (receiver *GoleMap) GetComplex64(key string) (complex64, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -863,7 +863,7 @@ func (receiver *BaseMap) GetComplex64(key string) (complex64, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetComplex128(key string) (complex128, bool) {
+func (receiver *GoleMap) GetComplex128(key string) (complex128, bool) {
 	if key == "" {
 		return 0, false
 	}
@@ -875,14 +875,14 @@ func (receiver *BaseMap) GetComplex128(key string) (complex128, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetString(key string) (string, bool) {
+func (receiver *GoleMap) GetString(key string) (string, bool) {
 	if key == "" {
 		return "", false
 	}
 	val, exit := receiver.innerMap.Get(key)
 	if exit {
 		if timestampVal, ok := val.(time.Time); ok {
-			return baseTime.TimeToStringYmdHmsS(timestampVal), true
+			return goleTime.TimeToStringYmdHmsS(timestampVal), true
 		} else {
 			return util.ToString(val), true
 		}
@@ -891,7 +891,7 @@ func (receiver *BaseMap) GetString(key string) (string, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetTime(key string) (time.Time, bool) {
+func (receiver *GoleMap) GetTime(key string) (time.Time, bool) {
 	if key == "" {
 		return time.Time{}, false
 	}
@@ -901,7 +901,7 @@ func (receiver *BaseMap) GetTime(key string) (time.Time, bool) {
 			return time.Time{}, false
 		}
 		if reflect.TypeOf(d).Kind() == reflect.String {
-			dataTime, err := baseTime.ParseTime(d.(string))
+			dataTime, err := goleTime.ParseTime(d.(string))
 			if err != nil {
 				return time.Time{}, false
 			}
@@ -914,7 +914,7 @@ func (receiver *BaseMap) GetTime(key string) (time.Time, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetBytes(key string) ([]byte, bool) {
+func (receiver *GoleMap) GetBytes(key string) ([]byte, bool) {
 	if key == "" {
 		return make([]byte, 0), false
 	}
@@ -926,7 +926,7 @@ func (receiver *BaseMap) GetBytes(key string) ([]byte, bool) {
 	}
 }
 
-func (receiver *BaseMap) GetMaps(key string) (*BaseMap, bool) {
+func (receiver *GoleMap) GetMaps(key string) (*GoleMap, bool) {
 	if key == "" {
 		return nil, false
 	}
@@ -942,7 +942,7 @@ func (receiver *BaseMap) GetMaps(key string) (*BaseMap, bool) {
 	}
 }
 
-func (receiver *BaseMap) Remove(key string) {
+func (receiver *GoleMap) Remove(key string) {
 	receiver.innerMap.Remove(key)
 	if receiver.sort {
 		id := util.IndexOf(receiver.keys, key)
@@ -953,7 +953,7 @@ func (receiver *BaseMap) Remove(key string) {
 	}
 }
 
-func (receiver *BaseMap) RemoveKeys(keys []string) {
+func (receiver *GoleMap) RemoveKeys(keys []string) {
 	for _, key := range keys {
 		receiver.innerMap.Remove(key)
 	}
@@ -969,19 +969,19 @@ func (receiver *BaseMap) RemoveKeys(keys []string) {
 	}
 }
 
-func (receiver *BaseMap) RemoveAll() {
+func (receiver *GoleMap) RemoveAll() {
 	receiver.innerMap.Clear()
 	if receiver.sort {
 		receiver.keys = make([]string, 0)
 	}
 }
-func (receiver *BaseMap) Clear() {
+func (receiver *GoleMap) Clear() {
 	receiver.innerMap.Clear()
 	if receiver.sort {
 		receiver.keys = make([]string, 0)
 	}
 }
-func (receiver *BaseMap) Size() int {
+func (receiver *GoleMap) Size() int {
 	return len(receiver.innerMap.Keys())
 }
 
