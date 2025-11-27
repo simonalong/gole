@@ -3,9 +3,10 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	goleTime "github.com/simonalong/gole/time"
+	baseTime "github.com/simonalong/gole/time"
 	"io"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -101,6 +102,13 @@ func IsNumber(fieldKing reflect.Kind) bool {
 	default:
 		return false
 	}
+}
+
+var isIntegerRegex = regexp.MustCompile(`^[-+]?\d+$`)
+
+// IsInt 判断字符串是否为整数
+func IsInt(s string) bool {
+	return isIntegerRegex.MatchString(s)
 }
 
 // IsBaseType 是否是常见基本类型
@@ -224,6 +232,17 @@ func IsArrayType(fieldType reflect.Type) bool {
 	return false
 }
 
+func IsType(object interface{}, targetType reflect.Type) bool {
+	if object == nil {
+		return false
+	}
+	objType := reflect.ValueOf(object)
+	if objType.Kind() == reflect.Ptr {
+		objType = objType.Elem()
+	}
+	return objType.Type() == targetType
+}
+
 func ToJsonString(value any) string {
 	if value == nil {
 		return ""
@@ -248,55 +267,55 @@ func ToString(value any) string {
 
 func ToInt(value any) int {
 	if value == nil {
-		return 0
+		return -1
 	}
 	result, err := ToValue(value, reflect.Int)
 	if err != nil {
-		return 0
+		return -1
 	}
 	return result.(int)
 }
 
 func ToInt8(value any) int8 {
 	if value == nil {
-		return 0
+		return -1
 	}
 	result, err := ToValue(value, reflect.Int8)
 	if err != nil {
-		return 0
+		return -1
 	}
 	return result.(int8)
 }
 
 func ToInt16(value any) int16 {
 	if value == nil {
-		return 0
+		return -1
 	}
 	result, err := ToValue(value, reflect.Int16)
 	if err != nil {
-		return 0
+		return -1
 	}
 	return result.(int16)
 }
 
 func ToInt32(value any) int32 {
 	if value == nil {
-		return 0
+		return -1
 	}
 	result, err := ToValue(value, reflect.Int32)
 	if err != nil {
-		return 0
+		return -1
 	}
 	return result.(int32)
 }
 
 func ToInt64(value any) int64 {
 	if value == nil {
-		return 0
+		return -1
 	}
 	result, err := ToValue(value, reflect.Int64)
 	if err != nil {
-		return 0
+		return -1
 	}
 	return result.(int64)
 }
@@ -445,16 +464,7 @@ func Cast(fieldKind reflect.Kind, valueStr string) (any, error) {
 		}
 		return int32(v), nil
 	case reflect.Int64:
-		if strings.Contains(valueStr, "E") {
-			f, err := strconv.ParseFloat(valueStr, 64)
-			if err != nil {
-				return nil, err
-			} else {
-				return int64(f), nil
-			}
-		} else {
-			return strconv.ParseInt(valueStr, 10, 64)
-		}
+		return strconv.ParseInt(valueStr, 10, 64)
 	case reflect.Uint:
 		v, err := strconv.ParseUint(valueStr, 10, 0)
 		if err != nil {
@@ -503,147 +513,16 @@ func Cast(fieldKind reflect.Kind, valueStr string) (any, error) {
 	return valueStr, nil
 }
 
-func ValueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
-	if dstType.Kind() == reflect.Ptr {
-		dstType = dstType.Elem()
-	}
-
-	if dstType == reflect.TypeOf(time.Time{}) {
-		// 针对时间类型单独处理
-		if timestampVal, ok := srcValue.Interface().(time.Time); ok {
-			return reflect.ValueOf(timestampVal)
-		}
-	} else if dstType.Kind() == reflect.Struct {
-		if dstType == reflect.TypeOf(time.Time{}) {
-			// 特殊处理：string类型转换time.Time类型；比如3ms，三毫秒，这种字符串转换为time.Duration类型
-			sourceValue := reflect.ValueOf(srcValue.Interface())
-			if sourceValue.IsValid() && IsBaseType(sourceValue.Type()) {
-				dataTime, err := goleTime.ParseTime(fmt.Sprintf("%v", sourceValue.Interface()))
-				if err == nil {
-					return reflect.ValueOf(dataTime)
-				} else {
-					v, err := Cast(dstType.Kind(), fmt.Sprintf("%v", srcValue.Interface()))
-					if err == nil {
-						return reflect.ValueOf(v)
-					}
-				}
-			}
-		}
-
-		if srcValue.Kind() == reflect.Ptr {
-			srcValue = srcValue.Elem()
-		}
-		sourceValue := reflect.ValueOf(srcValue.Interface())
-		if sourceValue.Kind() == reflect.Map || sourceValue.Kind() == reflect.Struct {
-			mapFieldValue := reflect.New(dstType)
-			for index, num := 0, mapFieldValue.Type().Elem().NumField(); index < num; index++ {
-				field := mapFieldValue.Type().Elem().Field(index)
-				fieldValue := mapFieldValue.Elem().Field(index)
-
-				doInvokeValue(sourceValue, field, fieldValue)
-			}
-			return mapFieldValue
-		}
-	} else if dstType.Kind() == reflect.Map {
-		if srcValue.Kind() == reflect.Ptr {
-			srcValue = srcValue.Elem()
-		}
-		sourceValue := reflect.ValueOf(srcValue.Interface())
-		if sourceValue.Kind() == reflect.Map {
-			mapFieldValue := reflect.MakeMap(dstType)
-			for mapR := sourceValue.MapRange(); mapR.Next(); {
-				mapKey := mapR.Key()
-				mapValue := mapR.Value()
-
-				mapKeyRealValue, err := Cast(mapFieldValue.Type().Key().Kind(), fmt.Sprintf("%v", mapKey.Interface()))
-				mapValueRealValue := ValueToTarget(mapValue, mapFieldValue.Type().Elem())
-				if err == nil {
-					if mapValueRealValue.Kind() == reflect.Ptr {
-						mapFieldValue.SetMapIndex(reflect.ValueOf(mapKeyRealValue), mapValueRealValue.Elem())
-					} else {
-						mapFieldValue.SetMapIndex(reflect.ValueOf(mapKeyRealValue), mapValueRealValue)
-					}
-				}
-			}
-			return mapFieldValue
-		} else if sourceValue.Kind() == reflect.Struct {
-			srcType := reflect.TypeOf(sourceValue)
-			srcValue := reflect.ValueOf(sourceValue)
-			mapFieldValue := reflect.MakeMap(dstType)
-
-			for index, num := 0, srcType.NumField(); index < num; index++ {
-				field := srcType.Field(index)
-				fieldValue := srcValue.Field(index)
-
-				mapValueRealValue := ObjectToData(fieldValue.Interface())
-				mapFieldValue.SetMapIndex(reflect.ValueOf(ToLowerFirstPrefix(field.Name)), reflect.ValueOf(mapValueRealValue))
-
-				doInvokeValue(sourceValue, field, fieldValue)
-			}
-			return mapFieldValue
-		}
-	} else if dstType.Kind() == reflect.Slice || dstType.Kind() == reflect.Array {
-		if srcValue.Kind() == reflect.Ptr {
-			srcValue = srcValue.Elem()
-		}
-		sourceValue := reflect.ValueOf(srcValue.Interface())
-		if sourceValue.Kind() == reflect.Slice || sourceValue.Kind() == reflect.Array {
-			arrayFieldValue := reflect.MakeSlice(dstType, 0, 0)
-			for arrayIndex := 0; arrayIndex < sourceValue.Len(); arrayIndex++ {
-				dataV := ValueToTarget(sourceValue.Index(arrayIndex), dstType.Elem())
-				if dataV.IsValid() {
-					if dataV.Kind() == reflect.Ptr {
-						arrayFieldValue = reflect.Append(arrayFieldValue, dataV.Elem())
-					} else {
-						arrayFieldValue = reflect.Append(arrayFieldValue, dataV)
-					}
-				}
-			}
-			return arrayFieldValue
-		}
-	} else if IsBaseType(dstType) {
-		// 特殊处理：string类型转换time.Duration类型；比如3ms，三毫秒，这种字符串转换为time.Duration类型
-		if dstType == reflect.TypeOf(time.Duration(0)) {
-			sourceValue := reflect.ValueOf(srcValue.Interface())
-			if sourceValue.IsValid() && IsBaseType(sourceValue.Type()) {
-				duration, err := time.ParseDuration(fmt.Sprintf("%v", sourceValue.Interface()))
-				if err == nil {
-					return reflect.ValueOf(duration)
-				} else {
-					v, err := Cast(dstType.Kind(), fmt.Sprintf("%v", srcValue.Interface()))
-					if err == nil {
-						return reflect.ValueOf(v)
-					}
-				}
-			}
-		} else {
-			sourceValue := reflect.ValueOf(srcValue.Interface())
-			if sourceValue.IsValid() && IsBaseType(sourceValue.Type()) {
-				v, err := Cast(dstType.Kind(), fmt.Sprintf("%v", srcValue.Interface()))
-				if err == nil {
-					return reflect.ValueOf(v)
-				}
-			}
-		}
-	} else if dstType.Kind() == reflect.Interface {
-		return reflect.ValueOf(ObjectToData(srcValue.Interface()))
-	} else {
-		v, err := Cast(dstType.Kind(), fmt.Sprintf("%v", srcValue.Interface()))
-		if err == nil {
-			return reflect.ValueOf(v)
-		}
-	}
-	return reflect.ValueOf(nil)
-}
-
-// DataToObject 其他的类型能够按照小写字母转换到对象
+// DataToEntity 其他的类型能够按照小写字母转换到对象
 // 其他类型：
 //   - 基本类型
 //   - 结构体类型：转换后对象
 //   - map类型
 //   - 集合/分片类型
 //   - 字符串类型：如果是json，则按照json进行转换
-func DataToObject(data any, targetPtrObj any) (any, error) {
+//
+// 说明：返回值any，这个主要是给基本类型使用
+func DataToEntity(data any, targetPtrObj any) (any, error) {
 	if data == nil {
 		return nil, nil
 	}
@@ -773,7 +652,7 @@ func ArrayToObject(dataArray any, targetPtrObj any) error {
 	dstValue := reflect.MakeSlice(dstType, 0, 0)
 
 	for arrayIndex := 0; arrayIndex < srcValue.Len(); arrayIndex++ {
-		dataV := valueToTarget(srcValue.Index(arrayIndex), dstItemType)
+		dataV := ValueToTarget(srcValue.Index(arrayIndex), dstItemType)
 		if dataV.IsValid() {
 			if dataV.Kind() == reflect.Ptr {
 				dstValue = reflect.Append(dstValue, dataV.Elem())
@@ -812,7 +691,7 @@ func MapToObject(dataMap any, targetPtrObj any) error {
 			mapValue := mapR.Value()
 
 			mapKeyRealValue, err := Cast(mapFieldValue.Type().Key().Kind(), fmt.Sprintf("%v", mapKey.Interface()))
-			mapValueRealValue := valueToTarget(mapValue, mapFieldValue.Type().Elem())
+			mapValueRealValue := ValueToTarget(mapValue, mapFieldValue.Type().Elem())
 			if err == nil {
 				if mapValueRealValue.Kind() == reflect.Ptr {
 					mapFieldValue.SetMapIndex(reflect.ValueOf(mapKeyRealValue), mapValueRealValue.Elem())
@@ -884,7 +763,7 @@ func doInvokeValue(fieldMapValue reflect.Value, field reflect.StructField, field
 	if fieldValue.Kind() == reflect.Ptr {
 		fValue = fValue.Elem()
 	}
-	targetValue := valueToTarget(fValue, field.Type)
+	targetValue := ValueToTarget(fValue, field.Type)
 	if !targetValue.IsValid() || targetValue.IsZero() {
 		return
 	}
@@ -924,7 +803,7 @@ func doInvokeValue(fieldMapValue reflect.Value, field reflect.StructField, field
 	}
 }
 
-func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
+func ValueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 	if dstType.Kind() == reflect.Ptr {
 		dstType = dstType.Elem()
 	}
@@ -939,7 +818,7 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 			// 特殊处理：string类型转换time.Time类型；比如3ms，三毫秒，这种字符串转换为time.Duration类型
 			sourceValue := reflect.ValueOf(srcValue.Interface())
 			if sourceValue.IsValid() && IsBaseType(sourceValue.Type()) {
-				dataTime, err := goleTime.ParseTime(fmt.Sprintf("%v", sourceValue.Interface()))
+				dataTime, err := baseTime.ParseTime(fmt.Sprintf("%v", sourceValue.Interface()))
 				if err == nil {
 					return reflect.ValueOf(dataTime)
 				} else {
@@ -977,7 +856,7 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 				mapValue := mapR.Value()
 
 				mapKeyRealValue, err := Cast(mapFieldValue.Type().Key().Kind(), fmt.Sprintf("%v", mapKey.Interface()))
-				mapValueRealValue := valueToTarget(mapValue, mapFieldValue.Type().Elem())
+				mapValueRealValue := ValueToTarget(mapValue, mapFieldValue.Type().Elem())
 				if err == nil {
 					if mapValueRealValue.Kind() == reflect.Ptr {
 						mapFieldValue.SetMapIndex(reflect.ValueOf(mapKeyRealValue), mapValueRealValue.Elem())
@@ -1011,12 +890,18 @@ func valueToTarget(srcValue reflect.Value, dstType reflect.Type) reflect.Value {
 		if sourceValue.Kind() == reflect.Slice || sourceValue.Kind() == reflect.Array {
 			arrayFieldValue := reflect.MakeSlice(dstType, 0, 0)
 			for arrayIndex := 0; arrayIndex < sourceValue.Len(); arrayIndex++ {
-				dataV := valueToTarget(sourceValue.Index(arrayIndex), dstType.Elem())
+				dataV := ValueToTarget(sourceValue.Index(arrayIndex), dstType.Elem())
 				if dataV.IsValid() {
 					if dataV.Kind() == reflect.Ptr {
-						arrayFieldValue = reflect.Append(arrayFieldValue, dataV.Elem())
+						if dstType.Elem().Kind() == reflect.Ptr {
+							arrayFieldValue = reflect.Append(arrayFieldValue, dataV)
+						} else {
+							arrayFieldValue = reflect.Append(arrayFieldValue, dataV.Elem())
+						}
 					} else {
-						arrayFieldValue = reflect.Append(arrayFieldValue, dataV)
+						if dstType.Kind() != reflect.Ptr {
+							arrayFieldValue = reflect.Append(arrayFieldValue, dataV)
+						}
 					}
 				}
 			}
@@ -1327,4 +1212,31 @@ func ToLowerFirstPrefix(dataStr string) string {
 // ToUpperFirstPrefix 首字母大写
 func ToUpperFirstPrefix(dataStr string) string {
 	return strings.ToLower(dataStr[:1]) + dataStr[1:]
+}
+
+const (
+	base         = 62
+	characterSet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+)
+
+// Int64ToBase62 将 int64 数字转换为 Base62 字符串（高性能版）
+func Int64ToBase62(num int64) string {
+	if num == 0 {
+		return string(characterSet[0])
+	}
+
+	// 预分配足够空间（int64 的 Base62 最大长度为 11）
+	buf := make([]byte, 0, 11)
+	for num > 0 {
+		remainder := num % base
+		buf = append(buf, characterSet[remainder])
+		num /= base
+	}
+
+	// 反向填充结果（避免切片反转）
+	res := make([]byte, len(buf))
+	for i, j := 0, len(buf)-1; j >= 0; i, j = i+1, j-1 {
+		res[i] = buf[j]
+	}
+	return string(res)
 }

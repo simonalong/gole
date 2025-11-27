@@ -58,12 +58,12 @@ func MkDirs(path string) bool {
 	}
 }
 
-func DeleteDirs(path string) bool {
-	return os.RemoveAll(path) == nil
+func DeleteDirs(path string) error {
+	return os.RemoveAll(path)
 }
 
-func DeleteFile(filePath string) bool {
-	return os.Remove(filePath) == nil
+func DeleteFile(filePath string) error {
+	return os.Remove(filePath)
 }
 
 func ReadFile(filePath string) string {
@@ -111,6 +111,19 @@ func WriteFileBytes(filePath string, data []byte) bool {
 	}
 }
 
+func GetFile(filePath string) (*os.File, error) {
+	p0 := ExtractFilePath(filePath)
+	if !DirectoryExists(p0) {
+		MkDirs(p0)
+	}
+
+	if fl, err := os.OpenFile(filePath, os.O_CREATE|os.O_RDWR, 0644); err != nil {
+		return nil, err
+	} else {
+		return fl, nil
+	}
+}
+
 func AppendFile(filePath string, text string) bool {
 	return AppendFileBytes(filePath, []byte(text))
 }
@@ -129,17 +142,104 @@ func AppendFileBytes(filePath string, data []byte) bool {
 	}
 }
 
-func CopyFile(srcFilePath string, destFilePath string) bool {
+func CopyFile(srcFilePath string, destFilePath string) error {
 	p0 := ExtractFilePath(destFilePath)
 	if !DirectoryExists(p0) {
 		MkDirs(p0)
 	}
-	src, _ := os.Open(srcFilePath)
+	src, err := os.Open(srcFilePath)
+	if err != nil {
+		return err
+	}
 	defer func(src *os.File) { _ = src.Close() }(src)
-	dst, _ := os.OpenFile(destFilePath, os.O_WRONLY|os.O_CREATE, 0644)
+	dst, err := os.OpenFile(destFilePath, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
 	defer func(dst *os.File) { _ = dst.Close() }(dst)
-	_, err := io.Copy(dst, src)
-	return err == nil
+	_, err = io.Copy(dst, src)
+	return err
+}
+
+func CopyDirs(srcDirPath string, destDirPath string) error {
+	err := filepath.Walk(srcDirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			path = filepath.Clean(path)
+			srcDirPath = filepath.Clean(srcDirPath)
+			if srcDirPath == path {
+				return nil
+			}
+
+			destDirPath = filepath.Clean(destDirPath)
+			dir := getNewDstDir(srcDirPath, destDirPath, path)
+			if !DirectoryExists(dir) {
+				MkDirs(dir)
+			}
+		} else {
+			dstFilePath := getNewDstDir(srcDirPath, destDirPath, path)
+			err := CopyFile(path, dstFilePath)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	return err
+}
+
+func CopyDirsExcept(srcDirPath, destDirPath, exceptSrcDirPath string) error {
+	srcDirPath, _ = filepath.Abs(srcDirPath)
+	destDirPath, _ = filepath.Abs(destDirPath)
+	exceptSrcDirPath, _ = filepath.Abs(exceptSrcDirPath)
+	err := filepath.Walk(srcDirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			path = filepath.Clean(path)
+			srcDirPath = filepath.Clean(srcDirPath)
+			if path == srcDirPath {
+				return nil
+			}
+
+			exceptSrcDirPath = filepath.Clean(exceptSrcDirPath)
+			if path == exceptSrcDirPath {
+				return nil
+			}
+
+			destDirPath = filepath.Clean(destDirPath)
+			dir := getNewDstDir(srcDirPath, destDirPath, path)
+			if !DirectoryExists(dir) {
+				MkDirs(dir)
+			}
+		} else {
+			except := filepath.Clean(exceptSrcDirPath)
+			if filepath.Dir(path) == except {
+				return nil
+			}
+
+			dstFilePath := getNewDstDir(srcDirPath, destDirPath, path)
+			err := CopyFile(path, dstFilePath)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	return err
+}
+
+func getNewDstDir(srcDirPath, destDirPath, path string) string {
+	index := strings.Index(path, srcDirPath)
+	if index == -1 {
+		return path
+	}
+	return filepath.Join(destDirPath, path[len(srcDirPath):])
 }
 
 func RenameFile(srcFilePath string, destFilePath string) bool {

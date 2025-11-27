@@ -70,7 +70,6 @@ func TestAssociateByAndValueTo(t *testing.T) {
 	t.Logf("%v", m)
 }
 
-//
 func TestAssociateByTo(t *testing.T) {
 	list := initList()
 	m := make(map[string]AssociateStruct)
@@ -80,14 +79,12 @@ func TestAssociateByTo(t *testing.T) {
 
 //
 
-//
 func TestAssociateWith(t *testing.T) {
 	list := initList()
 	m := util.AssociateWith(list, transformFun1)
 	t.Logf("%v", m)
 }
 
-//
 func TestAssociateWithTo(t *testing.T) {
 	list := initList()
 	m := make(map[AssociateStruct]int)

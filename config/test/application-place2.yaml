@@ -1,0 +1,2 @@
+test:
+  name: pre_${cloud}:8080/test

@@ -29,8 +29,8 @@ validate包核查模块，用于对入参的校验
 package main
 
 import (
-    "gitlab.seatakcloud.com/cbb/base/validate"
-    "gitlab.seatakcloud.com/cbb/base/logger"
+    "github.com/simonalong/gole/validate"
+    "github.com/simonalong/gole/logger"
 )
 
 type DemoInsert struct {
@@ -46,7 +46,7 @@ func main() {
 
     value = DemoInsert{Name: "chen"}
     // 核查
-    result, errMsg = validate.Check(value)
+    result, _, errMsg = validate.Check(value)
     if !result {
         // 属性 Name 的值 chen 不在只可用列表 [zhou] 中 
         logger.Error(errMsg)
@@ -473,7 +473,7 @@ package fun
 
 import (
     "fmt"
-    "github.com/simonalong/base/validate"
+    "github.com/simonalong/gole/validate"
 )
 
 type CustomizeEntity2 struct {

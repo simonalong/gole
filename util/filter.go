@@ -4,27 +4,27 @@ import (
 	"reflect"
 )
 
-//ListFilter filter specificated item in a list
+// ListFilter filter specificated item in a list
 func ListFilter[T any](list []T, f func(T) bool) []T {
 	var dest []T
 	return ListFilterTo(list, &dest, f)
 }
 
-//ListFilterNot Returns a list containing all elements not matching the given predicate.
+// ListFilterNot Returns a list containing all elements not matching the given predicate.
 func ListFilterNot[T any](list []T, predicate func(T) bool) []T {
 	var n []T
 	return ListFilterNotTo(list, &n, predicate)
 }
 
-//ListFilterIndexed Returns a list containing only elements matching the given predicate.
-//Params: predicate - function that takes the index of an element and the element itself and returns the result of predicate evaluation on the element.
+// ListFilterIndexed Returns a list containing only elements matching the given predicate.
+// Params: predicate - function that takes the index of an element and the element itself and returns the result of predicate evaluation on the element.
 func ListFilterIndexed[T any](list []T, predicate func(int, T) bool) []T {
 	var n []T
 	return ListFilterIndexedTo(list, &n, predicate)
 }
 
-//ListFilterNotIndexed Appends all elements matching the given predicate to the given destination.
-//Params: predicate - function that takes the index of an element and the element itself and returns the result of predicate evaluation on the element.
+// ListFilterNotIndexed Appends all elements matching the given predicate to the given destination.
+// Params: predicate - function that takes the index of an element and the element itself and returns the result of predicate evaluation on the element.
 func ListFilterNotIndexed[T any](list []T, f func(int, T) bool) []T {
 	var n []T
 	for i, e := range list {
@@ -35,7 +35,7 @@ func ListFilterNotIndexed[T any](list []T, f func(int, T) bool) []T {
 	return n
 }
 
-//ListFilterNotNull Returns a list containing all elements that are not null.
+// ListFilterNotNull Returns a list containing all elements that are not null.
 func ListFilterNotNull[T any](list []*T) []*T {
 	var n []*T
 	for _, e := range list {
@@ -46,7 +46,7 @@ func ListFilterNotNull[T any](list []*T) []*T {
 	return n
 }
 
-//ListFilterTo Appends all elements matching the given predicate to the given dest.
+// ListFilterTo Appends all elements matching the given predicate to the given dest.
 func ListFilterTo[T any](list []T, dest *[]T, f func(T) bool) []T {
 	var n []T
 	for _, e := range list {
@@ -58,7 +58,7 @@ func ListFilterTo[T any](list []T, dest *[]T, f func(T) bool) []T {
 	return n
 }
 
-//ListFilterNotTo Appends all elements not matching the given predicate to the given destination.
+// ListFilterNotTo Appends all elements not matching the given predicate to the given destination.
 func ListFilterNotTo[T any](list []T, dest *[]T, predicate func(T) bool) []T {
 	var n []T
 	for _, e := range list {
@@ -70,8 +70,8 @@ func ListFilterNotTo[T any](list []T, dest *[]T, predicate func(T) bool) []T {
 	return n
 }
 
-//ListFilterIndexedTo Appends all elements matching the given predicate to the given destination.
-//Params: predicate - function that takes the index of an element and the element itself and returns the result of predicate evaluation on the element.
+// ListFilterIndexedTo Appends all elements matching the given predicate to the given destination.
+// Params: predicate - function that takes the index of an element and the element itself and returns the result of predicate evaluation on the element.
 func ListFilterIndexedTo[T any](list []T, dest *[]T, predicate func(int, T) bool) []T {
 	var n []T
 	for i, e := range list {
@@ -83,8 +83,8 @@ func ListFilterIndexedTo[T any](list []T, dest *[]T, predicate func(int, T) bool
 	return n
 }
 
-//ListFilterNotIndexedTo Appends all elements not matching the given predicate to the given destination.
-//Params: predicate - function that takes the index of an element and the element itself and returns the result of predicate evaluation on the element.
+// ListFilterNotIndexedTo Appends all elements not matching the given predicate to the given destination.
+// Params: predicate - function that takes the index of an element and the element itself and returns the result of predicate evaluation on the element.
 func ListFilterNotIndexedTo[T any](list []T, dest *[]T, predicate func(int, T) bool) []T {
 	var n []T
 	for i, e := range list {

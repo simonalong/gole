@@ -58,7 +58,34 @@ func RSAGenerateKeyPair(size int, privateKeyPath string, publicKeyPath string) e
 	return nil
 }
 
-func RSAEncrypt(content string, publicKeyPath string) (string, error) {
+func RSAGenerateKey(size int) (string, string, error) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, size)
+	if err != nil {
+		return "", "", err
+	}
+
+	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
+	privateKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: privateKeyBytes,
+	})
+
+	publicKey := privateKey.PublicKey
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&publicKey)
+	if err != nil {
+		return "", "", err
+	}
+	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicKeyBytes,
+	})
+
+	privateKeyStr := string(privateKeyPEM)
+	publicKeyStr := string(publicKeyPEM)
+	return privateKeyStr, publicKeyStr, nil
+}
+
+func RSAEncryptByPath(content string, publicKeyPath string) (string, error) {
 	file, err := os.Open(publicKeyPath)
 	if err != nil {
 		return "", err
@@ -83,7 +110,21 @@ func RSAEncrypt(content string, publicKeyPath string) (string, error) {
 	return fmt.Sprintf("%x", text), nil
 }
 
-func RSADecrypt(content string, privateKeyPath string) (string, error) {
+func RSAEncryptByData(content string, publicKeyData []byte) (string, error) {
+	block, _ := pem.Decode(publicKeyData)
+	pubKeyIntf, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+	pubKey := pubKeyIntf.(*rsa.PublicKey)
+	text, err := rsa.EncryptPKCS1v15(rand.Reader, pubKey, []byte(content))
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", text), nil
+}
+
+func RSADecryptByPath(content string, privateKeyPath string) (string, error) {
 	file, err := os.Open(privateKeyPath)
 	if err != nil {
 		return "", err
@@ -96,6 +137,23 @@ func RSADecrypt(content string, privateKeyPath string) (string, error) {
 		return "", err
 	}
 	block, _ := pem.Decode(buf)
+	privKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+	b, err := hex.DecodeString(content)
+	if err != nil {
+		return "", err
+	}
+	text, err := rsa.DecryptPKCS1v15(rand.Reader, privKey, b)
+	if err != nil {
+		return "", err
+	}
+	return string(text), nil
+}
+
+func RSADecryptByData(content string, privateKeyData []byte) (string, error) {
+	block, _ := pem.Decode(privateKeyData)
 	privKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return "", err

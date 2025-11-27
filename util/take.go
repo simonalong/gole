@@ -1,6 +1,6 @@
 package util
 
-//Take Returns a list containing first n elements.
+// Take Returns a list containing first n elements.
 func Take[T any](list []T, n int) []T {
 	var t []T
 	if n <= 0 {
@@ -12,7 +12,7 @@ func Take[T any](list []T, n int) []T {
 	return SubList(list, 0, n)
 }
 
-//TakeLast Returns a list containing last n elements.
+// TakeLast Returns a list containing last n elements.
 func TakeLast[T any](list []T, n int) []T {
 	var t []T
 	if n <= 0 {
@@ -24,7 +24,7 @@ func TakeLast[T any](list []T, n int) []T {
 	return SubList(list, len(list)-n, len(list))
 }
 
-//TakeWhile Returns a list containing first elements satisfying the given predicate.
+// TakeWhile Returns a list containing first elements satisfying the given predicate.
 func TakeWhile[T any](list []T, n int, predicate func(T) bool) []T {
 	if n <= 0 {
 		return nil
@@ -38,7 +38,7 @@ func TakeWhile[T any](list []T, n int, predicate func(T) bool) []T {
 	return t
 }
 
-//TakeLastWhile Returns a list containing first elements satisfying the given predicate.
+// TakeLastWhile Returns a list containing first elements satisfying the given predicate.
 func TakeLastWhile[T any](list []T, n int, predicate func(T) bool) []T {
 	if n <= 0 {
 		return nil
@@ -52,7 +52,7 @@ func TakeLastWhile[T any](list []T, n int, predicate func(T) bool) []T {
 	return t
 }
 
-//Drop Returns a list containing all elements except first [n] elements.
+// Drop Returns a list containing all elements except first [n] elements.
 func Drop[T any](list []T, n int) []T {
 	if n < 0 {
 		return list
@@ -60,7 +60,7 @@ func Drop[T any](list []T, n int) []T {
 	return list[n:]
 }
 
-//DropLast Returns a list containing all elements except last n elements
+// DropLast Returns a list containing all elements except last n elements
 func DropLast[T any](list []T, n int) []T {
 	if n < 0 {
 		return nil
@@ -71,7 +71,7 @@ func DropLast[T any](list []T, n int) []T {
 	return list[:n]
 }
 
-//DropWhile Returns a list containing all elements except first elements that satisfy the given predicate.
+// DropWhile Returns a list containing all elements except first elements that satisfy the given predicate.
 func DropWhile[T any](list []T, n int, predicate func(T) bool) []T {
 	var t []T
 	var dropCount = 0
@@ -90,7 +90,7 @@ func DropWhile[T any](list []T, n int, predicate func(T) bool) []T {
 	return t
 }
 
-//DropLastWhile Returns a list containing all elements except last elements that satisfy the given predicate.
+// DropLastWhile Returns a list containing all elements except last elements that satisfy the given predicate.
 func DropLastWhile[T any](list []T, n int, predicate func(T) bool) []T {
 	var t []T
 	var dropCount = 0

@@ -181,22 +181,17 @@ func YamlToMap(contentOfYaml string) (map[string]any, error) {
 }
 
 func YamlToJson(contentOfYaml string) (string, error) {
-	if contentOfYaml != "-" && strings.Contains(contentOfYaml, ":") {
+	if !strings.Contains(contentOfYaml, ":") && !strings.Contains(contentOfYaml, "-") {
 		return "", &ConvertError{errMsg: "the content is invalidate for json"}
 	}
 
-	var data any
-	err := yaml.Unmarshal([]byte(contentOfYaml), &data)
+	resultMap := make(map[string]any)
+	err := yaml.Unmarshal([]byte(contentOfYaml), &resultMap)
 	if err != nil {
-		log.Printf("YamlToList, error: %v, content: %v", err, contentOfYaml)
+		log.Printf("YamlToMap, error: %v, content: %v", err, contentOfYaml)
 		return "", err
 	}
-
-	jsonStr, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-	return string(jsonStr), nil
+	return ObjectToJson(resultMap), nil
 }
 
 func YamlToKvList(contentOfYaml string) ([]StringPair, error) {
@@ -262,7 +257,7 @@ func PropertiesToMap(contentOfProperties string) (map[string]any, error) {
 		return nil, &ConvertError{errMsg: "the content is illegal for properties"}
 	}
 
-	var keyChangeMap = make(map[string]string)
+	//var keyChangeMap = make(map[string]string)
 	var resultMap = make(map[string]any)
 	propertiesLineWordList := GetPropertiesItemLineList(contentOfProperties)
 	for _, line := range propertiesLineWordList {
@@ -275,23 +270,33 @@ func PropertiesToMap(contentOfProperties string) (map[string]any, error) {
 		key := lineKVs[0]
 		value := lineKVs[1]
 
-		if strings.Contains(value, "\n") || value == "" {
+		if value == "" {
 			value = YamlNewLineDom + value
-		}
-
-		if strings.HasPrefix(value, "${") && strings.HasSuffix(value, "}") {
-			// 记录两个key，原始key和替代key
-			keyChangeMap[key] = value[2 : len(value)-1]
-			continue
+		} else if strings.Contains(value, "\\_n") {
+			value = strings.ReplaceAll(value, "\\_n", "\n")
 		}
 		resultMap[key] = value
 	}
+	return resultMap, nil
+}
 
-	// 将两个key进行替换
-	for keyOriginal, keyNewChange := range keyChangeMap {
-		if value, exist := resultMap[keyNewChange]; exist {
-			resultMap[keyOriginal] = value
+func EnvToMap(contentOfEnv string) (map[string]any, error) {
+	if !strings.Contains(contentOfEnv, "=") {
+		return nil, &ConvertError{errMsg: "the content is illegal for properties"}
+	}
+
+	var resultMap = make(map[string]any)
+	lineWordList := GetEnvItemLineList(contentOfEnv)
+	for _, line := range lineWordList {
+		line = strings.TrimSpace(line)
+		if "" == line {
+			continue
 		}
+
+		lineKVs := strings.SplitN(line, "=", 2)
+		key := lineKVs[0]
+		value := lineKVs[1]
+		resultMap[key] = value
 	}
 	return resultMap, nil
 }
@@ -391,8 +396,12 @@ func MapToProperties(dataMap map[string]any) (string, error) {
 			}
 		case reflect.String:
 			objectValue := reflect.ValueOf(value)
-			objectValueStr := strings.ReplaceAll(objectValue.String(), "\n", "\\\n")
-			propertyStrList = append(propertyStrList, prefixWithDOT("")+key+SignEqual+objectValueStr)
+			objectValueStr := strings.ReplaceAll(objectValue.String(), "\n", "\\_n")
+			if strings.HasPrefix(objectValueStr, "'") && strings.HasSuffix(objectValueStr, "'") {
+				propertyStrList = append(propertyStrList, prefixWithDOT("")+key+SignEqual+objectValueStr)
+			} else {
+				propertyStrList = append(propertyStrList, prefixWithDOT("")+key+SignEqual+"'"+objectValueStr+"'")
+			}
 		default:
 			propertyStrList = append(propertyStrList, prefixWithDOT("")+key+SignEqual+fmt.Sprintf("%v", value))
 		}
@@ -474,6 +483,29 @@ func GetPropertiesItemLineList(content string) []string {
 			itemLineList = append(itemLineList, stringAppender)
 			stringAppender = ""
 		}
+	}
+	return itemLineList
+}
+
+func GetEnvItemLineList(content string) []string {
+	if "" == content {
+		return []string{}
+	}
+
+	lineList := strings.Split(content, NewLine)
+	var itemLineList []string
+	var stringAppender string
+	for _, line := range lineList {
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		if strings.HasPrefix(line, "//") {
+			continue
+		}
+		stringAppender += line
+		itemLineList = append(itemLineList, stringAppender)
+		stringAppender = ""
 	}
 	return itemLineList
 }
@@ -631,7 +663,7 @@ func doMapToProperties(propertyStrList []string, value any, prefix string) []str
 		}
 	case reflect.String:
 		objectValue := reflect.ValueOf(value)
-		objectValueStr := strings.ReplaceAll(objectValue.String(), "\n", "\\\n")
+		objectValueStr := strings.ReplaceAll(objectValue.String(), "\n", "\\_n")
 		propertyStrList = append(propertyStrList, prefix+SignEqual+objectValueStr)
 	default:
 		objectValue := fmt.Sprintf("%v", reflect.ValueOf(value))
@@ -667,13 +699,14 @@ func peelArray(nodeName string) (string, int) {
 	return name, index
 }
 
-//
 // 将yaml对应的这种value进行添加前缀空格，其中value为key1对应的value
 // test:
-//   key1: |
-//     value1
-//     value2
-//     value3
+//
+//	key1: |
+//	  value1
+//	  value2
+//	  value3
+//
 // 对应的值
 // {@code
 // |
@@ -683,12 +716,14 @@ func peelArray(nodeName string) (string, int) {
 // }
 //
 // @param Value 待转换的值比如{@code
-//              test:
-//              key1: |
-//              value1
-//              value2
-//              value3
-//              }
+//
+//	test:
+//	key1: |
+//	value1
+//	value2
+//	value3
+//	}
+//
 // @return 添加前缀空格之后的处理
 // {@code
 // |
@@ -696,7 +731,6 @@ func peelArray(nodeName string) (string, int) {
 // value2
 // value3
 // }
-//
 func appendSpaceForArrayValue(value string) string {
 	if !strings.HasPrefix(value, YamlNewLineDom) {
 		return value

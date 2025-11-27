@@ -387,9 +387,9 @@ func parseDynamicTime(valueStr string) t0.Time {
 		resultTime := time.AddYears(time.Now(), years)
 		resultTime = time.AddMonths(resultTime, months)
 		resultTime = time.AddDays(resultTime, days)
-		resultTime = time.AddHour(resultTime, plusOrMinus, hours)
-		resultTime = time.AddMinutes(resultTime, plusOrMinus, minutes)
-		resultTime = time.AddSeconds(resultTime, plusOrMinus, seconds)
+		resultTime = time.AddHoursStr(resultTime, plusOrMinus+hours)
+		resultTime = time.AddMinutesStr(resultTime, plusOrMinus+minutes)
+		resultTime = time.AddSecondsStr(resultTime, plusOrMinus+seconds)
 
 		return resultTime
 	}

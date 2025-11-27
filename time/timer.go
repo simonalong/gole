@@ -26,8 +26,8 @@ func NewTimer() *Timer {
 	}
 }
 
-func NewTimerWithInterval(seconds float64) *Timer {
-	intv := int64(float64(t0.Second) * seconds)
+func NewTimerWithInterval(seconds int64) *Timer {
+	intv := int64(t0.Second) * seconds
 	return &Timer{
 		Interval:    intv,
 		IsStopped:   true,
@@ -36,8 +36,8 @@ func NewTimerWithInterval(seconds float64) *Timer {
 	}
 }
 
-func NewTimerWithFire(seconds float64, onTimer OnTimerFunc) *Timer {
-	intv := int64(float64(t0.Second) * seconds)
+func NewTimerWithFire(seconds int64, onTimer OnTimerFunc) *Timer {
+	intv := int64(t0.Second) * seconds
 	return &Timer{
 		Interval:    intv,
 		IsStopped:   true,

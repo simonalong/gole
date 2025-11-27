@@ -91,15 +91,15 @@ gole:
 
 ```shell
 # 获取注册的所有bean
-curl http://localhost:xxx/{api-prefix}/{api-module}/bean/name/all'
+curl http://localhost:xxx/{gole.server.http.api.prefix}/bean/name/all'
 # 查询注册的某些bean 
-curl http://localhost:xxx/{api-prefix}/{api-module}/bean/name/list/:name'
+curl http://localhost:xxx/{gole.server.http.api.prefix}/bean/name/list/:name'
 # 查询某个bean的属性值
-curl -X POST http://localhost:xxx/{api-prefix}/{api-module}/bean/field/get' -d '{"bean": "xx", "field": "xxx"}'
+curl -X POST http://localhost:xxx/{gole.server.http.api.prefix}/bean/field/get' -d '{"bean": "xx", "field": "xxx"}'
 # 修改某个bean的属性的值（暂时只支持基本类型）
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/bean/field/set' -d '{"bean": "xx", "field": "xxx", "value": "xxx"}'
+curl -X PUT http://localhost:xxx/{gole.server.http.api.prefix}/bean/field/set' -d '{"bean": "xx", "field": "xxx", "value": "xxx"}'
 # 调用bean的某个函数（参数暂时只支持基本类型）
-curl -X POST http://localhost:xxx/{api-prefix}/{api-module}/bean/fun/call' -d '{"bean": "xx", "fun": "xxx", "parameter": {"p1":"xx", "p2": "xxx"}}'
+curl -X POST http://localhost:xxx/{gole.server.http.api.prefix}/bean/fun/call' -d '{"bean": "xx", "fun": "xxx", "parameter": {"p1":"xx", "p2": "xxx"}}'
 ```
 
 提示：<br/>

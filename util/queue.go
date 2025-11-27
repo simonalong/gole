@@ -79,6 +79,7 @@ func NewQueue() *Queue {
 func (queue *Queue) Offer(value interface{}) (num int32) {
 	ele := newElement(value)
 	queue.lock.Lock()
+	defer queue.lock.Unlock()
 	if queue.num == 0 {
 		queue.input = ele
 		queue.output = ele
@@ -89,10 +90,7 @@ func (queue *Queue) Offer(value interface{}) (num int32) {
 	num = atomic.AddInt32(&queue.num, 1)
 	if queue.waitNum > 0 {
 		queue.waitNum--
-		queue.lock.Unlock()
 		queue.ch <- true
-	} else {
-		queue.lock.Unlock()
 	}
 	return
 }

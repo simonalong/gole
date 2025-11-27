@@ -1,23 +1,32 @@
 package test
 
 import (
+	"testing"
+
 	"github.com/simonalong/gole/config"
 	"github.com/simonalong/gole/logger"
 	"github.com/sirupsen/logrus"
-	"testing"
 )
 
 func TestInfo1(t *testing.T) {
 	config.LoadYamlFile("./application-debug.yaml")
+	config.FinishLoad()
 	////logger.InitLog()
 
+	logger.Debug("hello ", "debug")
 	logger.Info("hello ", "info")
-	logger.Infof("hello %v", "info")
+	//logger.Infof("hello %v", "info")
 }
 
 func TestInfo(t *testing.T) {
 	config.LoadYamlFile("./application-debug.yaml")
+	config.FinishLoad()
 	//logger.InitLog()
+
+	// debug
+	logger.Debugf("hello %v", "debug")
+	logger.Group("group1").Debug("hello", " ", "debug")
+	logger.Group("group1").Debugf("hello %v", "debug")
 
 	// info
 	logger.Infof("hello %v", "info")
@@ -25,25 +34,30 @@ func TestInfo(t *testing.T) {
 	logger.Group("group1").Infof("hello %v", "info")
 }
 
-func TestLevel(t *testing.T) {
+func TestLevel1(t *testing.T) {
 	config.LoadYamlFile("./application-debug.yaml")
+	config.FinishLoad()
 	//logger.InitLog()
-
-	// debug
 	logger.Debugf("hello %v", "debug")
-
-	// info
 	logger.Infof("hello %v", "info")
-
-	// warn
 	logger.Warnf("hello %v", "warn")
+	logger.Errorf("hello %v", "error")
+}
 
-	// error
+// gole.profiles.active=info
+func TestLevel2(t *testing.T) {
+	config.LoadYamlFile("./application-info.yaml")
+	config.FinishLoad()
+	//logger.InitLog()
+	logger.Debugf("hello %v", "debug")
+	logger.Infof("hello %v", "info")
+	logger.Warnf("hello %v", "warn")
 	logger.Errorf("hello %v", "error")
 }
 
 func TestLevelChange(t *testing.T) {
 	config.LoadYamlFile("./application-debug.yaml")
+	config.FinishLoad()
 	//logger.InitLog()
 
 	// info
@@ -58,6 +72,7 @@ func TestLevelChange(t *testing.T) {
 // 日志分组的级别变更
 func TestGroupLevelChange1(t *testing.T) {
 	config.LoadYamlFile("./application-debug.yaml")
+	config.FinishLoad()
 	//logger.InitLog()
 
 	// info
@@ -84,6 +99,7 @@ func TestGroupLevelChange1(t *testing.T) {
 // 日志分组的级别变更
 func TestGroupLevelChange2(t *testing.T) {
 	config.LoadYamlFile("./application-group.yaml")
+	config.FinishLoad()
 	//logger.InitLog()
 
 	logger.SetGlobalLevel("error")
@@ -107,6 +123,7 @@ func TestGroupLevelChange2(t *testing.T) {
 
 func TestLoggerPathShort(t *testing.T) {
 	config.LoadYamlFile("./application-short.yaml")
+	config.FinishLoad()
 	//logger.InitLog()
 
 	logger.Info("test")
@@ -114,6 +131,7 @@ func TestLoggerPathShort(t *testing.T) {
 
 func TestLoggerPathFull(t *testing.T) {
 	config.LoadYamlFile("./application-full.yaml")
+	config.FinishLoad()
 	//logger.InitLog()
 
 	logger.Info("test")
@@ -121,6 +139,7 @@ func TestLoggerPathFull(t *testing.T) {
 
 func TestLoggerRotate(t *testing.T) {
 	config.LoadYamlFile("./application-rotate.yaml")
+	config.FinishLoad()
 	//logger.InitLog()
 
 	//for i := 0; i < 100; i++ {
@@ -131,6 +150,7 @@ func TestLoggerRotate(t *testing.T) {
 
 func TestLoggerGroup2(t *testing.T) {
 	config.LoadYamlFile("./application-group2.yaml")
+	config.FinishLoad()
 	//logger.InitLog()
 
 	logger.Group("g1", "g2").Debug("test")

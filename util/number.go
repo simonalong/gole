@@ -15,192 +15,192 @@ type ISCFloat float32
 type ISCFloat64 float64
 type ISCChar rune
 
-func (i ISCInt) RangeTo(to int) ISCList[int] {
-	var ret ISCList[int]
+func (i ISCInt) RangeTo(to int) BsList[int] {
+	var ret BsList[int]
 	for ii := int(i); ii <= to; ii++ {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt) RangeStepTo(to int, step int) ISCList[int] {
-	var ret ISCList[int]
+func (i ISCInt) RangeStepTo(to int, step int) BsList[int] {
+	var ret BsList[int]
 	for ii := int(i); ii <= to; ii += step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt) DownTo(to int) ISCList[int] {
-	var ret ISCList[int]
+func (i ISCInt) DownTo(to int) BsList[int] {
+	var ret BsList[int]
 	for ii := int(i); ii >= to; ii-- {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt) DownStepTo(to int, step int) ISCList[int] {
-	var ret ISCList[int]
+func (i ISCInt) DownStepTo(to int, step int) BsList[int] {
+	var ret BsList[int]
 	for ii := int(i); ii >= to; ii -= step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt8) RangeTo(to int8) ISCList[int8] {
-	var ret ISCList[int8]
+func (i ISCInt8) RangeTo(to int8) BsList[int8] {
+	var ret BsList[int8]
 	for ii := int8(i); ii <= to; ii++ {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt8) RangeStepTo(to int8, step int8) ISCList[int8] {
-	var ret ISCList[int8]
+func (i ISCInt8) RangeStepTo(to int8, step int8) BsList[int8] {
+	var ret BsList[int8]
 	for ii := int8(i); ii <= to; ii += step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt8) DownTo(to int8) ISCList[int8] {
-	var ret ISCList[int8]
+func (i ISCInt8) DownTo(to int8) BsList[int8] {
+	var ret BsList[int8]
 	for ii := int8(i); ii >= to; ii-- {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt8) DownStepTo(to int8, step int8) ISCList[int8] {
-	var ret ISCList[int8]
+func (i ISCInt8) DownStepTo(to int8, step int8) BsList[int8] {
+	var ret BsList[int8]
 	for ii := int8(i); ii >= to; ii -= step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt16) RangeTo(to int16) ISCList[int16] {
-	var ret ISCList[int16]
+func (i ISCInt16) RangeTo(to int16) BsList[int16] {
+	var ret BsList[int16]
 	for ii := int16(i); ii <= to; ii++ {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt16) RangeStepTo(to int16, step int16) ISCList[int16] {
-	var ret ISCList[int16]
+func (i ISCInt16) RangeStepTo(to int16, step int16) BsList[int16] {
+	var ret BsList[int16]
 	for ii := int16(i); ii <= to; ii += step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt16) DownTo(to int16) ISCList[int16] {
-	var ret ISCList[int16]
+func (i ISCInt16) DownTo(to int16) BsList[int16] {
+	var ret BsList[int16]
 	for ii := int16(i); ii >= to; ii-- {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt16) DownStepTo(to int16, step int16) ISCList[int16] {
-	var ret ISCList[int16]
+func (i ISCInt16) DownStepTo(to int16, step int16) BsList[int16] {
+	var ret BsList[int16]
 	for ii := int16(i); ii >= to; ii -= step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt32) RangeTo(to int32) ISCList[int32] {
-	var ret ISCList[int32]
+func (i ISCInt32) RangeTo(to int32) BsList[int32] {
+	var ret BsList[int32]
 	for ii := int32(i); ii <= to; ii++ {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt32) RangeStepTo(to int32, step int32) ISCList[int32] {
-	var ret ISCList[int32]
+func (i ISCInt32) RangeStepTo(to int32, step int32) BsList[int32] {
+	var ret BsList[int32]
 	for ii := int32(i); ii <= to; ii += step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt32) DownTo(to int32) ISCList[int32] {
-	var ret ISCList[int32]
+func (i ISCInt32) DownTo(to int32) BsList[int32] {
+	var ret BsList[int32]
 	for ii := int32(i); ii >= to; ii-- {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt32) DownStepTo(to int32, step int32) ISCList[int32] {
-	var ret ISCList[int32]
+func (i ISCInt32) DownStepTo(to int32, step int32) BsList[int32] {
+	var ret BsList[int32]
 	for ii := int32(i); ii >= to; ii -= step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt64) RangeTo(to int64) ISCList[int64] {
-	var ret ISCList[int64]
+func (i ISCInt64) RangeTo(to int64) BsList[int64] {
+	var ret BsList[int64]
 	for ii := int64(i); ii <= to; ii++ {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt64) RangeStepTo(to int64, step int64) ISCList[int64] {
-	var ret ISCList[int64]
+func (i ISCInt64) RangeStepTo(to int64, step int64) BsList[int64] {
+	var ret BsList[int64]
 	for ii := int64(i); ii <= to; ii += step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt64) DownTo(to int64) ISCList[int64] {
-	var ret ISCList[int64]
+func (i ISCInt64) DownTo(to int64) BsList[int64] {
+	var ret BsList[int64]
 	for ii := int64(i); ii >= to; ii-- {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCInt64) DownStepTo(to int64, step int64) ISCList[int64] {
-	var ret ISCList[int64]
+func (i ISCInt64) DownStepTo(to int64, step int64) BsList[int64] {
+	var ret BsList[int64]
 	for ii := int64(i); ii >= to; ii -= step {
 		ret = append(ret, ii)
 	}
 	return ret
 }
 
-func (i ISCChar) RangeTo(to rune) ISCList[rune] {
-	var ret ISCList[rune]
+func (i ISCChar) RangeTo(to rune) BsList[rune] {
+	var ret BsList[rune]
 	for ii := int64(i); ii <= int64(to); ii++ {
 		ret = append(ret, rune(ii))
 	}
 	return ret
 }
 
-func (i ISCChar) RangeStepTo(to rune, step int64) ISCList[rune] {
-	var ret ISCList[rune]
+func (i ISCChar) RangeStepTo(to rune, step int64) BsList[rune] {
+	var ret BsList[rune]
 	for ii := int64(i); ii <= int64(to); ii += step {
 		ret = append(ret, rune(ii))
 	}
 	return ret
 }
 
-func (i ISCChar) DownTo(to rune) ISCList[rune] {
-	var ret ISCList[rune]
+func (i ISCChar) DownTo(to rune) BsList[rune] {
+	var ret BsList[rune]
 	for ii := int64(i); ii >= int64(to); ii-- {
 		ret = append(ret, rune(ii))
 	}
 	return ret
 }
 
-func (i ISCChar) DownStepTo(to rune, step int64) ISCList[rune] {
-	var ret ISCList[rune]
+func (i ISCChar) DownStepTo(to rune, step int64) BsList[rune] {
+	var ret BsList[rune]
 	for ii := int64(i); ii >= int64(to); ii -= step {
 		ret = append(ret, rune(ii))
 	}

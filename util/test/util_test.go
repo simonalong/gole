@@ -2,9 +2,13 @@ package test
 
 import (
 	"encoding/json"
-	"github.com/simonalong/gole/test"
+	"fmt"
+	"github.com/magiconair/properties/assert"
 	"github.com/simonalong/gole/util"
+	"github.com/simonalong/gole/validate/test"
+	"log"
 	"testing"
+	"time"
 )
 
 // 对以下的api进行测试
@@ -359,7 +363,7 @@ func TestDataToObject1(t *testing.T) {
 	inner1["age"] = 1
 
 	var targetObj ValueInnerEntity1
-	_, _ = util.DataToObject(inner1, &targetObj)
+	_, _ = util.DataToEntity(inner1, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_1\",\"Age\":1}", util.ToJsonString(targetObj))
 }
 
@@ -374,7 +378,7 @@ func TestDataToObject2(t *testing.T) {
 	inner2["inner1"] = inner1
 
 	var targetObj ValueInnerEntity2
-	_, _ = util.DataToObject(inner2, &targetObj)
+	_, _ = util.DataToEntity(inner2, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_2\",\"Age\":2,\"Inner1\":{\"Name\":\"inner_1\",\"Age\":1}}", util.ToJsonString(targetObj))
 }
 
@@ -394,7 +398,7 @@ func TestDataToObject3(t *testing.T) {
 	inner3["inner2"] = inner2
 
 	var targetObj ValueInnerEntity3
-	_, _ = util.DataToObject(inner3, &targetObj)
+	_, _ = util.DataToEntity(inner3, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_3\",\"Age\":3,\"Inner2\":{\"Name\":\"inner_2\",\"Age\":2,\"Inner1\":{\"Name\":\"inner_1\",\"Age\":1}}}", util.ToJsonString(targetObj))
 }
 
@@ -409,7 +413,7 @@ func TestDataToObject4(t *testing.T) {
 	inner1["dataMap"] = kvMap
 
 	var targetObj ValueInnerEntity4
-	_, _ = util.DataToObject(inner1, &targetObj)
+	_, _ = util.DataToEntity(inner1, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":\"name1\",\"k2\":\"name2\"}}", util.ToJsonString(targetObj))
 }
 
@@ -432,7 +436,7 @@ func TestDataToObject5(t *testing.T) {
 	inner1["dataMap"] = kvMap
 
 	var targetObj ValueInnerEntity5
-	_, _ = util.DataToObject(inner1, &targetObj)
+	_, _ = util.DataToEntity(inner1, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":{\"Name\":\"inner_1\",\"Age\":1},\"k2\":{\"Name\":\"inner_2\",\"Age\":2}}}", util.ToJsonString(targetObj))
 }
 
@@ -451,7 +455,7 @@ func TestDataToObject6(t *testing.T) {
 	inner1["dataMap"] = kvMap
 
 	var targetObj ValueInnerEntity6
-	_, _ = util.DataToObject(inner1, &targetObj)
+	_, _ = util.DataToEntity(inner1, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":[12,13],\"k2\":[12,13]}}", util.ToJsonString(targetObj))
 }
 
@@ -470,7 +474,7 @@ func TestDataToObject7(t *testing.T) {
 	inner1["dataMap"] = kvMap
 
 	var targetObj ValueInnerEntity7
-	_, _ = util.DataToObject(inner1, &targetObj)
+	_, _ = util.DataToEntity(inner1, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}],\"k2\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}]}}", util.ToJsonString(targetObj))
 }
 
@@ -489,7 +493,7 @@ func TestDataToObject8(t *testing.T) {
 	inner1["dataMap"] = kvMap
 
 	var targetObj ValueInnerEntity8
-	_, _ = util.DataToObject(inner1, &targetObj)
+	_, _ = util.DataToEntity(inner1, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":[{\"Name\":\"name1\",\"Address\":\"\"},{\"Name\":\"name2\",\"Address\":\"\"}],\"k2\":[{\"Name\":\"name1\",\"Address\":\"\"},{\"Name\":\"name2\",\"Address\":\"\"}]}}", util.ToJsonString(targetObj))
 }
 
@@ -508,7 +512,7 @@ func TestDataToObject9(t *testing.T) {
 	inner1["dataMap"] = kvMap
 
 	var targetObj ValueInnerEntity9
-	_, _ = util.DataToObject(inner1, &targetObj)
+	_, _ = util.DataToEntity(inner1, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}],\"k2\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}]}}", util.ToJsonString(targetObj))
 }
 
@@ -527,7 +531,7 @@ func TestDataToObject10(t *testing.T) {
 	inner1["dataMap"] = kvMap
 
 	var targetObj ValueInnerEntity9
-	_, _ = util.DataToObject(inner1, &targetObj)
+	_, _ = util.DataToEntity(inner1, &targetObj)
 	test.Equal(t, "{\"Name\":\"inner_1\",\"Age\":1,\"DataMap\":{\"k1\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}],\"k2\":[{\"Name\":\"name1\",\"Age\":1},{\"Name\":\"name2\",\"Age\":2}]}}", util.ToJsonString(targetObj))
 }
 
@@ -536,6 +540,13 @@ func TestStrToObject1(t *testing.T) {
 	var targetObj int
 	_, _ = util.StrToObject("123", &targetObj)
 	test.Equal(t, targetObj, 123)
+}
+
+func TestStrToObject1_1(t *testing.T) {
+	var demo *int
+	newPtr, _ := util.StrToObject("12", demo)
+	demo = newPtr.(*int)
+	fmt.Println(*demo)
 }
 
 func TestStrToObject2(t *testing.T) {
@@ -586,6 +597,162 @@ func TestStrToObject8(t *testing.T) {
 	var targetObj ValueInnerEntityStr1
 	_, _ = util.StrToObject(str, &targetObj)
 	test.Equal(t, util.ObjectToJson(targetObj), str)
+}
+
+// time.Duration 这个类型特殊处理
+func TestStrToObject9(t *testing.T) {
+	str := "{\"duration\":\"3s\"}"
+
+	type DurationEntity struct {
+		Duration time.Duration
+	}
+	var entity DurationEntity
+	_, _ = util.StrToObject(str, &entity)
+	test.Equal(t, entity.Duration.String(), "3s")
+}
+
+// 指针测试
+func TestStrToObject10(t *testing.T) {
+	type DemoEntity struct {
+		Demo *string
+	}
+	str := "{\"demo\":\"abc\"}"
+	var demo DemoEntity
+	util.StrToObject(str, &demo)
+	test.Equal(t, *demo.Demo, "abc")
+}
+
+func TestStrToObject11(t *testing.T) {
+	type DemoEntity struct {
+		Demo *string
+	}
+	str := "{\"demo\":\"abc\"}"
+	var demo DemoEntity
+	util.StrToObject(str, &demo)
+	test.Equal(t, *demo.Demo, "abc")
+}
+
+func TestStrToObject12(t *testing.T) {
+	str := "{\"duration\":\"3s\"}"
+
+	type DurationEntity struct {
+		Duration *time.Duration
+	}
+	var entity DurationEntity
+	_, _ = util.StrToObject(str, &entity)
+	test.Equal(t, entity.Duration.String(), "3s")
+}
+
+func TestStrToObject13(t *testing.T) {
+	str := "{\"entity\":{\"demo\":\"abc\"}}"
+
+	type DemoEntity struct {
+		Demo *string
+	}
+
+	type TestEntity struct {
+		Entity *DemoEntity
+	}
+	var entity TestEntity
+	_, _ = util.StrToObject(str, &entity)
+	test.Equal(t, *entity.Entity.Demo, "abc")
+}
+
+func TestStrToObject14(t *testing.T) {
+	str := "{\"time\":\"3s\"}"
+	type TestEntity struct {
+		Time *time.Duration
+	}
+	var entity TestEntity
+	_, _ = util.StrToObject(str, &entity)
+	test.Equal(t, entity.Time.String(), "3s")
+}
+
+//func TestStrToObject15(t *testing.T) {
+//	str := "{\"entity\":[{\"demo\": \"2024-07-12\"}]}"
+//	type DemoEntity struct {
+//		Demo *time.Time
+//	}
+//
+//	type TestEntity struct {
+//		Entity []DemoEntity
+//	}
+//	var entity TestEntity
+//	_, _ = util.StrToObject(str, &entity)
+//	test.Equal(t, baseTime.TimeToStringYmd(*entity.Entity[0].Demo), "2024-07-12")
+//}
+
+func TestStrToObject16(t *testing.T) {
+	str := "{\"entity\":[{\"demo\": \"3s\"}]}"
+	type DemoEntity struct {
+		Demo *time.Duration
+	}
+
+	type TestEntity struct {
+		Entity []DemoEntity
+	}
+	var entity TestEntity
+	_, _ = util.StrToObject(str, &entity)
+	test.Equal(t, (*entity.Entity[0].Demo).String(), "3s")
+}
+
+func TestStrToObject17(t *testing.T) {
+	str := "{\"demo\":\"123\"}"
+	type TestEntity struct {
+		Time *time.Duration
+	}
+	var entity TestEntity
+	_, _ = util.StrToObject(str, &entity)
+	isNull := false
+	if entity.Time == nil {
+		isNull = true
+	}
+	test.True(t, isNull)
+}
+
+func TestStrToObject18(t *testing.T) {
+	type DemoEntity struct {
+		// 点位
+		Pn int `json:"pn"`
+		// 功能
+		Fn int `json:"fn"`
+
+		// 实际数据
+		Data interface{} `json:"data"`
+	}
+	var targetObj []*DemoEntity
+	targetObj = append(targetObj, &DemoEntity{
+		Pn: 12,
+		Fn: 12,
+	})
+	targetObj = append(targetObj, &DemoEntity{
+		Pn: 14,
+		Fn: 14,
+	})
+	//_, _ = util.StrToObject("[{\"Age\": 12},{\"Age\":14}]", &targetObj)
+	test.Equal(t, util.ObjectToJson(targetObj), "[{\"fn\":12,\"pn\":12},{\"fn\":14,\"pn\":14}]")
+}
+
+// todo 我发现这个数据过大的时候，就不能设置了，这个是一个比较诡异的bug
+func TestStrToObject19(t *testing.T) {
+	type Inner struct {
+		Data int64 `json:"data"`
+	}
+
+	type Entity struct {
+		Inner Inner `json:"inner"`
+	}
+	entity := Entity{}
+	// error
+	//str := "{\"inner\":{\"data\":1723794000000}}"
+	// ok
+	str := "{\"inner\":{\"data\":172}}"
+	_, err := util.StrToObject(str, &entity)
+	if err != nil {
+		log.Println(err)
+	}
+	//
+	assert.Equal(t, "172", util.ToString(entity.Inner.Data))
 }
 
 // arrayToObject
@@ -779,7 +946,7 @@ func TestObjectToJson9(t *testing.T) {
 	rel := "{\"Records\":[{\"Id\":121,\"AppName\":\"asdf\",\"AppDesc\":\"fffds\",\"ActiveStatus\":1,\"CreateTime\":\"2021-12-20 14:05:10 +0800 CST\",\"UpdateTime\":\"2021-12-21 14:19:13 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":0,\"Version\":0},{\"Id\":117,\"AppName\":\"apaas-service\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-12-06 10:32:11 +0800 CST\",\"UpdateTime\":\"2021-12-06 10:32:11 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":10,\"Version\":0},{\"Id\":116,\"AppName\":\"config-sample-3\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-11-05 19:35:07 +0800 CST\",\"UpdateTime\":\"2021-11-05 19:35:07 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":4,\"Version\":0},{\"Id\":115,\"AppName\":\"config-sample-2\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-11-05 19:27:55 +0800 CST\",\"UpdateTime\":\"2021-11-05 19:27:55 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":4,\"Version\":0},{\"Id\":113,\"AppName\":\"config-sample1\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-11-05 19:21:18 +0800 CST\",\"UpdateTime\":\"2021-11-05 19:21:18 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":0,\"Version\":0},{\"Id\":112,\"AppName\":\"app-demo-xxx\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-28 14:29:46 +0800 CST\",\"UpdateTime\":\"2021-09-28 14:29:46 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":3,\"Version\":25},{\"Id\":84,\"AppName\":\"config-sample3\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-22 13:46:36 +0800 CST\",\"UpdateTime\":\"2021-09-22 13:46:36 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":2,\"Version\":23},{\"Id\":83,\"AppName\":\"config-sample-local\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-22 11:22:12 +0800 CST\",\"UpdateTime\":\"2021-09-22 11:22:12 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":29,\"Version\":22},{\"Id\":82,\"AppName\":\"monitoring-service2\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-18 11:47:50 +0800 CST\",\"UpdateTime\":\"2021-09-18 11:47:50 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":15,\"Version\":0},{\"Id\":81,\"AppName\":\"monitoring-service1\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-11 18:02:25 +0800 CST\",\"UpdateTime\":\"2021-09-11 18:02:25 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":15,\"Version\":21},{\"Id\":80,\"AppName\":\"lamp-demo-a\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-10 17:21:40 +0800 CST\",\"UpdateTime\":\"2021-09-10 17:28:18 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":1,\"Version\":20},{\"Id\":79,\"AppName\":\"pivotdemoa\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-10 17:17:33 +0800 CST\",\"UpdateTime\":\"2021-09-10 17:17:33 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":1,\"Version\":19},{\"Id\":78,\"AppName\":\"config-sample2\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-09 16:16:55 +0800 CST\",\"UpdateTime\":\"2021-09-09 16:16:55 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":25,\"Version\":18},{\"Id\":77,\"AppName\":\"config-sample-client\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-09-09 13:40:10 +0800 CST\",\"UpdateTime\":\"2021-09-09 13:40:10 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":25,\"Version\":17},{\"Id\":76,\"AppName\":\"pivot-client\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-08-30 17:53:10 +0800 CST\",\"UpdateTime\":\"2021-08-31 10:08:53 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":2,\"Version\":16},{\"Id\":74,\"AppName\":\"rpc-3-os0\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-08-30 17:52:17 +0800 CST\",\"UpdateTime\":\"2021-08-30 17:52:17 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":25,\"Version\":14},{\"Id\":73,\"AppName\":\"rpc-os0\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-07-06 15:23:25 +0800 CST\",\"UpdateTime\":\"2021-07-06 15:23:25 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":25,\"Version\":13},{\"Id\":71,\"AppName\":\"common-service-test\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-06-21 21:50:24 +0800 CST\",\"UpdateTime\":\"2021-06-21 21:50:24 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":63,\"Version\":11},{\"Id\":70,\"AppName\":\"config-sample\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-06-21 15:33:39 +0800 CST\",\"UpdateTime\":\"2021-06-21 15:33:39 +0800 CST\",\"CreateUser\":\"\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":30,\"Version\":10},{\"Id\":68,\"AppName\":\"route-service1\",\"AppDesc\":\"\",\"ActiveStatus\":1,\"CreateTime\":\"2021-06-09 16:00:38 +0800 CST\",\"UpdateTime\":\"2021-06-09 16:00:38 +0800 CST\",\"CreateUser\":\"admin\",\"UpdateUser\":\"\",\"MachineNum\":0,\"ConfigNum\":1,\"Version\":8}]}\n"
 
 	rp := PageRsp{}
-	_, _ = util.DataToObject(rel, &rp)
+	_, _ = util.DataToEntity(rel, &rp)
 
 	t.Log(util.ToJsonString(rp))
 
@@ -934,7 +1101,7 @@ func BenchmarkSprintfPress(b *testing.B) {
 	//b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		var entity ValueInnerEntity1
-		_, _ = util.DataToObject(jsonStr, &entity)
+		_, _ = util.DataToEntity(jsonStr, &entity)
 
 		resultMap := make(map[string]any)
 		_ = json.Unmarshal([]byte(jsonStr), &resultMap)

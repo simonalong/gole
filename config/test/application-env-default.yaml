@@ -1,0 +1,3 @@
+demo:
+  name: pre_${cloud:test-url}:8080/test
+  name1: pre_${cloud1:test-url}:8080/test

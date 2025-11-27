@@ -3,6 +3,7 @@ package test
 import (
 	"github.com/simonalong/gole/maps"
 	baseTime "github.com/simonalong/gole/time"
+	"github.com/simonalong/gole/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -255,7 +256,7 @@ func TestFromEntity5(t *testing.T) {
 		},
 	}
 	_ = maps.FromEntity(entity3)
-	//fmt.Println(dataMap.ToJsonOfSort())
+	//fmt.Println(bm.ToJsonOfSort())
 }
 
 func TestFromEntity6(t *testing.T) {
@@ -465,6 +466,32 @@ func TestToEntity3(t *testing.T) {
 	assert.Equal(t, entity1Expect.Address, entity1.Address)
 }
 
+func TestToEntity4(t *testing.T) {
+	type DemoEntity struct {
+		Ts      time.Time
+		Name    string
+		Age     int
+		Address string
+	}
+
+	entity1 := &DemoEntity{
+		Ts:      time.Now(),
+		Name:    "test",
+		Age:     22,
+		Address: "浙江",
+	}
+	entityMap := maps.FromEntity(entity1)
+
+	entity1Expect := DemoEntity{}
+	err := entityMap.ToEntity(&entity1Expect)
+
+	assert.Equal(t, nil, err)
+	assert.Equal(t, entity1.Ts, entity1Expect.Ts)
+	assert.Equal(t, entity1Expect.Name, entity1.Name)
+	assert.Equal(t, entity1Expect.Age, entity1.Age)
+	assert.Equal(t, entity1Expect.Address, entity1.Address)
+}
+
 func TestToString1(t *testing.T) {
 	dataMap := maps.New()
 	dataMap.Put("a", 12)
@@ -542,4 +569,80 @@ func TestDeepMap(t *testing.T) {
 	data, have := dataMap.AsDeepMap().GetInt("a.b.c")
 	assert.Equal(t, true, have)
 	assert.Equal(t, 12, data)
+}
+
+func TestKeyFormat(t *testing.T) {
+	type DemoEntity struct {
+		UserName string `json:"user"`
+		Password string `json:"pwd"`
+	}
+	entity := DemoEntity{
+		UserName: "test",
+		Password: "123456",
+	}
+	newMap, _ := maps.FromWithKeyFormat(entity, func(key string) string {
+		switch key {
+		case "user":
+			return "userName"
+		case "pwd":
+			return "password"
+		}
+		return key
+	})
+	user, _ := newMap.GetString("userName")
+	password, _ := newMap.GetString("password")
+	assert.Equal(t, "test", user)
+	assert.Equal(t, "123456", password)
+}
+
+func TestValueFormat(t *testing.T) {
+	type InnerEntity struct {
+		Age     int    `json:"age"`
+		Address string `json:"address"`
+	}
+
+	type DemoEntity struct {
+		UserName string      `json:"user"`
+		Password string      `json:"pwd"`
+		Info     InnerEntity `json:"info"`
+	}
+	entity := DemoEntity{
+		UserName: "test",
+		Password: "123456",
+		Info: InnerEntity{
+			Age:     22,
+			Address: "浙江",
+		},
+	}
+	newMap := maps.FromEntityWithValueFormat(entity, func(key string, value interface{}) interface{} {
+		switch key {
+		case "info":
+			return util.ToJsonString(value)
+		}
+		return value
+	})
+
+	user, _ := newMap.GetString("user")
+	password, _ := newMap.GetString("pwd")
+	info, _ := newMap.GetString("info")
+	assert.Equal(t, "test", user)
+	assert.Equal(t, "123456", password)
+	assert.Equal(t, "{\"age\":22,\"address\":\"浙江\"}", info)
+}
+
+func TestCloneIncludeKeys(t *testing.T) {
+	map1 := maps.OfSort("a", 12, "b", 13, "c", 124)
+	map2 := map1.CloneIncludeKeys([]string{"b", "c", "d"})
+
+	assert.Equal(t, len(map2.Keys()), 2)
+	assert.Equal(t, map2.Keys(), []string{"b", "c"})
+}
+
+func TestCloneIncludeKeys2(t *testing.T) {
+	map1 := maps.OfSort("a", 12, "b", 13, "c", 124)
+	//map2 := map1.CloneIncludeKeys([]string{})
+	map2 := map1.CloneIncludeKeys(nil)
+
+	assert.Equal(t, len(map2.Keys()), 3)
+	assert.Equal(t, map2.Keys(), []string{"a", "b", "c"})
 }

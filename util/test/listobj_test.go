@@ -12,7 +12,7 @@ type MyStruct struct {
 }
 
 func TestISCList_associateBy(t *testing.T) {
-	var testList util.ISCList[MyStruct]
+	var testList util.BsList[MyStruct]
 	s1 := MyStruct{
 		Name: "K",
 		Age:  1,

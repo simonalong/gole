@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"testing"
 
 	t0 "time"
@@ -10,8 +11,18 @@ import (
 
 func TestTimer(t *testing.T) {
 
+	// 这个定时器的打印，执行后是不会立马执行的，要等5秒之后才会执行
+	timer := time.NewTimerWithFire(5, func(tm *time.Timer) {
+		fmt.Println("打印一次", time.TimeToStringYmdHms(time.Now()))
+	})
+	timer.Start()
+	t0.Sleep(6 * t0.Second)
+}
+
+func TestTimer1(t *testing.T) {
+
 	globalCount := 0
-	timer := time.NewTimerWithFire(1.5, func(tm *time.Timer) {
+	timer := time.NewTimerWithFire(11, func(tm *time.Timer) {
 		// 这里是运行在协程内的
 		globalCount++
 		t.Logf("globalCount: %d", globalCount)
@@ -36,7 +47,7 @@ func TestTimer(t *testing.T) {
 
 func TestTimerParam(t *testing.T) {
 	globalCount := 0
-	timer := time.NewTimerWithFire(1.5, func(tm *time.Timer) {
+	timer := time.NewTimerWithFire(14, func(tm *time.Timer) {
 		// 这里是运行在协程内的
 		globalCount++
 		t.Logf("globalCount: %d", globalCount)

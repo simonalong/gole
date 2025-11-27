@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
@@ -12,12 +13,12 @@ import (
 )
 
 var (
-	Year   = "2006"
-	Month  = "01"
-	Day    = "02"
-	Hour   = "15"
-	Minute = "04"
-	Second = "05"
+	FmtYear   = "2006"
+	FmtMonth  = "01"
+	FmtDay    = "02"
+	FmtHour   = "15"
+	FmtMinute = "04"
+	FmtSecond = "05"
 
 	FmtYMdHmsSuS = "2006-01-02 15:04:05.000000"
 	FmtYMdHmsS   = "2006-01-02 15:04:05.000"
@@ -104,6 +105,14 @@ func TimeToStringFormat(t t0.Time, format string) string {
 	return t.Format(format)
 }
 
+func TimeToRFC3339(t t0.Time) string {
+	return t.Format(t0.RFC3339)
+}
+
+func ParseTimeRFC3339(timeStr string) (t0.Time, error) {
+	return t0.ParseInLocation(t0.RFC3339, timeStr, t0.Local)
+}
+
 func ParseTimeYmd(timeStr string) (t0.Time, error) {
 	return t0.ParseInLocation(FmtYMd, timeStr, t0.Local)
 }
@@ -130,14 +139,6 @@ func ParseTimeYmdHmsSLoc(timeStr string, loc *t0.Location) (t0.Time, error) {
 
 func ParseTimeYmdHmsSusLoc(timeStr string, loc *t0.Location) (t0.Time, error) {
 	return t0.ParseInLocation(FmtYMdHmsSuS, timeStr, loc)
-}
-
-func TimeToRFC3339(t t0.Time) string {
-	return t.Format(t0.RFC3339)
-}
-
-func ParseTimeRFC3339(timeStr string) (t0.Time, error) {
-	return t0.ParseInLocation(t0.RFC3339, timeStr, t0.Local)
 }
 
 // TimeInMillis 13位java时间戳
@@ -274,24 +275,120 @@ func Now() t0.Time {
 	return t0.Now()
 }
 
-func AddHour(times t0.Time, plusOrMinus string, hours string) t0.Time {
-	h, _ := t0.ParseDuration(fmt.Sprintf("%s%v", plusOrMinus, hours))
-	return times.Add(h)
+func AddHours(times t0.Time, hours int) t0.Time {
+	if hours > 0 {
+		h, _ := t0.ParseDuration(fmt.Sprintf("+%vh", hours))
+		return times.Add(h)
+	} else {
+		h, _ := t0.ParseDuration(fmt.Sprintf("%vh", hours))
+		return times.Add(h)
+	}
 }
 
-func AddMinutes(times t0.Time, plusOrMinus string, minutes string) t0.Time {
-	h, _ := t0.ParseDuration(fmt.Sprintf("%s%v", plusOrMinus, minutes))
-	return times.Add(h)
+// AddHoursStr 示例
+// hours: +12h 或者 -12h 或者 12h
+func AddHoursStr(times t0.Time, hours string) t0.Time {
+	if !strings.HasSuffix(hours, "h") {
+		hours += "h"
+	}
+	if strings.HasPrefix(hours, "-") {
+		h, _ := t0.ParseDuration(hours)
+		return times.Add(h)
+	} else if strings.HasPrefix(hours, "+") {
+		h, _ := t0.ParseDuration(hours)
+		return times.Add(h)
+	} else {
+		h, _ := t0.ParseDuration(fmt.Sprintf("+%v", hours))
+		return times.Add(h)
+	}
 }
 
-func AddSeconds(times t0.Time, plusOrMinus string, seconds string) t0.Time {
-	h, _ := t0.ParseDuration(fmt.Sprintf("%s%v", plusOrMinus, seconds))
-	return times.Add(h)
+func AddMinutes(times t0.Time, minutes int) t0.Time {
+	if minutes > 0 {
+		h, _ := t0.ParseDuration(fmt.Sprintf("+%vm", minutes))
+		return times.Add(h)
+	} else {
+		h, _ := t0.ParseDuration(fmt.Sprintf("%vm", minutes))
+		return times.Add(h)
+	}
 }
 
-func AddTime(times t0.Time, plusOrMinus string, timeStr string) t0.Time {
-	h, _ := t0.ParseDuration(fmt.Sprintf("%s%v", plusOrMinus, timeStr))
-	return times.Add(h)
+func AddMinutesStr(times t0.Time, minutesStr string) t0.Time {
+	if !strings.HasSuffix(minutesStr, "m") {
+		minutesStr += "m"
+	}
+	if strings.HasPrefix(minutesStr, "-") {
+		h, _ := t0.ParseDuration(minutesStr)
+		return times.Add(h)
+	} else if strings.HasPrefix(minutesStr, "+") {
+		h, _ := t0.ParseDuration(minutesStr)
+		return times.Add(h)
+	} else {
+		h, _ := t0.ParseDuration(fmt.Sprintf("+%v", minutesStr))
+		return times.Add(h)
+	}
+}
+
+func AddSeconds(times t0.Time, seconds int) t0.Time {
+	if seconds > 0 {
+		h, _ := t0.ParseDuration(fmt.Sprintf("+%vs", seconds))
+		return times.Add(h)
+	} else {
+		h, _ := t0.ParseDuration(fmt.Sprintf("%vs", seconds))
+		return times.Add(h)
+	}
+}
+
+func AddSecondsStr(times t0.Time, secondsStr string) t0.Time {
+	if !strings.HasSuffix(secondsStr, "s") {
+		secondsStr += "s"
+	}
+	if strings.HasPrefix(secondsStr, "-") {
+		h, _ := t0.ParseDuration(secondsStr)
+		return times.Add(h)
+	} else if strings.HasPrefix(secondsStr, "+") {
+		h, _ := t0.ParseDuration(secondsStr)
+		return times.Add(h)
+	} else {
+		h, _ := t0.ParseDuration(fmt.Sprintf("+%v", secondsStr))
+		return times.Add(h)
+	}
+}
+
+func AddMilliseconds(times t0.Time, milliseconds int) t0.Time {
+	if milliseconds > 0 {
+		h, _ := t0.ParseDuration(fmt.Sprintf("+%vms", milliseconds))
+		return times.Add(h)
+	} else {
+		h, _ := t0.ParseDuration(fmt.Sprintf("%vms", milliseconds))
+		return times.Add(h)
+	}
+}
+
+func AddMillisecondsStr(times t0.Time, millisecondsStr string) t0.Time {
+	if !strings.HasSuffix(millisecondsStr, "ms") {
+		millisecondsStr += "ms"
+	}
+	if strings.HasPrefix(millisecondsStr, "-") {
+		h, _ := t0.ParseDuration(millisecondsStr)
+		return times.Add(h)
+	} else if strings.HasPrefix(millisecondsStr, "+") {
+		h, _ := t0.ParseDuration(millisecondsStr)
+		return times.Add(h)
+	} else {
+		h, _ := t0.ParseDuration(fmt.Sprintf("+%v", millisecondsStr))
+		return times.Add(h)
+	}
+}
+
+func AddTime(times t0.Time, timeStr string) t0.Time {
+	if strings.HasPrefix(timeStr, "-") {
+		h, _ := t0.ParseDuration(fmt.Sprintf("%v", timeStr))
+		return times.Add(h)
+	} else {
+		h, _ := t0.ParseDuration(fmt.Sprintf("+%v", timeStr))
+		return times.Add(h)
+	}
 }
 
 func AddDays(times t0.Time, days int) t0.Time {
@@ -379,7 +476,81 @@ func ParseTime(timeStr string) (t0.Time, error) {
 		log.Printf("解析时间错误, time: %v", timeStr)
 		return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, time: %v", timeStr))
 	}
-	return EmptyTime, errors.New("内部解析器格式暂时不匹配")
+}
+
+func ParseTimeLocation(timeStr string, loc *t0.Location) (t0.Time, error) {
+	timeStr = strings.TrimSpace(timeStr)
+	timeStr = strings.TrimSpace(strings.ReplaceAll(timeStr, "\\'", " "))
+
+	if timeStr == "" {
+		return EmptyTime, errors.New("时间字段为空")
+	}
+	if yRegex.MatchString(timeStr) {
+		if times, err := t0.ParseInLocation(FmtY, timeStr, loc); err == nil {
+			return times, nil
+		} else {
+			return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, err: %v", err))
+		}
+	} else if yyyyMmDdRegex.MatchString(timeStr) {
+		if times, err := t0.ParseInLocation(FmtYYYYMMdd, timeStr, loc); err == nil {
+			return times, nil
+		} else {
+			log.Printf("解析时间错误, err: %v", err)
+			return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, err: %v", err))
+		}
+	} else if ymRegex.MatchString(timeStr) {
+		if times, err := t0.ParseInLocation(FmtYM, timeStr, loc); err == nil {
+			return times, nil
+		} else {
+			log.Printf("解析时间错误, err: %v", err)
+			return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, err: %v", err))
+		}
+	} else if ymdRegex.MatchString(timeStr) {
+		if times, err := t0.ParseInLocation(FmtYMd, timeStr, loc); err == nil {
+			return times, nil
+		} else {
+			log.Printf("解析时间错误, err: %v", err)
+			return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, err: %v", err))
+		}
+	} else if ymdHRegex.MatchString(timeStr) {
+		if times, err := t0.ParseInLocation(FmtYMdH, timeStr, loc); err == nil {
+			return times, nil
+		} else {
+			log.Printf("解析时间错误, err: %v", err)
+			return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, err: %v", err))
+		}
+	} else if ymdHmRegex.MatchString(timeStr) {
+		if times, err := t0.ParseInLocation(FmtYMdHm, timeStr, loc); err == nil {
+			return times, nil
+		} else {
+			log.Printf("解析时间错误, err: %v", err)
+			return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, err: %v", err))
+		}
+	} else if ymdHmsRegex.MatchString(timeStr) {
+		if times, err := t0.ParseInLocation(FmtYMdHms, timeStr, loc); err == nil {
+			return times, nil
+		} else {
+			log.Printf("解析时间错误, err: %v", err)
+			return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, err: %v", err))
+		}
+	} else if ymdHmsSRegex.MatchString(timeStr) {
+		if times, err := t0.ParseInLocation(FmtYMdHmsS, timeStr, loc); err == nil {
+			return times, nil
+		} else {
+			log.Printf("解析时间错误, err: %v", err)
+			return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, err: %v", err))
+		}
+	} else if ymdHmsSuSRegex.MatchString(timeStr) {
+		if times, err := t0.ParseInLocation(FmtYMdHmsSuS, timeStr, loc); err == nil {
+			return times, nil
+		} else {
+			log.Printf("解析时间错误, err: %v", err)
+			return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, err: %v", err))
+		}
+	} else {
+		log.Printf("解析时间错误, time: %v", timeStr)
+		return EmptyTime, errors.New(fmt.Sprintf("解析时间错误, time: %v", timeStr))
+	}
 }
 
 func IsTimeEmpty(time t0.Time) bool {
@@ -409,6 +580,11 @@ const baseOriginSecond = 1136185445
 const baseDiffDay = 38719
 
 // ExcelDateToTime 将 Excel 日期序列号（示例：45342）转换为 Go 的 time.Time 对象
-func ExcelDateToTime(excelDate int) t0.Time {
-	return t0.Unix(int64(baseOriginSecond+(excelDate-baseDiffDay)*24*3600), 0)
+func ExcelDateToTime(excelDate int) string {
+	return t0.Unix(int64(baseOriginSecond+(excelDate-baseDiffDay)*24*3600), 0).Format(FmtCnYMd)
+}
+
+// RandomSleep 随机休眠一段时间
+func RandomSleep(maxNum int, duration t0.Duration) {
+	t0.Sleep(NumToTimeDuration(rand.Intn(maxNum), duration))
 }

@@ -5,3 +5,6 @@ place:
 test:
   name: ${place.name}
   name2: ${place.name2}
+  name3: ${place.name2}:oktest
+  name4: pre_${place.name2}:oktest
+  name5: pre_${place.name2}:${place.name}:oktest

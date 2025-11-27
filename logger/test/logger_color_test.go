@@ -2,13 +2,16 @@ package test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/gookit/color"
 	"github.com/simonalong/gole/config"
 	"github.com/simonalong/gole/logger"
-	"testing"
 )
 
 func TestOriginal(t *testing.T) {
+	color.ForceOpenColor()
+
 	//简单快速的使用，跟 fmt.Print* 类似
 	color.Redp("Simple to use color")
 	color.Redln("Simple to use color")
@@ -120,6 +123,7 @@ func TestColor(t *testing.T) {
 
 func TestLoggerColor(t *testing.T) {
 	config.LoadYamlFile("./application-color.yaml")
+	config.FinishLoad()
 	logger.InitLog()
 
 	logger.Debug("debug data")

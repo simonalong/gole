@@ -1,7 +1,7 @@
 package util
 
 // GroupBy Groups elements of the original collection by the key returned by the given keySelector function applied to each element and returns a map where each group key is associated with a list of corresponding elements.
-// The returned map preserves the entry iteration order of the sortKeys produced from the original collection.
+// The returned map preserves the entry iteration order of the keys produced from the original collection.
 func GroupBy[T any, K comparable](list []T, keySelector func(T) K) (destination map[K][]T) {
 	dest := make(map[K][]T)
 	return GroupByTo(list, &dest, keySelector)

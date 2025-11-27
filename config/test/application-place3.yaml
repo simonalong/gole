@@ -1,0 +1,7 @@
+pre:
+  username: 西湖区
+  age: 18
+data:
+  name: zhou
+  age: ${pre.age}
+  address: 杭州市${pre.username}这边

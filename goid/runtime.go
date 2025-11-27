@@ -26,7 +26,7 @@ type g struct {
 	sched        gobuf
 	syscallsp    uintptr
 	syscallpc    uintptr
-	stktopsp     uintptr
+	basetopsp    uintptr
 	param        uintptr
 	atomicstatus uint32
 	stackLock    uint32

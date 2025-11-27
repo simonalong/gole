@@ -50,10 +50,10 @@ func (t *storage) Set(v any) (oldValue any) {
 	// try restart gc timer if Set for the first time
 	if oldValue == nil {
 		storageLock.Lock()
+		defer storageLock.Unlock()
 		if storageGCTimer == nil {
 			storageGCTimer = time.AfterFunc(storageGCInterval, clearDeadStore)
 		}
-		storageLock.Unlock()
 	}
 	return
 }
@@ -79,6 +79,7 @@ func loadCurrentStore() (s *store) {
 	storeMap := storages.Load().(map[int64]*store)
 	if s = storeMap[gid]; s == nil {
 		storageLock.Lock()
+		defer storageLock.Unlock()
 		oldStoreMap := storages.Load().(map[int64]*store)
 		if s = oldStoreMap[gid]; s == nil {
 			s = &store{
@@ -92,7 +93,7 @@ func loadCurrentStore() (s *store) {
 			newStoreMap[gid] = s
 			storages.Store(newStoreMap)
 		}
-		storageLock.Unlock()
+
 	}
 	return
 }

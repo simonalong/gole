@@ -8,7 +8,7 @@ import (
 	"unsafe"
 )
 
-const labelTag = "github.com/simonalong/gole"
+const labelTag = "github.com/simonalong/gole/"
 
 var lastID uintptr
 

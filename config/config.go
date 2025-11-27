@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/simonalong/gole/listener"
 	"log"
 	"os"
 	"path"
@@ -10,38 +9,66 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/simonalong/gole/file"
-
+	"github.com/simonalong/gole/listener"
 	"github.com/simonalong/gole/util"
 	"gopkg.in/yaml.v2"
 )
 
 var appProperty *ApplicationProperty
+
 var configExist = false
 var loadLock sync.Mutex
-var configLoaded = false
+var Loaded = false
 var CurrentProfile = ""
 
-func LoadConfig() {
+func Load() {
 	loadLock.Lock()
 	defer loadLock.Unlock()
-	if configLoaded {
+	if Loaded {
 		return
 	}
-
 	LoadConfigFromRelativePath("")
-	configLoaded = true
+	AppendEnvFromRelativePath("")
+
+	FinishLoad()
 }
 
+func Clean() {
+	appProperty = nil
+}
+
+// FinishLoad 配置加载完成
+// 说明：对于一些不使用默认Load()函数的，需要自行加载的，请在加载完之后，调用该函数，用于后续的处理
+func FinishLoad() {
+	// 发布事件：配置加载完成
+	go func() {
+		time.Sleep(1 * time.Second)
+		listener.PublishEvent(EventOfLoadFinish{})
+	}()
+}
+
+// LoadConfigFromRelativePath 读取相对路径
 func LoadConfigFromRelativePath(resourceAbsPath string) {
 	dir, _ := os.Getwd()
-	pkg := strings.Replace(dir, "\\", "/", -1)
-
-	LoadConfigFromAbsPath(path.Join(pkg, "", resourceAbsPath))
+	LoadConfigFromAbsPath(path.Join(dir+string(os.PathSeparator), "", resourceAbsPath))
 }
 
+func AppendEnvFromRelativePath(resourceAbsPath string) {
+	dir, _ := os.Getwd()
+	AppendEnvFromAbsPath(path.Join(dir+string(os.PathSeparator), "", resourceAbsPath))
+}
+
+func AppendEnvFromAbsPath(resourceAbsPath string) {
+	if !strings.HasSuffix(resourceAbsPath, string(os.PathSeparator)) {
+		resourceAbsPath += string(os.PathSeparator)
+	}
+	AppendEnvFile(resourceAbsPath + ".env")
+}
+
+// LoadConfigFromAbsPath 读取绝对路径
 func LoadConfigFromAbsPath(resourceAbsPath string) {
 	doLoadConfigFromAbsPath(resourceAbsPath)
 
@@ -51,17 +78,14 @@ func LoadConfigFromAbsPath(resourceAbsPath string) {
 	}
 	AppendConfigFromRelativePath(cmPath)
 
-	ApiModule = GetValueString("api-module")
-
-	if err := GetValueObject("gole", &GoleCfg); err != nil {
+	if err := GetValueObject("gole", &BaseCfg); err != nil {
 		log.Printf("加载 Base 配置失败(%v)", err)
 	}
 }
 
 func AppendConfigFromRelativePath(fileName string) {
 	dir, _ := os.Getwd()
-	pkg := strings.Replace(dir, "\\", "/", -1)
-	fileName = path.Join(pkg, "", fileName)
+	fileName = path.Join(dir+string(os.PathSeparator), "", fileName)
 	extend := getFileExtension(fileName)
 	extend = strings.ToLower(extend)
 	switch extend {
@@ -96,61 +120,44 @@ type EnvProperty struct {
 	Value string
 }
 
+// ExistConfigFile
+// deprecate 弃用，后续请使用Loaded
 func ExistConfigFile() bool {
 	return configExist
 }
 
-func GetConfigValues(c *gin.Context) {
+func GetConfigValues() interface{} {
 	if nil != appProperty {
-		c.Data(200, "application/json; charset=utf-8", []byte(util.ObjectToJson(appProperty.ValueMap)))
+		return appProperty.ValueMap
 	} else {
-		c.Data(200, "application/json; charset=utf-8", []byte("{}"))
+		return nil
 	}
 }
 
-func GetConfigDeepValues(c *gin.Context) {
+func GetConfigDeepValues() interface{} {
 	if nil != appProperty {
-		c.Data(200, "application/json; charset=utf-8", []byte(util.ObjectToJson(appProperty.ValueDeepMap)))
+		return appProperty.ValueDeepMap
 	} else {
-		c.Data(200, "application/json; charset=utf-8", []byte("{}"))
+		return nil
 	}
 }
 
-func GetConfigValue(c *gin.Context) {
+func GetConfigValue(key string) interface{} {
 	if nil != appProperty {
-		value := GetValue(c.Param("key"))
-		if nil == value {
-			c.Data(200, "application/json; charset=utf-8", []byte(""))
-			return
-		}
-		if util.IsBaseType(reflect.TypeOf(value)) {
-			c.Data(200, "application/json; charset=utf-8", []byte(util.ToString(value)))
-		} else {
-			c.Data(200, "application/json; charset=utf-8", []byte(util.ObjectToJson(value)))
-		}
+		return GetValue(key)
 	} else {
-		c.Data(200, "application/json; charset=utf-8", []byte("{}"))
+		return nil
 	}
 }
 
-func UpdateConfig(c *gin.Context) {
-	valueMap := map[string]any{}
-	_, err := util.DataToObject(c.Request.Body, &valueMap)
-	if err != nil {
-		log.Printf("解析失败，%v", err.Error())
-		return
-	}
-
-	key, _ := valueMap["key"]
-	value, _ := valueMap["value"]
-
-	SetValue(key.(string), value)
+func UpdateConfig(key string, value interface{}) {
+	SetValue(key, value)
 }
 
 // 多种格式优先级：json > properties > yaml > yml
 func doLoadConfigFromAbsPath(resourceAbsPath string) {
-	if !strings.HasSuffix(resourceAbsPath, "/") {
-		resourceAbsPath += "/"
+	if !strings.HasSuffix(resourceAbsPath, string(os.PathSeparator)) {
+		resourceAbsPath += string(os.PathSeparator)
 	}
 	files, err := os.ReadDir(resourceAbsPath)
 	if err != nil {
@@ -184,16 +191,12 @@ func doLoadConfigFromAbsPath(resourceAbsPath string) {
 
 		// 默认配置
 		if fileName == "application.yaml" {
-			configExist = true
 			break
 		} else if fileName == "application.yml" {
-			configExist = true
 			break
 		} else if fileName == "application.properties" {
-			configExist = true
 			break
 		} else if fileName == "application.json" {
-			configExist = true
 			break
 		}
 
@@ -203,7 +206,6 @@ func doLoadConfigFromAbsPath(resourceAbsPath string) {
 			SetValue("gole.profiles.active", profile)
 			currentProfile := getProfileFromFileName(fileName)
 			if currentProfile == profile {
-				configExist = true
 				AppendFile(resourceAbsPath + fileName)
 			}
 		}
@@ -214,17 +216,15 @@ func LoadFile(filePath string) {
 	extend := getFileExtension(filePath)
 	extend = strings.ToLower(extend)
 	if extend == "yaml" {
-		configExist = true
 		LoadYamlFile(filePath)
 	} else if extend == "yml" {
-		configExist = true
 		LoadYamlFile(filePath)
 	} else if extend == "properties" {
-		configExist = true
 		LoadPropertyFile(filePath)
 	} else if extend == "json" {
-		configExist = true
 		LoadJsonFile(filePath)
+	} else if extend == "env" {
+		LoadEnvFile(filePath)
 	}
 }
 
@@ -239,6 +239,8 @@ func AppendFile(filePath string) {
 		AppendPropertyFile(filePath)
 	} else if extend == "json" {
 		AppendJsonFile(filePath)
+	} else if extend == "env" {
+		AppendEnvFile(filePath)
 	}
 }
 
@@ -284,7 +286,7 @@ func LoadYamlFile(filePath string) {
 	}
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		// log.Printf("读取文件失败(%v)", err)
+		log.Printf("读取文件失败：%v", err)
 		return
 	}
 
@@ -300,6 +302,7 @@ func LoadYamlFile(filePath string) {
 
 	property, err := util.YamlToProperties(string(content))
 	if err != nil {
+		log.Printf("YamlToProperties转换失败：%v", err)
 		return
 	}
 	valueMap, _ := util.PropertiesToMap(property)
@@ -307,9 +310,11 @@ func LoadYamlFile(filePath string) {
 
 	yamlMap, err := util.YamlToMap(string(content))
 	if err != nil {
+		log.Printf("YamlToMap转换失败：%v", err)
 		return
 	}
 	appProperty.ValueDeepMap = yamlMap
+	Loaded = true
 }
 
 func AppendYamlFile(filePath string) {
@@ -322,6 +327,17 @@ func AppendYamlFile(filePath string) {
 		return
 	}
 
+	AppendYamlContent(string(content))
+	Loaded = true
+}
+
+func AppendYamlContent(content string) {
+	property, err := util.YamlToProperties(content)
+	if err != nil {
+		//logger.Errorf("配置Append异常 YamlToProperties：%v, content=%v", err, content)
+		return
+	}
+
 	if appProperty == nil {
 		appProperty = &ApplicationProperty{}
 		appProperty.ValueMap = make(map[string]interface{})
@@ -330,11 +346,6 @@ func AppendYamlFile(filePath string) {
 		appProperty.ValueMap = make(map[string]interface{})
 	} else if appProperty.ValueDeepMap == nil {
 		appProperty.ValueDeepMap = make(map[string]interface{})
-	}
-
-	property, err := util.YamlToProperties(string(content))
-	if err != nil {
-		return
 	}
 	AppendValue(property)
 }
@@ -365,9 +376,79 @@ func LoadPropertyFile(filePath string) {
 	yamlStr, _ := util.PropertiesToYaml(string(content))
 	yamlMap, _ := util.YamlToMap(yamlStr)
 	appProperty.ValueDeepMap = yamlMap
+	Loaded = true
+}
+
+func LoadEnvFile(filePath string) {
+	if !file.FileExists(filePath) {
+		return
+	}
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return
+	}
+
+	if appProperty == nil {
+		appProperty = &ApplicationProperty{}
+		appProperty.ValueMap = make(map[string]interface{})
+		appProperty.ValueDeepMap = make(map[string]interface{})
+	} else if appProperty.ValueMap == nil {
+		appProperty.ValueMap = make(map[string]interface{})
+	} else if appProperty.ValueDeepMap == nil {
+		appProperty.ValueDeepMap = make(map[string]interface{})
+	}
+
+	valueMap, _ := util.EnvToMap(string(content))
+	appProperty.ValueMap = valueMap
+
+	// 设置到os.Env里面去
+	for k, v := range valueMap {
+		_ = os.Setenv(k, util.ToString(v))
+	}
+
+	yamlStr, _ := util.PropertiesToYaml(string(content))
+	yamlMap, _ := util.YamlToMap(yamlStr)
+	appProperty.ValueDeepMap = yamlMap
+	Loaded = true
 }
 
 func AppendPropertyFile(filePath string) {
+	if !file.FileExists(filePath) {
+		return
+	}
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		log.Printf("读取文件失败(%v)", err)
+		return
+	}
+
+	AppendPropertyContent(string(content))
+}
+
+func AppendPropertyContent(content string) {
+	valueMap, err := util.PropertiesToMap(content)
+	if err != nil {
+		//logger.Errorf("配置Append异常 PropertiesToMap：%v, content=%v", err, content)
+		return
+	}
+	propertiesValue, err := util.MapToProperties(valueMap)
+	if err != nil {
+		//logger.Errorf("配置Append异常 MapToProperties：%v, content=%v", err, content)
+		return
+	}
+	if appProperty == nil {
+		appProperty = &ApplicationProperty{}
+		appProperty.ValueMap = make(map[string]interface{})
+		appProperty.ValueDeepMap = make(map[string]interface{})
+	} else if appProperty.ValueMap == nil {
+		appProperty.ValueMap = make(map[string]interface{})
+	} else if appProperty.ValueDeepMap == nil {
+		appProperty.ValueDeepMap = make(map[string]interface{})
+	}
+	AppendValue(propertiesValue)
+}
+
+func AppendEnvFile(filePath string) {
 	if !file.FileExists(filePath) {
 		return
 	}
@@ -387,10 +468,16 @@ func AppendPropertyFile(filePath string) {
 		appProperty.ValueDeepMap = make(map[string]interface{})
 	}
 
-	valueMap, err := util.PropertiesToMap(string(content))
+	valueMap, err := util.EnvToMap(string(content))
 	if err != nil {
 		return
 	}
+
+	// 设置到os.Env里面去
+	for k, v := range valueMap {
+		_ = os.Setenv(k, util.ToString(v))
+	}
+
 	propertiesValue, err := util.MapToProperties(valueMap)
 	if err != nil {
 		return
@@ -426,6 +513,7 @@ func LoadJsonFile(filePath string) {
 
 	yamlMap, _ := util.YamlToMap(yamlStr)
 	appProperty.ValueDeepMap = yamlMap
+	Loaded = true
 }
 
 func AppendJsonFile(filePath string) {
@@ -438,6 +526,20 @@ func AppendJsonFile(filePath string) {
 		return
 	}
 
+	AppendJsonContent(string(content))
+}
+
+func AppendJsonContent(content string) {
+	yamlStr, err := util.JsonToYaml(content)
+	if err != nil {
+		//logger.Errorf("配置Append异常 JsonToYaml：%v, content=%v", err, content)
+		return
+	}
+	property, err := util.YamlToProperties(yamlStr)
+	if err != nil {
+		//logger.Errorf("配置Append异常 YamlToProperties：%v, content=%v", err, content)
+		return
+	}
 	if appProperty == nil {
 		appProperty = &ApplicationProperty{}
 		appProperty.ValueMap = make(map[string]interface{})
@@ -447,39 +549,33 @@ func AppendJsonFile(filePath string) {
 	} else if appProperty.ValueDeepMap == nil {
 		appProperty.ValueDeepMap = make(map[string]interface{})
 	}
-
-	yamlStr, err := util.JsonToYaml(string(content))
-	if err != nil {
-		return
-	}
-	property, err := util.YamlToProperties(yamlStr)
-	if err != nil {
-		return
-	}
-
 	AppendValue(property)
 }
 
-func AppendValue(propertiesNewValue string) {
-	pMap, err := util.PropertiesToMap(propertiesNewValue)
+func AppendValue(content string) {
+	pMap, err := util.PropertiesToMap(content)
 	for k, v := range pMap {
 		appProperty.ValueMap[k] = v
 	}
 
 	propertiesValueOfOriginal, err := util.MapToProperties(appProperty.ValueMap)
 	if err != nil {
+		//logger.Errorf("配置Append异常 MapToProperties：%v, content=%v", err, content)
 		return
 	}
 
 	resultYaml, err := util.PropertiesToYaml(propertiesValueOfOriginal)
 	if err != nil {
+		//logger.Errorf("配置Append异常 PropertiesToYaml：%v, content=%v", err, content)
 		return
 	}
 	resultDeepMap, err := util.YamlToMap(resultYaml)
 	if err != nil {
+		//logger.Errorf("配置Append异常 YamlToMap ：%v, content=%v", err, content)
 		return
 	}
 	appProperty.ValueDeepMap = resultDeepMap
+	Loaded = true
 }
 
 func SetValue(key string, value any) {
@@ -531,7 +627,7 @@ func SetValue(key string, value any) {
 	appProperty.ValueDeepMap = resultDeepMap
 
 	// 发布配置变更事件
-	listener.PublishEvent(listener.ConfigChangeEvent{Key: key, Value: util.ToString(util.ObjectToData(value))})
+	listener.PublishEvent(EventOfChange{Key: key, Value: util.ToString(util.ObjectToData(value))})
 }
 
 func parseProperties(key string, value any, resultMap map[string]any) (map[string]any, error) {
@@ -545,7 +641,7 @@ func parseProperties(key string, value any, resultMap map[string]any) (map[strin
 		}
 	} else if reflect.ValueOf(value).Kind() == reflect.Slice || reflect.ValueOf(value).Kind() == reflect.Array {
 		values := []any{}
-		_, err := util.DataToObject(util.ObjectToJson(value), &values)
+		_, err := util.DataToEntity(util.ObjectToJson(value), &values)
 		if err != nil {
 			return resultMap, err
 		}
@@ -556,7 +652,7 @@ func parseProperties(key string, value any, resultMap map[string]any) (map[strin
 	} else {
 		if reflect.ValueOf(value).Kind() == reflect.String && util.ToString(value) != "" {
 			resultMap[key] = value
-		} else if value == nil {
+		} else if value != nil {
 			resultMap[key] = value
 		}
 	}
@@ -568,7 +664,15 @@ func GetValueString(key string) string {
 		return ""
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToString(value)
+		result := util.ToString(parseVariableOfString(util.ToString(value)))
+		if strings.HasPrefix(result, "'") {
+			result = result[1 : len(result)-1]
+		}
+
+		if strings.HasSuffix(result, "'") {
+			result = result[0 : len(result)-1]
+		}
+		return result
 	}
 	return ""
 }
@@ -578,7 +682,7 @@ func GetValueInt(key string) int {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt(value)
+		return util.ToInt(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -588,7 +692,7 @@ func GetValueInt8(key string) int8 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt8(value)
+		return util.ToInt8(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -598,7 +702,7 @@ func GetValueInt16(key string) int16 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt16(value)
+		return util.ToInt16(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -608,7 +712,7 @@ func GetValueInt32(key string) int32 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt32(value)
+		return util.ToInt32(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -618,7 +722,7 @@ func GetValueInt64(key string) int64 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt64(value)
+		return util.ToInt64(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -628,7 +732,7 @@ func GetValueUInt(key string) uint {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt(value)
+		return util.ToUInt(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -638,7 +742,7 @@ func GetValueUInt8(key string) uint8 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt8(value)
+		return util.ToUInt8(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -648,7 +752,7 @@ func GetValueUInt16(key string) uint16 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt16(value)
+		return util.ToUInt16(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -658,7 +762,7 @@ func GetValueUInt32(key string) uint32 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt32(value)
+		return util.ToUInt32(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -668,7 +772,7 @@ func GetValueUInt64(key string) uint64 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt64(value)
+		return util.ToUInt64(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -678,7 +782,7 @@ func GetValueFloat32(key string) float32 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToFloat32(value)
+		return util.ToFloat32(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -688,7 +792,7 @@ func GetValueFloat64(key string) float64 {
 		return 0
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToFloat64(value)
+		return util.ToFloat64(parseVariableOfString(util.ToString(value)))
 	}
 	return 0
 }
@@ -698,7 +802,7 @@ func GetValueBool(key string) bool {
 		return false
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToBool(value)
+		return util.ToBool(parseVariableOfString(util.ToString(value)))
 	}
 	return false
 }
@@ -708,7 +812,7 @@ func GetValueStringDefault(key, defaultValue string) string {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToString(value)
+		return util.ToString(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -718,7 +822,7 @@ func GetValueIntDefault(key string, defaultValue int) int {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt(value)
+		return util.ToInt(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -728,7 +832,7 @@ func GetValueInt8Default(key string, defaultValue int8) int8 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt8(value)
+		return util.ToInt8(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -738,7 +842,7 @@ func GetValueInt16Default(key string, defaultValue int16) int16 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt16(value)
+		return util.ToInt16(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -748,7 +852,7 @@ func GetValueInt32Default(key string, defaultValue int32) int32 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt32(value)
+		return util.ToInt32(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -758,7 +862,7 @@ func GetValueInt64Default(key string, defaultValue int64) int64 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToInt64(value)
+		return util.ToInt64(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -768,7 +872,7 @@ func GetValueUIntDefault(key string, defaultValue uint) uint {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt(value)
+		return util.ToUInt(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -778,7 +882,7 @@ func GetValueUInt8Default(key string, defaultValue uint8) uint8 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt8(value)
+		return util.ToUInt8(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -788,7 +892,7 @@ func GetValueUInt16Default(key string, defaultValue uint16) uint16 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt16(value)
+		return util.ToUInt16(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -798,7 +902,7 @@ func GetValueUInt32Default(key string, defaultValue uint32) uint32 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt32(value)
+		return util.ToUInt32(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -808,7 +912,7 @@ func GetValueUInt64Default(key string, defaultValue uint64) uint64 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToUInt64(value)
+		return util.ToUInt64(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -818,7 +922,7 @@ func GetValueFloat32Default(key string, defaultValue float32) float32 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToFloat32(value)
+		return util.ToFloat32(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -828,7 +932,7 @@ func GetValueFloat64Default(key string, defaultValue float64) float64 {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToFloat64(value)
+		return util.ToFloat64(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -838,7 +942,7 @@ func GetValueBoolDefault(key string, defaultValue bool) bool {
 		return defaultValue
 	}
 	if value, exist := appProperty.ValueMap[key]; exist {
-		return util.ToBool(value)
+		return util.ToBool(parseVariableOfString(util.ToString(value)))
 	}
 	return defaultValue
 }
@@ -848,7 +952,7 @@ func GetValueObject(key string, targetPtrObj any) error {
 		return nil
 	}
 	data := doGetValue(appProperty.ValueDeepMap, key)
-	_, err := util.DataToObject(data, targetPtrObj)
+	_, err := util.DataToEntity(data, targetPtrObj)
 	if err != nil {
 		return err
 	}
@@ -862,7 +966,7 @@ func GetValueArray(key string) []any {
 
 	var arrayResult []any
 	data := doGetValue(appProperty.ValueDeepMap, key)
-	_, err := util.DataToObject(data, &arrayResult)
+	_, err := util.DataToEntity(data, &arrayResult)
 	if err != nil {
 		return arrayResult
 	}
@@ -876,7 +980,7 @@ func GetValueArrayInt(key string) []int {
 
 	var arrayResult []int
 	data := doGetValue(appProperty.ValueDeepMap, key)
-	_, err := util.DataToObject(data, &arrayResult)
+	_, err := util.DataToEntity(data, &arrayResult)
 	if err != nil {
 		return arrayResult
 	}
@@ -890,7 +994,7 @@ func GetValueArrayString(key string) []string {
 
 	var arrayResult []string
 	data := doGetValue(appProperty.ValueDeepMap, key)
-	_, err := util.DataToObject(data, &arrayResult)
+	_, err := util.DataToEntity(data, &arrayResult)
 	if err != nil {
 		return arrayResult
 	}
@@ -906,7 +1010,7 @@ func GetValue(key string) any {
 
 func doGetValue(parentValue any, key string) any {
 	if key == "" {
-		return parentValue
+		return parseVariableOfObj(parentValue)
 	}
 	parentValueKind := reflect.ValueOf(parentValue).Kind()
 	if parentValueKind == reflect.Map {
@@ -925,6 +1029,99 @@ func doGetValue(parentValue any, key string) any {
 	return nil
 }
 
+func parseVariableOfObj(value any) any {
+	valType := reflect.TypeOf(value)
+	if valType.Kind() == reflect.String {
+		return parseVariableOfString(value.(string))
+	} else if valType.Kind() == reflect.Map {
+		valueValue := reflect.ValueOf(value)
+		dataMap := map[string]interface{}{}
+		for mapR := valueValue.MapRange(); mapR.Next(); {
+			dataMap[mapR.Key().Interface().(string)] = parseVariableOfObj(mapR.Value().Interface())
+		}
+		return dataMap
+	} else {
+		return value
+	}
+}
+
+func parseVariableOfString(value string) string {
+	if !strings.Contains(value, "${") || !strings.Contains(value, "}") {
+		return value
+	}
+
+	keys, defaultKeyValueMap, formatValue := parseAllVariable(value)
+	var values []any
+	for _, key := range keys {
+		val := GetValue(key)
+		if val == nil {
+			val = defaultKeyValueMap[key]
+		}
+		values = append(values, val)
+	}
+	return fmt.Sprintf(formatValue, values...)
+}
+
+func parseAllVariable(value string) ([]string, map[string]any, string) {
+	if !strings.Contains(value, "${") || !strings.Contains(value, "}") {
+		return nil, nil, value
+	}
+	var keys []string
+	beginIndex := strings.Index(value, "${")
+	if beginIndex == -1 {
+		return keys, nil, value
+	}
+	endIndex := strings.Index(value, "}")
+	if endIndex == -1 || endIndex == 0 {
+		return keys, nil, value
+	}
+
+	defaultKeyValueMap := map[string]any{}
+	keyName := value[beginIndex+2 : endIndex]
+	keyName = strings.TrimSpace(keyName)
+	if keyName != "" {
+		relKeyName, defaultValue := parseKeyForDefaultValue(keyName)
+		keys = append(keys, relKeyName)
+		defaultKeyValueMap[relKeyName] = defaultValue
+		nextKeys, nextDefaultKeyValueMap, endStr := parseAllVariable(value[endIndex+1:])
+
+		if nextDefaultKeyValueMap != nil {
+			for k, v := range nextDefaultKeyValueMap {
+				defaultKeyValueMap[k] = v
+			}
+		}
+
+		if nextKeys != nil && len(nextKeys) > 0 {
+			keys = append(keys, nextKeys...)
+		}
+		return keys, defaultKeyValueMap, value[:beginIndex] + "%v" + endStr
+	} else {
+		nextVars, nextDefaultKeyValueMap, endStr := parseAllVariable(value[endIndex+1:])
+
+		if nextDefaultKeyValueMap != nil {
+			for k, v := range nextDefaultKeyValueMap {
+				defaultKeyValueMap[k] = v
+			}
+		}
+
+		if nextVars != nil && len(nextVars) > 0 {
+			keys = append(keys, nextVars...)
+		}
+		return keys, defaultKeyValueMap, value[:endIndex+1] + endStr
+	}
+}
+
+func parseKeyForDefaultValue(keyName string) (string, string) {
+	if !strings.Contains(keyName, ":") {
+		return keyName, ""
+	}
+	index := strings.Index(keyName, ":")
+	if index == -1 {
+		return keyName, ""
+	}
+	return strings.TrimSpace(keyName[:index]), strings.TrimSpace(keyName[index+1:])
+}
+
 type ApplicationProperty struct {
 	ValueMap     map[string]any
 	ValueDeepMap map[string]any
@@ -938,7 +1135,7 @@ func LoadYamlConfig(fileName string, AConfig any, handler func(data []byte, ACon
 	return LoadYamlConfigByAbsolutPath(fp, AConfig, handler)
 }
 
-// LoadYamlConfigByAbsolutPath read fileName from absolute path fileName,eg:/home/gole/application.yml, and transform it to AConfig
+// LoadYamlConfigByAbsolutPath read fileName from absolute path fileName,eg:/home/base/application.yml, and transform it to AConfig
 // note: AConfig must be a pointer
 func LoadYamlConfigByAbsolutPath(path string, AConfig any, handler func(data []byte, AConfig any) error) error {
 	data, err := os.ReadFile(path)
@@ -948,9 +1145,9 @@ func LoadYamlConfigByAbsolutPath(path string, AConfig any, handler func(data []b
 	return handler(data, AConfig)
 }
 
-//LoadSpringConfig read fileName from current dictionary and fileName is application.yml,eg:/home/gole/application.yml, and transform it to AConfig
+//LoadSpringConfig read fileName from current dictionary and fileName is application.yml,eg:/home/base/application.yml, and transform it to AConfig
 //note: AConfig must be a pointer
-//note: if it has Spring.Profiles.Active,eg: Spring.Profiles.Active=dev,will load config from /home/gole/application-dev.yml,and same key
+//note: if it has Spring.Profiles.Active,eg: Spring.Profiles.Active=dev,will load config from /home/base/application-dev.yml,and same key
 //will write in the last one.
 
 func LoadSpringConfig(AConfig any) {

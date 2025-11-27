@@ -18,7 +18,7 @@ func (s ISCString) Length() int {
 	return len(s)
 }
 
-func (s ISCString) Chars() ISCList[uint8] {
+func (s ISCString) Chars() BsList[uint8] {
 	var list []uint8
 	for i := 0; i < len(s); i++ {
 		list = append(list, s[i])
@@ -289,6 +289,10 @@ func (s ISCString) ToFloat64() float64 {
 	return ToFloat64(s)
 }
 
+func (s ISCString) ToString() string {
+	return string(s)
+}
+
 func (s ISCString) ToIntRadix(radix int) (int64, error) {
 	if radix != 2 && radix != 8 && radix != 10 && radix != 16 {
 		return 0, fmt.Errorf("radix %d is not supported", radix)
@@ -301,14 +305,14 @@ func (s ISCString) ToJSONEncoded() ISCString {
 	return s.ReplaceAll("\\", "\\\\").ReplaceAll("\n", "\\n").ReplaceAll("\"", "\\\"")
 }
 
-func (s ISCString) ToMap() ISCMap[ISCString, ISCString] {
+func (s ISCString) ToMap() BsMap[ISCString, ISCString] {
 	return ListToTripleFrom[ISCString, ISCString, ISCString](s.Split("&")).Associate(func(item ISCString) Pair[ISCString, ISCString] {
 		sa := item.Split("=")
 		return NewPair(sa[0], sa[1])
 	})
 }
 
-func (s ISCString) ToCookieMap() ISCMap[ISCString, ISCString] {
+func (s ISCString) ToCookieMap() BsMap[ISCString, ISCString] {
 	return ListToTripleFrom[ISCString, ISCString, ISCString](s.Split(";")).Associate(func(item ISCString) Pair[ISCString, ISCString] {
 		sa := item.TrimSpace().Split("=")
 		return NewPair(sa[0].TrimSpace(), sa[1].TrimSpace())
@@ -336,7 +340,7 @@ func (s ISCString) TakeLast(n int) ISCString {
 	return s[len(s)-n:]
 }
 
-// BigCamel 小驼峰到大驼峰：首字母变成大写: DataGoleUser -> DateGoleUser
+// BigCamel 小驼峰到大驼峰：首字母变成大写: dataBaseUser -> DateBaseUser
 func BigCamel(word string) string {
 	if word == "" {
 		return ""
@@ -344,7 +348,7 @@ func BigCamel(word string) string {
 	return strings.ToUpper(word[:1]) + word[1:]
 }
 
-// BigCamelToMiddleLine 大驼峰到中划线: DataGoleUser -> data-db-user
+// BigCamelToMiddleLine 大驼峰到中划线: DataBaseUser -> data-db-user；DataBaseUSER -> data-db-uSER
 func BigCamelToMiddleLine(word string) string {
 	if word == "" {
 		return ""
@@ -352,7 +356,7 @@ func BigCamelToMiddleLine(word string) string {
 	return MiddleLine(BigCamelToSmallCamel(word))
 }
 
-// BigCamelToPostUnder 大驼峰到后缀下划线: DataGoleUser -> data_gole_user_
+// BigCamelToPostUnder 大驼峰到后缀下划线: DataBaseUser -> data_base_user_
 func BigCamelToPostUnder(word string) string {
 	if word == "" {
 		return ""
@@ -360,7 +364,7 @@ func BigCamelToPostUnder(word string) string {
 	return PostUnder(BigCamelToSmallCamel(word))
 }
 
-// BigCamelToPrePostUnder 大驼峰到前后缀下划线: DataGoleUser -> _data_gole_user_
+// BigCamelToPrePostUnder 大驼峰到前后缀下划线: DataBaseUser -> _data_base_user_
 func BigCamelToPrePostUnder(word string) string {
 	if word == "" {
 		return ""
@@ -368,7 +372,7 @@ func BigCamelToPrePostUnder(word string) string {
 	return PrePostUnder(BigCamelToSmallCamel(word))
 }
 
-// BigCamelToPreUnder 大驼峰到前后缀下划线: DataGoleUser -> _data_gole_user
+// BigCamelToPreUnder 大驼峰到前后缀下划线: DataBaseUser -> _data_base_user
 func BigCamelToPreUnder(word string) string {
 	if word == "" {
 		return ""
@@ -376,7 +380,7 @@ func BigCamelToPreUnder(word string) string {
 	return PreUnder(BigCamelToSmallCamel(word))
 }
 
-// BigCamelToSmallCamel 大驼峰到小驼峰：首字母变成小写：DataGoleUser -> dataGoleUser
+// BigCamelToSmallCamel 大驼峰到小驼峰：首字母变成小写：DataBaseUser -> dataBaseUser
 func BigCamelToSmallCamel(word string) string {
 	if word == "" {
 		return ""
@@ -384,7 +388,7 @@ func BigCamelToSmallCamel(word string) string {
 	return strings.ToLower(word[:1]) + word[1:]
 }
 
-// BigCamelToUnderLine 大驼峰到下划线：DataGoleUser -> data_gole_user
+// BigCamelToUnderLine 大驼峰到下划线：DataBaseUser -> data_base_user
 func BigCamelToUnderLine(word string) string {
 	if word == "" {
 		return ""
@@ -392,7 +396,7 @@ func BigCamelToUnderLine(word string) string {
 	return UnderLine(BigCamelToSmallCamel(word))
 }
 
-// BigCamelToUpperMiddle 大驼峰到小写中划线：DataGoleUser -> DATA-GOLE-USER
+// BigCamelToUpperMiddle 大驼峰到小写中划线：DataBaseUser -> DATA-BASE-USER
 func BigCamelToUpperMiddle(word string) string {
 	if word == "" {
 		return ""
@@ -400,7 +404,7 @@ func BigCamelToUpperMiddle(word string) string {
 	return UpperUnderMiddle(BigCamelToSmallCamel(word))
 }
 
-// BigCamelToUpperUnder 大驼峰到大写下划线: DataGoleUser -> DATA_GOLE_USER
+// BigCamelToUpperUnder 大驼峰到大写下划线: DataBaseUser -> DATA_BASE_USER
 func BigCamelToUpperUnder(word string) string {
 	if word == "" {
 		return ""
@@ -408,7 +412,7 @@ func BigCamelToUpperUnder(word string) string {
 	return UpperUnder(BigCamelToSmallCamel(word))
 }
 
-// MiddleLine 小驼峰到中划线：DataGoleUser -> data-db-user
+// MiddleLine 小驼峰到中划线：dataBaseUser -> data-db-user
 func MiddleLine(word string) string {
 	if word == "" {
 		return ""
@@ -419,9 +423,16 @@ func MiddleLine(word string) string {
 	}
 
 	subIndex := reg.FindAllStringSubmatchIndex(word, -1)
-	var lastIndex = 0
+	var lastIndex int
 	var result = ""
 	for i := 0; i < len(subIndex); i++ {
+		if lastIndex != 0 {
+			if lastIndex == subIndex[i][0] {
+				result += word[lastIndex:subIndex[i][1]]
+				lastIndex = subIndex[i][1]
+				continue
+			}
+		}
 		result += word[lastIndex:subIndex[i][0]]
 		result += "-" + strings.ToLower(word[subIndex[i][0]:subIndex[i][1]])
 		lastIndex = subIndex[i][1]
@@ -430,7 +441,7 @@ func MiddleLine(word string) string {
 	return result
 }
 
-// MiddleLineToBigCamel 中划线到大驼峰：data-db-user -> DataGoleUser
+// MiddleLineToBigCamel 中划线到大驼峰：data-db-user -> DataBaseUser
 func MiddleLineToBigCamel(word string) string {
 	if word == "" {
 		return ""
@@ -438,7 +449,7 @@ func MiddleLineToBigCamel(word string) string {
 	return BigCamel(MiddleLineToSmallCamel(word))
 }
 
-// MiddleLineToSmallCamel 中划线到小驼峰：data-gole-user -> DataGoleUser
+// MiddleLineToSmallCamel 中划线到小驼峰：data-base-user -> dataBaseUser
 func MiddleLineToSmallCamel(word string) string {
 	if word == "" {
 		return ""
@@ -446,7 +457,7 @@ func MiddleLineToSmallCamel(word string) string {
 	return strings.ReplaceAll(ToUpperWord("(?<=-)[a-z]", word), "-", "")
 }
 
-// PostUnder 小驼峰到后下划线：DataGoleUser -> data_gole_user_
+// PostUnder 小驼峰到后下划线：DataBaseUser -> data_base_user_
 func PostUnder(word string) string {
 	if word == "" {
 		return ""
@@ -454,12 +465,12 @@ func PostUnder(word string) string {
 	return UnderLine(word) + "_"
 }
 
-// PreFixUnderLine 小驼峰到添加前缀字符下划线：DataGoleUser -> pre_data_gole_user
+// PreFixUnderLine 小驼峰到添加前缀字符下划线：DataBaseUser -> pre_data_base_user
 func PreFixUnderLine(word, preFix string) string {
 	return preFix + UnderLine(word)
 }
 
-// PreFixUnderToSmallCamel 前缀字符下划线去掉到小驼峰：pre_data_gole_user -> DataGoleUser
+// PreFixUnderToSmallCamel 前缀字符下划线去掉到小驼峰：pre_data_base_user -> dataBaseUser
 func PreFixUnderToSmallCamel(word, preFix string) string {
 	if strings.HasPrefix(word, preFix) {
 		return UnderLineToSmallCamel(word[len(preFix):])
@@ -467,7 +478,7 @@ func PreFixUnderToSmallCamel(word, preFix string) string {
 	return UnderLineToSmallCamel(word)
 }
 
-// PrePostUnder 小驼峰到前后缀下划线：DataGoleUser -> _data_gole_user_
+// PrePostUnder 小驼峰到前后缀下划线：DataBaseUser -> _data_base_user_
 func PrePostUnder(word string) string {
 	if word == "" {
 		return ""
@@ -475,7 +486,7 @@ func PrePostUnder(word string) string {
 	return "_" + UnderLine(word) + "_"
 }
 
-// PreUnder 小驼峰到前下划线：DataGoleUser -> _data_gole_user
+// PreUnder 小驼峰到前下划线：DataBaseUser -> _data_base_user
 func PreUnder(word string) string {
 	if word == "" {
 		return ""
@@ -483,7 +494,7 @@ func PreUnder(word string) string {
 	return "_" + UnderLine(word)
 }
 
-// UnderLine 小驼峰到下划线：非边缘单词开头大写变前下划线和后面大写：DataGoleUser -> data_gole_user
+// UnderLine 小驼峰到下划线：非边缘单词开头大写变前下划线和后面大写：DataBaseUser -> data_base_user
 func UnderLine(word string) string {
 	if word == "" {
 		return ""
@@ -506,10 +517,10 @@ func UnderLine(word string) string {
 }
 
 // UnderLineToBigCamel 下划线到大驼峰：下划线后面小写变大写，下划线去掉
-// data_gole_user   -> DataGoleUser
-// _data_gole_user  -> DataGoleUser
-// _data_gole_user_ -> DataGoleUser
-// data_gole_user_  -> DataGoleUser
+// data_base_user   -> DataBaseUser
+// _data_base_user  -> DataBaseUser
+// _data_base_user_ -> DataBaseUser
+// data_base_user_  -> DataBaseUser
 func UnderLineToBigCamel(word string) string {
 	if word == "" {
 		return ""
@@ -529,12 +540,12 @@ func UnderLineToSmallCamel(word string) string {
 	return BigCamelToSmallCamel(strings.ReplaceAll(ToUpperWord("(?<=_)[a-z]", word), "_", ""))
 }
 
-// 大写中划线到大驼峰：DATA-GOLE-USER -> DataGoleUser
+// UpperMiddleToBigCamel 大写中划线到大驼峰：DATA-BASE-USER -> DataBaseUser
 func UpperMiddleToBigCamel(word string) string {
 	return BigCamel(UpperUnderMiddleToSmallCamel(word))
 }
 
-// UpperUnder 小驼峰到大写下划线：DataGoleUser -> DATA_GOLE_USER
+// UpperUnder 小驼峰到大写下划线：DataBaseUser -> DATA_BASE_USER
 func UpperUnder(word string) string {
 	if word == "" {
 		return ""
@@ -556,7 +567,7 @@ func UpperUnder(word string) string {
 	return result
 }
 
-// UpperUnderMiddle 小驼峰到大写中划线：DataGoleUser -> DATA-GOLE-USER
+// UpperUnderMiddle 小驼峰到大写中划线：DataBaseUser -> DATA-BASE-USER
 func UpperUnderMiddle(word string) string {
 	if word == "" {
 		return ""
@@ -578,7 +589,7 @@ func UpperUnderMiddle(word string) string {
 	return result
 }
 
-// UpperUnderMiddleToSmallCamel 大写中划线到大驼峰：DATA-GOLE-USER -> DataGoleUser
+// UpperUnderMiddleToSmallCamel 大写中划线到大驼峰：DATA-BASE-USER -> dataBaseUser
 func UpperUnderMiddleToSmallCamel(word string) string {
 	if word == "" {
 		return ""
@@ -586,7 +597,7 @@ func UpperUnderMiddleToSmallCamel(word string) string {
 	return MiddleLineToSmallCamel(strings.ToLower(word))
 }
 
-// UpperUnderToBigCamel 大写下划线到大驼峰：DATA_GOLE_USER -> DataGoleUser
+// UpperUnderToBigCamel 大写下划线到大驼峰：DATA_BASE_USER -> DataBaseUser
 func UpperUnderToBigCamel(word string) string {
 	if word == "" {
 		return ""
@@ -594,7 +605,7 @@ func UpperUnderToBigCamel(word string) string {
 	return BigCamel(UpperUnderToSmallCamel(word))
 }
 
-// UpperUnderToSmallCamel 大写下划线到小驼峰：DATA_GOLE_USER -> DataGoleUser
+// UpperUnderToSmallCamel 大写下划线到小驼峰：DATA_BASE_USER -> dataBaseUser
 func UpperUnderToSmallCamel(word string) string {
 	if word == "" {
 		return ""

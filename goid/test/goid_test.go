@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/magiconair/properties/assert"
 	"github.com/simonalong/gole/goid"
-	"github.com/simonalong/gole/test"
 	"testing"
 	"time"
 )
@@ -56,7 +55,7 @@ func TestGoStorage(t *testing.T) {
 	stg.Set(variable)
 	goid.Go(func() {
 		v := stg.Get()
-		test.True(t, v != nil && v.(string) == variable)
+		assert.Equal(t, true, v != nil && v.(string) == variable)
 	})
 	time.Sleep(time.Millisecond)
 	stg.Clear()

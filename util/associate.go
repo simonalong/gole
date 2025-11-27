@@ -58,7 +58,7 @@ func AssociateByAndValueTo[T, V any, K comparable](list []T, destination *map[K]
 	return *destination
 }
 
-// AssociateWith Returns a Map where sortKeys are elements from the given collection and values are produced by the valueSelector function applied to each element.
+// AssociateWith Returns a Map where keys are elements from the given collection and values are produced by the valueSelector function applied to each element.
 // If any two elements are equal, the last one gets added to the map.
 // The returned map preserves the entry iteration order of the original collection.
 func AssociateWith[T comparable, V any](list []T, valueSelector func(T) V) map[T]V {

@@ -38,3 +38,6 @@ key1:
 
 entity:
   name: 'name-original'
+
+place:
+  username: ${username}

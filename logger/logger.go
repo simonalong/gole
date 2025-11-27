@@ -3,18 +3,21 @@ package logger
 import (
 	"bytes"
 	"fmt"
-	"github.com/gookit/color"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	cmap "github.com/orcaman/concurrent-map"
-	"github.com/rifflock/lfshook"
-	"github.com/simonalong/gole/config"
-	"github.com/simonalong/gole/util"
-	"github.com/sirupsen/logrus"
 	"os"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gookit/color"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	cmap "github.com/orcaman/concurrent-map"
+	"github.com/rifflock/lfshook"
+	"github.com/simonalong/gole/config"
+	"github.com/simonalong/gole/global"
+	"github.com/simonalong/gole/listener"
+	"github.com/simonalong/gole/util"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -30,6 +33,7 @@ var gColor = true
 
 // var loggerMap map[string]*logrus.Logger
 var loggerMap cmap.ConcurrentMap
+var initLock sync.Mutex
 
 // var rotateMap map[string]*rotatelogs.RotateLogs
 var rotateMap cmap.ConcurrentMap
@@ -38,11 +42,6 @@ var rootLogger *logrus.Logger
 func init() {
 	loggerMap = cmap.New()
 	rotateMap = cmap.New()
-	rootLogger = Group("root")
-
-	_gColor := config.GetValueBoolDefault("gole.logger.color.enable", false)
-	gColor = _gColor
-
 	InitLog()
 }
 
@@ -70,34 +69,37 @@ func SetGroupLevel(groupName, level string) {
 }
 
 func Group(groupNames ...string) *logrus.Logger {
-	var resultLogger *logrus.Logger
 	var groupNamesOfUnContain []string
 	for _, groupName := range groupNames {
 		if logger, exit := loggerMap.Get(groupName); exit {
-			resultLogger = logger.(*logrus.Logger)
+			return logger.(*logrus.Logger)
 		} else {
 			groupNamesOfUnContain = append(groupNamesOfUnContain, groupName)
 		}
 	}
 
-	if resultLogger != nil {
-		return resultLogger
-	} else {
-		resultLogger = logrus.New()
-		resultLogger.SetReportCaller(true)
-		formatters := &StandardFormatter{}
-		resultLogger.Formatter = formatters
-
-		loggerDir := config.GetValueStringDefault("gole.logger.home", "."+string(os.PathSeparator)+"logs"+string(os.PathSeparator))
-		resultLogger.AddHook(lfshook.NewHook(lfshook.WriterMap{
-			logrus.DebugLevel: rotateLogWithCache(loggerDir, "debug"),
-			logrus.InfoLevel:  rotateLogWithCache(loggerDir, "info"),
-			logrus.WarnLevel:  rotateLogWithCache(loggerDir, "warn"),
-			logrus.ErrorLevel: rotateLogWithCache(loggerDir, "error"),
-			logrus.PanicLevel: rotateLogWithCache(loggerDir, "panic"),
-			logrus.FatalLevel: rotateLogWithCache(loggerDir, "fatal"),
-		}, formatters))
+	initLock.Lock()
+	defer initLock.Unlock()
+	for _, groupName := range groupNames {
+		if logger, exit := loggerMap.Get(groupName); exit {
+			return logger.(*logrus.Logger)
+		}
 	}
+
+	resultLogger := logrus.New()
+	resultLogger.SetReportCaller(true)
+	formatters := &StandardFormatter{}
+	resultLogger.Formatter = formatters
+
+	loggerDir := config.GetValueStringDefault("gole.logger.home", "."+string(os.PathSeparator)+"logs"+string(os.PathSeparator))
+	resultLogger.AddHook(lfshook.NewHook(lfshook.WriterMap{
+		logrus.DebugLevel: rotateLogWithCache(loggerDir, "debug"),
+		logrus.InfoLevel:  rotateLogWithCache(loggerDir, "info"),
+		logrus.WarnLevel:  rotateLogWithCache(loggerDir, "warn"),
+		logrus.ErrorLevel: rotateLogWithCache(loggerDir, "error"),
+		logrus.PanicLevel: rotateLogWithCache(loggerDir, "panic"),
+		logrus.FatalLevel: rotateLogWithCache(loggerDir, "fatal"),
+	}, formatters))
 
 	// 值最大的级别，对应的level最小，比如Debug对应的数值比Info要大
 	maxValueLevel := logrus.PanicLevel
@@ -129,74 +131,42 @@ func Group(groupNames ...string) *logrus.Logger {
 	return resultLogger
 }
 
-func doGroup(groupName string) *logrus.Logger {
-	if groupName == "" {
-		return rootLogger
-	}
-	if logger, exit := loggerMap.Get(groupName); exit {
-		return logger.(*logrus.Logger)
-	}
+func InitLog() {
+	listener.AddListener(config.EventOfConfigLoadFinish, func(event listener.BaseEvent) {
+		rootLogger = Group("root")
+		_gColor := config.GetValueBoolDefault("gole.logger.color.enable", false)
+		if _gColor {
+			color.ForceOpenColor()
+		}
+		gColor = _gColor
 
-	if loggerMap == nil {
-		loggerMap = cmap.New()
-	}
-	logger := logrus.New()
-	logger.SetReportCaller(true)
-	formatters := &StandardFormatter{}
-	logger.Formatter = formatters
-
-	loggerDir := config.GetValueStringDefault("gole.logger.home", "./logs/")
-	logger.AddHook(lfshook.NewHook(lfshook.WriterMap{
-		logrus.DebugLevel: rotateLogWithCache(loggerDir, "debug"),
-		logrus.InfoLevel:  rotateLogWithCache(loggerDir, "info"),
-		logrus.WarnLevel:  rotateLogWithCache(loggerDir, "warn"),
-		logrus.ErrorLevel: rotateLogWithCache(loggerDir, "error"),
-		logrus.PanicLevel: rotateLogWithCache(loggerDir, "panic"),
-		logrus.FatalLevel: rotateLogWithCache(loggerDir, "fatal"),
-	}, formatters))
-
-	var finalGroupLevel string
-	rootLevel := config.GetValueStringDefault("gole.logger.level", "info")
-	groupLevel := config.GetValueString("gole.logger.group." + groupName + ".level")
-	if groupLevel != "" {
-		finalGroupLevel = groupLevel
-	} else {
-		finalGroupLevel = rootLevel
-	}
-
-	lgLevel, err := logrus.ParseLevel(finalGroupLevel)
-	if err != nil {
-		lgLevel = logrus.InfoLevel
-	}
-	logger.SetLevel(lgLevel)
-
-	loggerMap.Set(groupName, logger)
-	return logger
+		if !listener.ContainListener("*", config.EventOfConfigChange) {
+			listener.AddListenerWithGroup("*", config.EventOfConfigChange, ConfigChangeListener)
+		}
+	})
 }
 
-func InitLog() {
-	rootLogger = Group("root")
-	loggerDir := config.GetValueStringDefault("gole.logger.home", "./logs/")
-	rootLogger.AddHook(lfshook.NewHook(lfshook.WriterMap{
-		logrus.DebugLevel: rotateLog(loggerDir, "debug"),
-		logrus.InfoLevel:  rotateLog(loggerDir, "info"),
-		logrus.WarnLevel:  rotateLog(loggerDir, "warn"),
-		logrus.ErrorLevel: rotateLog(loggerDir, "error"),
-		logrus.PanicLevel: rotateLog(loggerDir, "panic"),
-		logrus.FatalLevel: rotateLog(loggerDir, "fatal"),
-	}, &StandardFormatter{}))
-	lgLevel, err := logrus.ParseLevel(config.GetValueStringDefault("gole.logger.level", "info"))
-	if err != nil {
-		lgLevel = logrus.InfoLevel
+func ConfigChangeListener(event listener.BaseEvent) {
+	ev := event.(config.EventOfChange)
+	if ev.Key == "gole.logger.level" {
+		SetGlobalLevel(ev.Value)
+	} else if strings.HasPrefix(ev.Key, "gole.logger.group") {
+		words := strings.Split(ev.Key, ".")
+		if len(words) != 5 {
+			return
+		}
+		_group := words[3]
+		_level := ev.Value
+		le, err := logrus.ParseLevel(_level)
+		if err != nil {
+			return
+		}
+		Group(_group).SetLevel(le)
 	}
-	rootLogger.SetLevel(lgLevel)
-
-	_gColor := config.GetValueBoolDefault("gole.logger.color.enable", false)
-	gColor = _gColor
 }
 
 func GetLoggerGroupList(name string) []string {
-	if name == "_all_" {
+	if name == "" || name == "_all_" {
 		return loggerMap.Keys()
 	}
 	var groupNames []string
@@ -218,64 +188,106 @@ func SetGlobalLevel(strLevel string) {
 // Trace 这个日志级别不建议使用，因为目前来看没有日志输出
 // Deprecated
 func Trace(v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Trace(v...)
 }
 
 func Debug(v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Debug(v...)
 }
 
 func Info(v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Info(v...)
 }
 
 func Warn(v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Warn(v...)
 }
 
 func Error(v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Error(v...)
 }
 
 func Fatal(v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Fatal(v...)
 }
 
 // Panic 这个日志级别也不建议使用
 // Deprecated
 func Panic(v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Panic(v...)
 }
 
 // Tracef 这个日志级别也不建议使用
 // Deprecated
 func Tracef(format string, v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Tracef(format, v...)
 }
 
 func Debugf(format string, v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Debugf(format, v...)
 }
 
 func Infof(format string, v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Infof(format, v...)
 }
 
 func Warnf(format string, v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Warnf(format, v...)
 }
 
 func Errorf(format string, v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Errorf(format, v...)
 }
 
 // Panicf 不建议使用
 // Deprecated
 func Panicf(format string, v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Panicf(format, v...)
 }
 
 func Fatalf(format string, v ...any) {
+	if rootLogger == nil {
+		rootLogger = Group("root")
+	}
 	rootLogger.Fatalf(format, v...)
 }
 
@@ -368,26 +380,27 @@ func (m *StandardFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		fieldsStr = strings.Join(fields, " ")
 	}
 	var newLog string
+	traceId := global.GetTraceId()
 
 	// todo 租户id，字段先预留
 	var tenantId string
 	if gColor {
 		levelStr := levelToStr(entry.Level)
-		newLog = fmt.Sprintf("%s[%s][%s][tid=%s][%s][%v] %s %s\n",
+		newLog = fmt.Sprintf("%s [%s][%s][tid=%s][%s][%v] %s %s\n",
 			colorTimestampStr(levelStr, timestamp),
-			color.FgDarkGray.Render(config.GetValueStringDefault("gole.application.name", "base")),
+			color.FgDarkGray.Render(config.GetValueStringDefault("gole.application.name", "gole")),
 			colorLevelStr(levelStr),
-			color.FgLightCyan.Render(""),
+			color.FgLightCyan.Render(traceId),
 			tenantId,
 			color.FgDarkGray.Render(funPath),
 			colorMsgStr(levelStr, entry.Message),
 			color.FgCyan.Render(fieldsStr))
 	} else {
-		newLog = fmt.Sprintf("%s[%s][%s][tid=%s][%s][%v] %s %s\n",
+		newLog = fmt.Sprintf("%s [%s][%s][tid=%s][%s][%v] %s %s\n",
 			timestamp,
-			config.GetValueStringDefault("gole.application.name", "base"),
+			config.GetValueStringDefault("gole.application.name", "gole"),
 			levelToStr(entry.Level),
-			"",
+			traceId,
 			tenantId,
 			funPath,
 			entry.Message,

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/binary"
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -26,7 +25,6 @@ func GzipCompress(data []byte) ([]byte, error) {
 func GzipDecompress(data []byte) ([]byte, error) {
 	var res bytes.Buffer
 	_ = binary.Write(&res, binary.LittleEndian, data)
-	fmt.Printf("res: %v\n", res.Bytes())
 	gz, _ := gzip.NewReader(&res)
 	defer func(gz *gzip.Reader) { _ = gz.Close() }(gz)
 	d, err := io.ReadAll(gz)

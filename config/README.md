@@ -62,8 +62,8 @@ config.getValueObject("xxx.xxx", &xxx)
 ```go
 var ServerCfg ServerConfig
 
-// gole前缀
-type GoleConfig struct {
+// base前缀
+type BaseConfig struct {
     Application AppApplication
     Data string
 }
@@ -87,10 +87,10 @@ config.getValueObject("gole", &ServerCfg)
 
 说明：
 v1.0.12版本后，支持对配置的中划线支持，此外还支持更多配置
-- 中划线：比如：data-gole-user
-- 小驼峰：比如：dataGoleUser
-- 大驼峰：比如：DataGoleUser
-- 下划线：比如：data_gole_user
+- 中划线：比如：data-base-user
+- 小驼峰：比如：dataBaseUser
+- 大驼峰：比如：DataBaseUser
+- 下划线：比如：data_base_user
 
 比如：
 ```yaml
@@ -174,28 +174,28 @@ gole:
 
 ```shell
 // 查看应用所有配置
-curl http://localhost:xxx/{api-prefix}/{api-module}/config/values
+curl http://localhost:xxx/{gole.server.http.api.prefix}/config/values
 
 // 查看应用所有配置（yaml结构）
-curl http://localhost:xxx/{api-prefix}/{api-module}/config/values/yaml
+curl http://localhost:xxx/{gole.server.http.api.prefix}/config/values/yaml
 
 // 查看应用的某个配置
-curl http://localhost:xxx/{api-prefix}/{api-module}/config/value/{key}
+curl http://localhost:xxx/{gole.server.http.api.prefix}/config/value/{key}
 
 // 修改应用的配置
-curl -X PUT http://localhost:xxx/{api-prefix}/{api-module}/config/update -d '{"key":"xxx", "value":"yyyy"}'
+curl -X PUT http://localhost:xxx/{gole.server.http.api.prefix}/config/update -d '{"key":"xxx", "value":"yyyy"}'
 ```
 
 提示：<br/>
 修改应用的配置会发送配置变更事件"event_of_config_change"，如果想要对配置变更进行监听，请监听，示例：
 ```go
 func xxxx() {
-    // 添加配置变更事件的监听，listener.EventOfConfigChange是内置的"event_of_config_change"
-    listener.AddListener(listener.EventOfConfigChange, ConfigChangeListener)
+    // 添加配置变更事件的监听，config.EventOfConfigChange是内置的"event_of_config_change"
+    listener.AddListener(config.EventOfConfigChange, ConfigChangeListener)
 }
 
-func ConfigChangeListener(event listener.GoleEvent) {
-    ev := event.(listener.ConfigChangeEvent)
+func ConfigChangeListener(event listener.BaseEvent) {
+    ev := event.(config.ConfigChangeEvent)
     if ev.Key == "xxx" {
         value := ev.Value
         // 你的配置变更处理代码
@@ -212,7 +212,7 @@ func ConfigChangeListener(event listener.GoleEvent) {
   - 不支持默认配置
 - api实时调用
   - 配置可以动态的变更
-  - 有默认的api
+  - 有默认的值
     
 建议：配置使用时候建议使用config.GetXXXX()
 

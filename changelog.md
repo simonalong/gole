@@ -7,38 +7,62 @@ x.y.z[.s]
 
 发版时间：最多一周发一次（无论大小版本），每周五下班前发布
 
-## v1.5.5（doing）
-### 新增
-1. 增加：增加neoMap这个map结构
+### 1.0.12
+优化：
+1. 修改监听的默认分组名
+2. 优化链路方面的功能
 
-### 优化
-1. 修改：
+修复：
+1. 修复fromEntity的对象为指针情况下的问题
+2. 修复map的并发写入问题
+
+### 1.0.10
+优化：
+1. 优化：修改dataToObject为dataToEntity
+2. 优化：更新日志的时间戳字段后面添加空格
 
 
+### 1.0.9
+优化：
+1. 优化：删除一些内置的无用的一些配置
+2. 优化：修改日志中的traceId为tid，简化日志
+3. 优化：修改time中的字段，用于与标准库进行区分
 
 
-## v1.0.0 
-### 新增：支持如下功能
-| 包名                            | 简介 |
-|-------------------------------| :----: |
-| [util](/util)                 | 基础工具（更新中）|
-| [config](/config)             | 配置文件管理|
-| [validate](/validate)         |校验核查 |
-| [logger](/logger)             | 日志 |
-| [database](/database)         |数据库处理（待更新） |
-| [server](/server)             | 服务处理 |
-| [goid](/goid)                 | 局部id传递处理（theadlocal） |
-| [json](/json)                 | json字符串处理工具 |
-| [cache](/cache)               | 缓存工具 |
-| [time](/time)                 | 时间管理工具 |
-| [file](/file)                 | 文件管理工具 |
-| [coder](/coder)               | 编解码加解密工具 |
-| [http](/http)                 | http的辅助工具 |
-| [listener](/listener)         | 事件监听机制 |
-| [bean](/bean)                 | 对象管理工具 |
-| [debug](/debug)               | 线上调试工具统一介绍文档 |
-| [extend/orm](/extend/orm)     | gorm、xorm的封装 |
-| [extend/etcd](/extend/etcd)   | etcd封装 |
-| [extend/redis](/extend/redis) | go-redis的封装 |
-| [extend/emqx](/extend/emqx)   | emqx客户端的封装 |
-| [extend/kafka](/extend/kafka) | kafka客户端的封装 |
+### 1.0.8
+新增：
+1. 新增：baseMap的putAll方法
+2. 新增：新增int64到Base62格式的编码
+
+优化：
+1. 优化：包logger的traceId的名字部分
+
+
+### 1.0.7
+新增：
+1. 新增：包time增加RFC3339格式的解析
+2. 新增：maps包增加路径查找方法
+3. 新增：包logger增加监听所有分组的功能
+4. 新增：包event增加分组功能
+
+优化：
+1. 优化：包logger的日志级别初始化部分
+
+
+### 1.0.6
+新增：
+1. 新增：包validate对指针类型的处理
+2. 新增：增加coder里面的关于公私钥的生成方法和api
+
+优化：
+1. 优化：包validate的返回值类型
+2. 优化：包time的时间格式化
+3. 优化：修改time包中的时间名字，用于与标准库进行区分
+4. 优化：扩充time包add方法
+
+修复：
+1. 修复：修改validate、goid、util中关于加锁的逻辑部分
+2. 修复：修改关于yaml的格式转换上面包含换行符的处理
+
+## v1.0.0
+- 初始版本，沉淀自gole-boot，保留并优化部分功能

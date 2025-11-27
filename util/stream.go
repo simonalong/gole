@@ -100,7 +100,7 @@ func (s Stream[T]) ForEach(fn func(T)) {
 	}
 }
 
-//FirsVal returns the first element,channel is FIFO,so first goroutine will get head element or nil
+// FirsVal returns the first element,channel is FIFO,so first goroutine will get head element or nil
 func (s Stream[T]) FirsVal() any {
 	for item := range s.source {
 		go StreamDrain(s.source)
@@ -109,7 +109,7 @@ func (s Stream[T]) FirsVal() any {
 	return nil
 }
 
-//First returns the first element,channel is FIFO,so first goroutine will get head element
+// First returns the first element,channel is FIFO,so first goroutine will get head element
 func (s Stream[T]) First(valueSelector func(T) bool) Stream[T] {
 	source := make(chan T)
 	go func() {
@@ -145,7 +145,7 @@ func (s Stream[T]) Last(valueSelector func(any) bool) Stream[T] {
 	return StreamRange(source)
 }
 
-//Filter Returns a list containing only elements matching the given predicate.
+// Filter Returns a list containing only elements matching the given predicate.
 func (s Stream[T]) Filter(predicate func(T) bool) Stream[T] {
 	source := make(chan T)
 	for item := range s.source {

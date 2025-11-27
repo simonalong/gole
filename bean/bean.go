@@ -1,9 +1,7 @@
 package bean
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/simonalong/gole/logger"
-	"github.com/simonalong/gole/server/rsp"
 	"github.com/simonalong/gole/util"
 	"reflect"
 	"strings"
@@ -169,42 +167,6 @@ func SetField(beanName string, fieldName string, fieldValue any) {
 			fValue.FieldByName(fieldName).Set(reflect.ValueOf(v))
 		}
 	}
-}
-
-func DebugBeanAll(c *gin.Context) {
-	rsp.SuccessOfStandard(c, GetBeanNames(""))
-}
-
-func DebugBeanList(c *gin.Context) {
-	rsp.SuccessOfStandard(c, GetBeanNames(c.Param("name")))
-}
-
-func DebugBeanGetField(c *gin.Context) {
-	fieldGetReq := FieldGetReq{}
-	_, err := util.DataToObject(c.Request.Body, &fieldGetReq)
-	if err != nil {
-		return
-	}
-	rsp.SuccessOfStandard(c, GetField(fieldGetReq.Bean, fieldGetReq.Field))
-}
-
-func DebugBeanSetField(c *gin.Context) {
-	fieldSetReq := FieldSetReq{}
-	_, err := util.DataToObject(c.Request.Body, &fieldSetReq)
-	if err != nil {
-		return
-	}
-	SetField(fieldSetReq.Bean, fieldSetReq.Field, fieldSetReq.Value)
-	rsp.SuccessOfStandard(c, fieldSetReq.Value)
-}
-
-func DebugBeanFunCall(c *gin.Context) {
-	funCallReq := FunCallReq{}
-	_, err := util.DataToObject(c.Request.Body, &funCallReq)
-	if err != nil {
-		return
-	}
-	rsp.SuccessOfStandard(c, CallFun(funCallReq.Bean, funCallReq.Fun, funCallReq.Parameter))
 }
 
 func BeanTest() {

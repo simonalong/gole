@@ -25,8 +25,8 @@ func (s ISCUTF8String) Length() int {
 	return len(s)
 }
 
-func (s ISCUTF8String) Chars() ISCList[rune] {
-	return ISCList[rune](s)
+func (s ISCUTF8String) Chars() BsList[rune] {
+	return BsList[rune](s)
 }
 
 func (s ISCUTF8String) Count(substr ISCUTF8String) int {

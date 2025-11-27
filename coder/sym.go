@@ -22,6 +22,7 @@ func AesDecrypt(content string, key string, iv string) string {
 	return string(origData)
 }
 
+// AesEncrypt key的长度必须是 16，24，32
 func AesEncrypt(content string, key string, iv string) string {
 	origData := pkcs5Padding([]byte(content), aes.BlockSize)
 	block, _ := aes.NewCipher([]byte(key))
@@ -32,6 +33,7 @@ func AesEncrypt(content string, key string, iv string) string {
 }
 
 // AesDecryptECB 兼容java的AES解密方式
+// key的长度必须是 16，24，32
 func AesDecryptECB(content string, key string) string {
 	b, _ := base64.StdEncoding.DecodeString(content)
 	cp, _ := aes.NewCipher([]byte(key))
@@ -40,7 +42,8 @@ func AesDecryptECB(content string, key string) string {
 	for bs, be := 0, size; bs < len(b); bs, be = bs+size, be+size {
 		cp.Decrypt(d[bs:be], b[bs:be])
 	}
-	return strings.TrimSpace(string(d))
+	// 去除填充的
+	return strings.ReplaceAll(strings.TrimSpace(string(d)), "\x00", "")
 }
 
 // AesEncryptECB 兼容java的AES加密方式
