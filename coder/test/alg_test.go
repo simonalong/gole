@@ -126,9 +126,9 @@ func TestAes(t *testing.T) {
 func TestAesJava(t *testing.T) {
 	content := "abcdefg"
 	key := "simonalong123456"
-	s1 := coder.AesEncryptECB(content, key)
+	s1 := coder.AesEncryptECBForJava(content, key)
 	t.Logf("%s aes is %s", content, s1)
-	s2 := coder.AesDecryptECB(s1, key)
+	s2 := coder.AesDecryptECBForJava(s1, key)
 	fmt.Println(fmt.Sprintf("%s aes is %v", s1, s2))
 }
 func TestAesCBC(t *testing.T) {
